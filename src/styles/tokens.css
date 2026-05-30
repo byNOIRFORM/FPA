@@ -1,0 +1,60 @@
+/* =============================================================
+   Design tokens — single source of truth for colors, type,
+   spacing, motion and layout. Themed via [data-theme] on <html>.
+   ============================================================= */
+
+:root {
+  /* ---------- Color (light, default) ---------- */
+  --bg: #FAF9F6;
+  --bg-soft: #F0EDE3;
+  --ink: #1A1A1A;
+  --ink-soft: #3D3D3D;
+  --ink-mute: #7A7A7A;
+  --ink-faint: #C8C8C8;
+  --line-faint: #E0DDD3;
+  --accent-red: #C73E2C;
+
+  /* ---------- Spacing scale (8pt-ish) ---------- */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  24px;
+  --s-6:  32px;
+  --s-7:  48px;
+  --s-8:  64px;
+  --s-9:  96px;
+  --s-10: 128px;
+  --s-11: 160px;
+
+  /* ---------- Typography ---------- */
+  --font-display: "Instrument Serif", "Times New Roman", ui-serif, serif;
+  --font-sans: "Switzer", "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ---------- Layout ---------- */
+  --maxw: 1680px;
+  --gutter: clamp(20px, 4vw, 48px);
+  --nav-h: 56px;
+
+  color-scheme: light;
+}
+
+/* ---------- Color (dark) ---------- */
+[data-theme="dark"] {
+  --bg: #0E0D0B;
+  --bg-soft: #16140F;
+  --ink: #EFEBE0;
+  --ink-soft: #C0BBAD;
+  --ink-mute: #7B7669;
+  --ink-faint: #2E2B23;
+  /* line-faint intentionally inherits/echoes ink-faint in dark */
+  --line-faint: #2E2B23;
+  /* accent kept identical for brand consistency across themes */
+
+  color-scheme: dark;
+}

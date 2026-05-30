@@ -1,0 +1,552 @@
+---
+/**
+ * Hero — first section.
+ *
+ * Reveal choreography (driven from loader.ts → revealHero()):
+ *   - .hero-media-img: scale 1.1 → 1 (Ken Burns intro)
+ *   - .hero-media-overlay: opacity 0 → 0.3 (dark wash fades in)
+ *   - .nav-animate: stagger fade + slide down (logo, clock, langs, links, CTA)
+ *   - .hero-title-word: word-by-word mask reveal with stagger
+ *   - .hero-scroll: fade + slide-up last
+ *
+ * Hover micro-interactions:
+ *   - .nav-flip: text flip mask via ::after content: attr(data-text)
+ *   - .nav-cta: dark curtain slide-in + text/arrow translate
+ *
+ * Live clock + custom cursor wired in scripts/hero.ts → initHero().
+ */
+---
+
+<section class="hero" id="hero">
+  <div class="hero-media" aria-hidden="true">
+    <img
+      class="hero-media-img"
+      src="/images/hero.jpg"
+      alt=""
+      decoding="async"
+    />
+  </div>
+  <div class="hero-media-overlay" aria-hidden="true"></div>
+
+  {/* Cinematic depth: vignette + animated film grain.
+      Sit above the image+overlay, below content. */}
+  <div class="hero-vignette" aria-hidden="true"></div>
+  <div class="hero-grain" aria-hidden="true"></div>
+
+  <nav class="nav" aria-label="Hlavná navigácia">
+    <div class="nav-left">
+      <a class="nav-logo nav-animate" href="/">
+        <span class="nav-logo-main">FOTTA//POPADIČ</span>
+        <span class="nav-logo-sub">architekt</span>
+      </a>
+      <span class="nav-clock nav-animate" data-clock>Bardejov --:--</span>
+    </div>
+
+    <ul class="nav-langs nav-animate" aria-label="Jazyk">
+      <li><a href="/" class="nav-flip nav-lang nav-lang--active" data-text="SK,"><span>SK,</span></a></li>
+      <li><a href="/cz" class="nav-flip nav-lang" data-text="CZ,"><span>CZ,</span></a></li>
+      <li><a href="/en" class="nav-flip nav-lang" data-text="EN"><span>EN</span></a></li>
+    </ul>
+
+    <div class="nav-right">
+      <ul class="nav-links nav-animate">
+        <li><a class="nav-flip" href="#o-nas" data-text="O nás,"><span>O nás,</span></a></li>
+        <li><a class="nav-flip" href="#projekty" data-text="Projekty,"><span>Projekty,</span></a></li>
+        <li><a class="nav-flip" href="#sluzby" data-text="Služby"><span>Služby</span></a></li>
+      </ul>
+      {/* data-magnetic + data-cta-scramble both disabled — the helper
+          functions in hero.ts stay intact for future reuse on other
+          elements. Current hover = dark curtain slide + content
+          translate, nothing more. */}
+      <a class="nav-cta nav-animate" href="#kontakt">
+        <span class="nav-cta-text">Kontaktujte nás</span>
+        <svg
+          class="nav-cta-arrow"
+          width="16"
+          height="10"
+          viewBox="0 0 16 10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+        </svg>
+      </a>
+    </div>
+  </nav>
+
+  <h1 class="hero-title">
+    <span class="hero-title-line">
+      <span class="hero-title-mask"><span class="hero-title-word">Kedy</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">budova</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">prestáva</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">byť</span></span>
+    </span>
+    <span class="hero-title-line">
+      <span class="hero-title-mask"><span class="hero-title-word">stavbou</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">a</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">stáva</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">sa</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word">miestom?</span></span>
+    </span>
+  </h1>
+
+  {/* Scroll cue — informational only. NOT clickable: it tells the
+      user "more content below, use scroll", not "click me". Premium
+      sites trust user agency on scroll. Concrete scroll-to buttons
+      (eg. "SEE ALL PROJECTS") elsewhere will be the click targets. */}
+  <div class="hero-scroll" aria-hidden="true">
+    <svg
+      class="hero-scroll-arrow"
+      width="12"
+      height="28"
+      viewBox="0 0 12 28"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M6 0 V22 M1 18 L6 22 L11 18" />
+    </svg>
+    <span class="hero-scroll-label">SCROLL</span>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    overflow: hidden;
+    color: #fff;
+    background: var(--bg);
+  }
+
+  /* ===== Media =====
+     Hero image sits at fullscreen FROM THE START, behind the loader
+     curtain. When the loader slides up (yPercent: -100), the hero
+     is revealed bottom-up — that's the "image rises from below"
+     effect the user wanted, achieved by the curtain motion rather
+     than by animating the image itself.
+     The image has a slight 1.1 → 1 settle (Ken Burns intro) timed
+     to overlap the curtain rise, so the reveal feels cinematic. */
+  .hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-media-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.1);
+    transform-origin: 50% 50%;
+    will-change: transform;
+  }
+
+  /* Overlay is a SEPARATE full-screen sibling of .hero-media so it
+     doesn't scale with the media. Starts transparent — fades in only
+     after the media has grown, so during the expansion the user sees
+     no dark rectangle on the light background (which was the jarring
+     contrast in the previous build). */
+  .hero-media-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    pointer-events: none;
+    will-change: opacity;
+  }
+
+  /* Vignette — radial dark corners. Adds cinematic depth without
+     competing for attention. Sits above overlay, below content. */
+  .hero-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 55%,
+      rgba(0, 0, 0, 0.32) 100%
+    );
+  }
+
+  /* Film grain — animated SVG fractal noise. 4-step flicker gives
+     the "film stock" sense without distracting. mix-blend overlay
+     keeps the noise contextual to the underlying image. */
+  .hero-grain {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.08;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.7 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 200px 200px;
+    animation: heroGrain 0.4s steps(4) infinite;
+  }
+
+  @keyframes heroGrain {
+    0% { background-position: 0 0; }
+    25% { background-position: -40px 20px; }
+    50% { background-position: 30px -30px; }
+    75% { background-position: -20px -40px; }
+    100% { background-position: 0 0; }
+  }
+
+  /* ===== Navbar =====
+     All text elements use line-height: 1 so their bounding boxes
+     match their font-size exactly. Without this, the langs (default
+     1.5 line-height = 24px tall) and the logo's italic sub line
+     (default 1.5 = 36px tall) had different heights, and even though
+     align-items: center technically centered each element, the
+     visual centers landed at different Y positions in the row.
+     With line-height: 1 everywhere, every element is exactly its
+     font-size in height and align-items: center works cleanly. */
+  .nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 48px;
+    padding: 22px 28px;
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .nav-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    text-decoration: none;
+    color: inherit;
+    line-height: 1;
+  }
+
+  .nav-logo-main {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .nav-logo-sub {
+    font-size: 24px;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .nav-clock {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nav-langs {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .nav-lang {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 80px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: inherit;
+    text-decoration: none;
+    line-height: 1;
+    display: inline-block;
+  }
+
+  /* Text flip hover — visible text slides up out of the mask, an
+     identical copy (::after, content: attr(data-text)) rises into
+     view from below. Pure CSS, no JS required. */
+  .nav-flip {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1.15;
+    vertical-align: top;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .nav-flip span {
+    display: inline-block;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .nav-flip::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .nav-flip:hover span,
+  .nav-flip:hover::after {
+    transform: translateY(-100%);
+  }
+
+  .nav-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 211px;
+    padding: 14px 16px;
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    line-height: 1;
+    overflow: hidden;
+  }
+
+  /* CTA hover — dark curtain slides in from the left, text shifts a
+     touch right, arrow runs ahead a bit further. Three small motions,
+     same easing, one moment. Background stays in the dark family
+     (the bright white invert we tried earlier read as cheap). */
+
+  .nav-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .nav-cta:hover::before {
+    transform: translateX(0);
+  }
+
+  .nav-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-cta-text {
+    display: inline-block;
+    color: #fff;
+    line-height: 1;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .nav-cta:hover .nav-cta-text {
+    transform: translateX(3px);
+  }
+
+  .nav-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    color: #fff;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  /* Arrow travels ~2× the text distance — the gap widens slightly
+     as the arrow "leans into" the click. */
+  .nav-cta:hover .nav-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* ===== Title (bottom) =====
+     Figma spec: Switzer 64px / 400 / line-height 70px / no tracking.
+     font-size uses clamp so the slogan scales down on smaller screens
+     while hitting the exact 64px on the Figma desktop viewport
+     (5vw = 64px at 1280px wide).
+     line-height ratio (1.09375 = 70/64) keeps the per-line height
+     proportional at every clamp step.
+     IMPORTANT: font-style: normal explicitly resets the italic that
+     global.css applies to all h1–h6 (those are styled with the serif
+     display font in italic by default). Without this reset the
+     slogan rendered italic, and italic glyphs are taller — that was
+     the actual cause of the diacritic + descender clipping. */
+  .hero-title {
+    position: absolute;
+    left: 28px;
+    bottom: 56px;
+    right: 28px;
+    max-width: 915px;
+    z-index: 5;
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-style: normal;
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 1.09375;
+    letter-spacing: 0;
+  }
+
+  .hero-title-line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.28em;
+  }
+
+  /* Mask wrapper inherits the title's 1.09375 line-height = exactly
+     70px at 64px font. Switzer Regular at this size fits cleanly
+     (accents + descenders) inside 70px now that the title is no
+     longer being rendered italic. */
+  .hero-title-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: inherit;
+  }
+
+  /* IMPORTANT: no CSS transform here. GSAP reads CSS translateY(%)
+     as a pixel value (matrix decomposition) and stores it in `y`,
+     so animating `yPercent` would leave the pixel offset uncleared
+     and the word would never reach visible. opacity:0 alone hides
+     it until gsap.set() seeds yPercent in hero.ts. */
+  .hero-title-word {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ===== Scroll cue — bottom-right, downward arrow + Switzer label.
+     Informational only (not clickable). Replaces generic "scroll ↓"
+     with an editorial / architectural mark. ===== */
+  .hero-scroll {
+    position: absolute;
+    bottom: 56px;
+    right: 28px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+    text-decoration: none;
+    opacity: 0;
+    transform: translateY(8px);
+    will-change: transform, opacity;
+  }
+
+  /* Arrow pulses opacity + nudges 3px downward — gentle "scroll" cue.
+     No hover state — this element is purely informational. */
+  .hero-scroll-arrow {
+    display: block;
+    animation: heroScrollPulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    will-change: transform, opacity;
+  }
+
+  @keyframes heroScrollPulse {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50%      { transform: translateY(3px); opacity: 0.95; }
+  }
+
+  .hero-scroll-label {
+    font-family: var(--font-sans);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    line-height: 1;
+    opacity: 0.75;
+  }
+
+  /* ===== Initial hidden states (cleared by revealHero) ===== */
+  .nav-animate {
+    opacity: 0;
+    transform: translateY(-12px);
+    will-change: transform, opacity;
+  }
+
+  /* ===== Reduced motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .hero-media-img {
+      transform: none;
+    }
+    .hero-media-overlay,
+    .hero-title-word,
+    .nav-animate {
+      transform: none;
+      opacity: 1;
+    }
+    .hero-scroll {
+      opacity: 1;
+      transform: none;
+    }
+    .hero-grain,
+    .hero-scroll-arrow {
+      animation: none;
+    }
+  }
+
+  /* ===== Smaller screens ===== */
+  @media (max-width: 1100px) {
+    .nav {
+      gap: 24px;
+      padding: 20px 20px 12px;
+    }
+    .nav-left,
+    .nav-right {
+      gap: 32px;
+    }
+    .nav-langs,
+    .nav-links {
+      display: none;
+    }
+    .nav-cta {
+      width: auto;
+      padding: 10px 14px;
+    }
+    .hero-title {
+      bottom: 40px;
+      left: 20px;
+      right: 20px;
+    }
+  }
+</style>

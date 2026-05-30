@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2 2 20 20">
+    <style>
+        /* Stroke is heavier here than in the loader SVG (1.5 → 2)
+           because the favicon renders at 16–32px and the line needs
+           to read clearly at that scale. The loader keeps its
+           original weight for proportion at 32×40 display. */
+        path {
+            stroke: #1A1A1A;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        @media (prefers-color-scheme: dark) {
+            path { stroke: #FAF9F6; }
+        }
+    </style>
+    <!-- Isometric house — same geometry as the loader SVG, scaled to
+         24×24 favicon dimensions. Five strokes: front wall, right wall,
+         front gable, right roof slope, ridge. -->
+    <path d="M 12 21 L 3 17 L 3 9 L 12 13 Z" />
+    <path d="M 12 21 L 21 17 L 21 9 L 12 13 Z" />
+    <path d="M 12 13 L 3 9 L 7 7 Z" />
+    <path d="M 12 13 L 21 9 L 17 3 L 7 7 Z" />
+    <path d="M 7 7 L 17 3" />
+</svg>

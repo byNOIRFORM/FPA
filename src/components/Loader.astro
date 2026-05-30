@@ -1,0 +1,191 @@
+---
+/**
+ * Intro loader — Beat 1: isometric house outline + studio name fade.
+ *
+ * The house is a pure outline (stroke-only) drawn in true isometric
+ * projection: front wall + right wall + front gable + right roof slope,
+ * with a separate ridge line connecting the two roof apexes.
+ *
+ * Animation logic lives in src/scripts/loader.ts.
+ */
+---
+
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-content">
+    <svg
+      class="loader-icon"
+      viewBox="53 44 94 120"
+      width="32"
+      height="40"
+      fill="none"
+      stroke="var(--ink)"
+      stroke-width="10"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <!-- Path vertex order is intentionally bottom-up so the stroke
+           draws upward as dashoffset shrinks. -->
+
+      <!-- Front wall: starts at the bottom-front (closest to viewer),
+           then left along the base, up the left edge, across the top,
+           and closes back down to start. -->
+      <path class="draw draw-front" d="M 100 160 L 57 135 L 57 85 L 100 110 Z" />
+
+      <!-- Right wall: starts at bottom-front, right along the base,
+           up the right edge, across the top, closes. -->
+      <path class="draw draw-side" d="M 100 160 L 143 135 L 143 85 L 100 110 Z" />
+
+      <!-- Front gable (left half of roof): starts at the right base of
+           the gable triangle, goes left across the eave line, then up
+           to the apex, closes back. -->
+      <path class="draw draw-roof-left" d="M 100 110 L 57 85 L 78 72 Z" />
+
+      <!-- Right roof slope (right half of roof, parallelogram):
+           starts at the front-bottom corner, around to the back-top. -->
+      <path class="draw draw-roof-right" d="M 100 110 L 143 85 L 122 48 L 78 72 Z" />
+
+      <!-- Ridge: front apex → back apex. -->
+      <path class="draw draw-ridge" d="M 78 72 L 122 48" />
+    </svg>
+
+    <div class="loader-name">
+      <div class="loader-name-main">
+        <span class="word-mask"><span class="word word-fotta">FOTTA/</span></span>
+        <span class="word-mask"><span class="word word-popadic">/POPADIČ</span></span>
+      </div>
+      <span class="word-mask"><span class="word loader-name-sub">architekt</span></span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .loader {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    opacity: 1;
+    /* overflow: hidden clips the logo (which is counter-translated
+       down during the curtain rise to stay visually in place) the
+       moment the rising loader edge passes the logo's position.
+       Without this, the logo bleeds out below the loader box and
+       floats over the revealed hero — see the bug report. */
+    overflow: hidden;
+    transition: opacity 500ms var(--ease-in-out);
+  }
+
+  .loader[data-loader-done] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Wrapper that the outro animates as a single unit
+     (lift + opacity), separate from the background fade. */
+  .loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loader-icon {
+    display: block;
+    /* GSAP scales/fades this in via tl.from(); ensures transform-origin
+       is centered so the breathe/settle pulse feels symmetric. */
+    transform-origin: 50% 50%;
+  }
+
+  /* Each path starts hidden via a large dash. loader.ts measures each
+     path's getTotalLength() and overrides these with the exact value
+     before animating offset to 0. */
+  .loader-icon .draw {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+
+  .loader-name {
+    margin-top: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    line-height: 26px;
+  }
+
+  /* No gap — the two halves "FOTTA/" and "/POPADIČ" sit flush so they
+     read as a single word "FOTTA//POPADIČ" once both masks reveal. */
+  .loader-name-main {
+    display: flex;
+    gap: 0;
+    align-items: baseline;
+    justify-content: center;
+  }
+
+  /* Mask wrappers clip the inner .word until it slides up from below.
+     Padding bottom gives descenders breathing room without affecting
+     the line baseline that the flex container uses for alignment. */
+  .word-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1.15;
+    padding-bottom: 0.1em;
+    vertical-align: bottom;
+  }
+
+  /* IMPORTANT: do NOT set transform here. GSAP reads CSS-applied
+     translateY(%) as a pixel value (via matrix decomposition) and stores
+     it in the `y` channel, so animating `yPercent` then leaves the
+     pixel offset untouched and the word never returns to visible.
+     Initial state is set entirely via gsap.set() in loader.ts; opacity:0
+     prevents any pre-script flash. */
+  .word {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* Switzer Semibold 24px / tracking 0.48px. */
+  .word-fotta,
+  .word-popadic {
+    font-family: var(--font-sans);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  /* Switzer Regular Italic 24px — "architekt" subtitle. */
+  .loader-name-sub {
+    font-family: var(--font-sans);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 24px;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  /* Body scroll lock while loader is active — released by loader.ts. */
+  :global(body[data-loader-active]) {
+    overflow: hidden;
+  }
+
+  /* Reduced motion: show icon + text as a static frame, no drawing,
+     no slide-in. loader.ts will still fade the whole loader out. */
+  @media (prefers-reduced-motion: reduce) {
+    .loader-icon .draw {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+    }
+    .word {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
