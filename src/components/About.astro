@@ -1,0 +1,232 @@
+---
+/**
+ * About (Section 2) — studio intro statement + CTA + divider.
+ *
+ * Figma spec (node 2592:367):
+ *   - Container: flex col, gap 120px, pt 120px, px 28px
+ *   - Headline: Switzer Medium 48px, #222, leading normal,
+ *     text-center, max-width 1150px
+ *   - CTA "Viac o nás": same pattern as hero CTA (black 211×p12)
+ *   - Divider: 1px #A3A3A3, max-width 1384px
+ *
+ * Reveal choreography (see scripts/about.ts):
+ *   - Each word: color #C8C8C8 → #222 via SCROLL SCRUB + stagger
+ *     ("disabled until you scroll past" — Glass Field pattern)
+ *   - "27" inside the headline: value scrubs 0 → 27 as user scrolls
+ *     through the counter's position. Standard tally counter.
+ *   - CTA + divider: one-shot reveals after section enters viewport.
+ */
+
+// Words pre-rendered as individual spans — needed for per-word color
+// stagger. "247" gets `about-counter` class for the value scrub
+// (project count, scrubs 000 → 247 as the user scrolls).
+const HEADLINE =
+  "Na to myslíme pri každom zadaní už od roku 1998. Za 27 rokov sme dali reálnu tvár 247 projektom naprieč Slovenskom a Českom — bez hlučných gest, no s rešpektom k detailu. Dnes už tvoríme z dvoch ateliérov: v Bardejove a Košiciach.";
+const words = HEADLINE.split(" ");
+---
+
+<section class="about" id="o-nas" aria-labelledby="about-heading">
+  <div class="about-content">
+    <h2 class="about-headline" id="about-heading">
+      {
+        words.map((word, i) => {
+          const isCounter = word === "247";
+          const cls = isCounter ? "about-word about-counter" : "about-word";
+          return (
+            <>
+              {isCounter ? (
+                <span class={cls} data-target="247">{word}</span>
+              ) : (
+                <span class={cls}>{word}</span>
+              )}
+              {i < words.length - 1 ? " " : ""}
+            </>
+          );
+        })
+      }
+    </h2>
+
+    <a class="about-cta" href="#about">
+      <span class="about-cta-text">Spoznajte nás</span>
+      <svg
+        class="about-cta-arrow"
+        width="16"
+        height="10"
+        viewBox="0 0 16 10"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+      </svg>
+    </a>
+  </div>
+
+  <div class="about-divider" aria-hidden="true"></div>
+</section>
+
+<style>
+  .about {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 120px;
+    padding: 120px 28px 0;
+    background: var(--bg);
+  }
+
+  /* ===== Content block (headline + CTA) ===== */
+  .about-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 48px;
+    width: 100%;
+    max-width: 1150px;
+  }
+
+  /* ===== Headline =====
+     Switzer Medium 48px, normal style (must explicitly reset the
+     global h1–h6 italic — see project-h1-italic-gotcha memory).
+     Clamp scales it down on smaller viewports while hitting the
+     exact 48px on Figma's 1440 desktop canvas.
+
+     Note: NO opacity/y initial state here anymore — the reveal is
+     per-word color scrub (see .about-word below). */
+  .about-headline {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(28px, 3.75vw, 48px);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    text-align: center;
+    margin: 0;
+  }
+
+  /* Per-word span — each starts in "disabled" grey, GSAP scrubs
+     color to #222 as user scrolls through the section. */
+  .about-word {
+    color: var(--ink-faint);
+    will-change: color;
+  }
+
+  /* Counter — value is leading-zero padded by JS ("000" → "247"),
+     so the content is ALWAYS 3 digits wide. tabular-nums then
+     ensures every digit is the same width within Switzer, so the
+     whole headline never reflows during the scrub. Editorial /
+     archive numbering vibe (think "Projekt 001", "Vol. 027"). */
+  .about-counter {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ===== CTA (Viac o nás) =====
+     Mirrors the hero "Kontaktujte nás" CTA pattern: dark curtain
+     slides in from the left, text shifts a touch, arrow runs ahead. */
+  .about-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 211px;
+    padding: 14px 16px;
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+
+    /* Initial state — cleared by ScrollTrigger reveal. */
+    opacity: 0;
+    transform: translateY(20px);
+    will-change: transform, opacity;
+  }
+
+  .about-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .about-cta:hover::before {
+    transform: translateX(0);
+  }
+
+  .about-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .about-cta-text {
+    display: inline-block;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .about-cta:hover .about-cta-text {
+    transform: translateX(3px);
+  }
+
+  .about-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .about-cta:hover .about-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* ===== Divider =====
+     1px border line. Initial state scaleX(0) origin left — draws
+     in from the left like a CAD line. */
+  .about-divider {
+    width: 100%;
+    max-width: 1384px;
+    height: 1px;
+    background: #a3a3a3;
+    transform: scaleX(0);
+    transform-origin: left center;
+    will-change: transform;
+  }
+
+  /* ===== Reduced motion ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .about-word {
+      color: #222;
+    }
+    .about-cta {
+      opacity: 1;
+      transform: none;
+    }
+    .about-divider {
+      transform: none;
+    }
+  }
+
+  /* ===== Smaller screens ===== */
+  @media (max-width: 1100px) {
+    .about {
+      gap: 80px;
+      padding: 80px 20px 0;
+    }
+    .about-content {
+      gap: 36px;
+    }
+  }
+</style>

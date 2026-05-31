@@ -26,6 +26,37 @@ export function initHero(): void {
   if (typeof window === "undefined") return;
   initClock();
   initCursor();
+  initHeroParallax();
+}
+
+/**
+ * Scrub parallax — hero image lags behind page scroll, giving the
+ * section a sense of depth as content above it scrolls past.
+ *
+ * yPercent: 12 means as user scrolls hero from top to bottom of
+ * viewport, the image translates DOWN by 12% of its own height.
+ * Result: image "stays" with the user longer than the surrounding
+ * content — classic parallax lag.
+ *
+ * yPercent only RISES with scroll (starts at 0), so at scroll 0
+ * the image fills the section perfectly — no empty area at top.
+ * Coexists with the Ken Burns scale tween (different transform
+ * channels; GSAP composes them).
+ */
+function initHeroParallax(): void {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) return;
+
+  gsap.to(".hero-media-img", {
+    yPercent: 12,
+    ease: "none",
+    scrollTrigger: {
+      trigger: ".hero",
+      start: "top top",
+      end: "bottom top",
+      scrub: true,
+    },
+  });
 }
 
 /**
