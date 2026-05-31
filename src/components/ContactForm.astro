@@ -1,0 +1,558 @@
+---
+/**
+ * ContactForm — site-wide contact panel.
+ *
+ * Triggered by any element with [data-open-contact]. Slides in from
+ * the right with a blurred backdrop. Close by clicking the X icon,
+ * the backdrop outside the panel, or pressing Escape.
+ *
+ * Figma spec (node 2624:908):
+ *  - Panel: bg #f7f8f9, width 1040px, full-height, right-anchored
+ *  - Backdrop: rgba(34,34,34,0.6) with backdrop-blur 2px
+ *  - Sections separated by 1px #a3a3a3 borders
+ *  - Form fields use HTML5 native validation (required, type=email, etc.)
+ *
+ * Close X is position:absolute inside the panel so it stays in place
+ * while the content scrolls. Hover state rotates the icon 90°.
+ */
+
+const SERVICES = [
+  "Urbanistická štúdia",
+  "Architektonická štúdia",
+  "Územné rozhodnutie",
+  "Stavebné povolenie",
+  "Realizačná dokumentácia",
+  "Iné",
+];
+---
+
+<aside
+  class="contact-panel"
+  id="contact-form"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="contact-heading"
+  aria-hidden="true"
+>
+  <div class="contact-backdrop" data-contact-close></div>
+
+  <div class="contact-sheet" role="document">
+    <button
+      type="button"
+      class="contact-close"
+      data-contact-close
+      aria-label="Zavrieť formulár"
+    >
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M4 4 L16 16 M16 4 L4 16" />
+      </svg>
+    </button>
+
+    {/* data-lenis-prevent — tells Lenis NOT to intercept wheel events
+        that originate inside this container. Without it, Lenis catches
+        all wheel events page-wide (even with lenis.stop() the
+        wheel-event hijack remains), and the form's native overflow
+        scroll never fires. */}
+    <div class="contact-scroll" data-lenis-prevent>
+      <form class="contact-form" novalidate={false}>
+        <header class="contact-section contact-section--header">
+          <h2 class="contact-title" id="contact-heading">Kontaktujte nás</h2>
+          <p class="contact-intro">
+            Na úvod by sme vás chceli požiadať, aby ste nám poskytli
+            základné informácie o vašom projekte, ktoré nám pomôžu
+            lepšie pochopiť vaše potreby.
+          </p>
+        </header>
+
+        <section class="contact-section">
+          <h3 class="contact-section-label">O akú službu máte záujem</h3>
+          <div class="contact-section-content contact-services">
+            {
+              SERVICES.map((label, i) => (
+                <label class="service-pill">
+                  <input
+                    type="radio"
+                    name="service"
+                    value={label}
+                    data-service-index={i}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))
+            }
+          </div>
+        </section>
+
+        <section class="contact-section">
+          <h3 class="contact-section-label">Vaše kontaktné údaje</h3>
+          <div class="contact-section-content contact-fields">
+            <label class="contact-field">
+              <span class="contact-field-label">Meno</span>
+              <input
+                type="text"
+                name="name"
+                required
+                autocomplete="name"
+                aria-required="true"
+              />
+            </label>
+            <label class="contact-field">
+              <span class="contact-field-label">Emailová adresa</span>
+              <input
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+                aria-required="true"
+              />
+            </label>
+            <label class="contact-field">
+              <span class="contact-field-label">Telefónne číslo</span>
+              <input
+                type="tel"
+                name="phone"
+                autocomplete="tel"
+                inputmode="tel"
+              />
+            </label>
+            <label class="contact-field">
+              <span class="contact-field-label">Vaša správa</span>
+              <textarea
+                name="message"
+                required
+                aria-required="true"
+                rows="8"></textarea>
+            </label>
+
+            <button type="submit" class="contact-submit">
+              <span>Odoslať</span>
+              <svg
+                width="16"
+                height="10"
+                viewBox="0 0 16 10"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+              </svg>
+            </button>
+          </div>
+        </section>
+
+        <section class="contact-section contact-section--last">
+          <h3 class="contact-section-label">Kde nás najdete</h3>
+          <div class="contact-section-content contact-locations">
+            <address class="contact-location">
+              <h4>Bardejov</h4>
+              <p>Priemyselná 3767, 085 01 Bardejov, Slovensko</p>
+              <p>
+                <a href="mailto:atelier@fottapopadic.sk">atelier@fottapopadic.sk</a>
+              </p>
+              <p>
+                <a href="tel:+421950132451">+421 0950 132 451</a>
+              </p>
+            </address>
+            <address class="contact-location">
+              <h4>Košice</h4>
+              <p>
+                Dominikánske námestie 590/6, 040 01 Staré Mesto, Slovensko
+              </p>
+              <p>
+                <a href="tel:+421950321154">+421 0950 321 154</a>
+              </p>
+            </address>
+          </div>
+        </section>
+      </form>
+    </div>
+  </div>
+</aside>
+
+<style>
+  /* ===== Root layer ===== */
+  .contact-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+    visibility: hidden;
+  }
+
+  .contact-panel[aria-hidden="false"] {
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  /* ===== Backdrop — dark blur, fills viewport behind panel ===== */
+  .contact-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 34, 34, 0.6);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  /* ===== Sheet — the slide-in panel =====
+     IMPORTANT: no CSS transform here. GSAP reads CSS-applied
+     translateX(%) as a pixel value (matrix decomposition) and
+     stores it in the `x` channel, so animating `xPercent` then
+     leaves the pixel offset uncleared and the sheet never reaches
+     the screen. Initial off-screen state is set entirely via
+     gsap.set() in contact-form.ts; the parent `.contact-panel`
+     has visibility:hidden so there's no pre-script flash. */
+  .contact-sheet {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1040px;
+    max-width: calc(100vw - 40px);
+    background: #f7f8f9;
+    will-change: transform;
+    overflow: hidden;
+  }
+
+  /* Close button — absolute inside the sheet, so it stays put as
+     the inner content scrolls. Hover rotates the X by 90° smoothly. */
+  .contact-close {
+    position: absolute;
+    top: 40px;
+    right: 28px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: #222;
+    color: #fff;
+    border: 0;
+    cursor: pointer;
+    transition: background 280ms ease;
+  }
+
+  .contact-close svg {
+    transition: transform 360ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .contact-close:hover svg {
+    transform: rotate(90deg);
+  }
+
+  .contact-close:hover {
+    background: #000;
+  }
+
+  /* Scroll area inside the sheet */
+  .contact-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* ===== Form layout ===== */
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
+    padding: 40px 28px 80px;
+    font-family: var(--font-sans);
+    color: #222;
+  }
+
+  .contact-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #a3a3a3;
+  }
+
+  .contact-section--header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .contact-section--last {
+    border-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  /* ===== Header ===== */
+  .contact-title {
+    font-family: var(--font-sans);
+    font-size: 48px;
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1;
+    margin: 0;
+    /* Reserve room so the absolute close button never overlaps the
+       title on the right side of the header. */
+    padding-right: 56px;
+  }
+
+  .contact-intro {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.45;
+    color: #666;
+    max-width: 578px;
+    margin: 0;
+  }
+
+  /* ===== Section labels (left column) ===== */
+  .contact-section-label {
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.2;
+    margin: 0;
+    flex: 0 0 auto;
+  }
+
+  /* Right column container — bumped from Figma's 572 to 620 so the
+     6 service pills fit on 2 rows (browser-rendered Switzer is
+     slightly wider than Figma's text metrics). All section-content
+     blocks share this width so their LEFT edges line up vertically,
+     not just their right edges via space-between. */
+  .contact-section-content {
+    width: 620px;
+    flex: 0 0 auto;
+    max-width: 100%;
+  }
+
+  /* ===== Service pills ===== */
+  .contact-services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .service-pill {
+    cursor: pointer;
+  }
+
+  .service-pill input {
+    /* Hide the actual checkbox — the label span is the visual UI. */
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .service-pill span {
+    display: inline-block;
+    padding: 12px;
+    border: 1px solid #a3a3a3;
+    background: transparent;
+    color: #222;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 20px;
+    transition:
+      background 280ms cubic-bezier(0.65, 0, 0.35, 1),
+      color 280ms cubic-bezier(0.65, 0, 0.35, 1),
+      border-color 280ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .service-pill:hover span {
+    border-color: #222;
+  }
+
+  .service-pill input:checked + span {
+    background: #222;
+    color: #fff;
+    border-color: #222;
+  }
+
+  /* Browser focus styles for keyboard users */
+  .service-pill input:focus-visible + span {
+    outline: 2px solid #222;
+    outline-offset: 2px;
+  }
+
+  /* ===== Form fields ===== */
+  .contact-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .contact-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .contact-field-label {
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 20px;
+  }
+
+  .contact-field input,
+  .contact-field textarea {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid #a3a3a3;
+    color: #222;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.4;
+    resize: none;
+    transition: border-color 200ms ease;
+  }
+
+  .contact-field input {
+    height: 44px;
+  }
+
+  /* Textarea auto-grows downward as the user types. min-height keeps
+     the starting frame at 200px; JS adjusts the height on every input
+     event to match scrollHeight, so the box expands and the parent
+     .contact-scroll picks up the new total to scroll. overflow:hidden
+     suppresses the internal scrollbar — overflow is handled by the
+     panel's outer scroll. field-sizing: content is a progressive
+     enhancement for modern browsers (Chrome 123+/FF 124+). */
+  .contact-field textarea {
+    min-height: 200px;
+    overflow: hidden;
+    field-sizing: content;
+  }
+
+  .contact-field input:hover,
+  .contact-field textarea:hover {
+    border-color: #555;
+  }
+
+  .contact-field input:focus,
+  .contact-field textarea:focus {
+    border-color: #222;
+    outline: none;
+  }
+
+  /* Native browser invalid state — happens on submit attempt */
+  .contact-field input:user-invalid,
+  .contact-field textarea:user-invalid {
+    border-color: #c73e2c;
+  }
+
+  /* ===== Submit button — mirrors hero CTA pattern ===== */
+  .contact-submit {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 211px;
+    padding: 14px 16px;
+    margin-top: 8px;
+    background: #222;
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    border: 0;
+    cursor: pointer;
+    overflow: hidden;
+  }
+
+  .contact-submit::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    z-index: 0;
+  }
+
+  .contact-submit:hover::before {
+    transform: translateX(0);
+  }
+
+  .contact-submit > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .contact-submit svg {
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .contact-submit:hover svg {
+    transform: translateX(4px);
+  }
+
+  /* ===== Locations ===== */
+  .contact-locations {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .contact-location {
+    font-style: normal;
+  }
+
+  .contact-location h4 {
+    font-family: var(--font-sans);
+    font-size: 20px;
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1.2;
+    margin: 0 0 4px;
+  }
+
+  .contact-location p {
+    font-size: 16px;
+    line-height: 22px;
+    color: #666;
+    margin: 0;
+  }
+
+  .contact-location a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 200ms ease;
+  }
+
+  .contact-location a:hover {
+    color: #222;
+  }
+
+  /* ===== Responsive ===== */
+  @media (max-width: 1100px) {
+    .contact-section {
+      flex-direction: column;
+      gap: 16px;
+    }
+    .contact-section-content {
+      width: 100%;
+    }
+  }
+</style>

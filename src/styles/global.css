@@ -16,6 +16,18 @@ html {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
   text-rendering: optimizeLegibility;
+
+  /* Hide the page scrollbar entirely. With no scrollbar drawn AND
+     no gutter reserved, body's `overflow` toggle (loader active,
+     contact form open) produces zero visual change — no layout
+     shift, no jump. Scrolling still works via wheel / trackpad /
+     keyboard / touch via Lenis. */
+  scrollbar-width: none; /* Firefox */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none; /* Chrome / Safari / Webkit */
 }
 
 html,

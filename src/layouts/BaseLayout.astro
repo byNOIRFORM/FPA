@@ -3,6 +3,7 @@ import "../styles/tokens.css";
 import "../styles/global.css";
 import "lenis/dist/lenis.css";
 import Loader from "../components/Loader.astro";
+import ContactForm from "../components/ContactForm.astro";
 
 interface Props {
   title?: string;
@@ -69,14 +70,20 @@ const {
 
     <slot />
 
+    {/* Contact form lives at the layout level so any CTA on any
+        page can open it via [data-open-contact]. */}
+    <ContactForm />
+
     <script>
       import { setupGsap } from "../scripts/gsap-setup";
       import { initLoader } from "../scripts/loader";
       import { initHero } from "../scripts/hero";
       import { initAbout } from "../scripts/about";
+      import { initContactForm } from "../scripts/contact-form";
       setupGsap();
       initHero();
       initAbout();
+      initContactForm();
       initLoader();
     </script>
   </body>

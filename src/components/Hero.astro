@@ -56,9 +56,9 @@
       </ul>
       {/* data-magnetic + data-cta-scramble both disabled — the helper
           functions in hero.ts stay intact for future reuse on other
-          elements. Current hover = dark curtain slide + content
-          translate, nothing more. */}
-      <a class="nav-cta nav-animate" href="#kontakt">
+          elements. data-open-contact wires this CTA to the contact
+          form panel (slides in from the right). */}
+      <a class="nav-cta nav-animate" href="#kontakt" data-open-contact>
         <span class="nav-cta-text">Kontaktujte nás</span>
         <svg
           class="nav-cta-arrow"
