@@ -54,10 +54,8 @@
         <li><a class="nav-flip" href="#projekty" data-text="Projekty,"><span>Projekty,</span></a></li>
         <li><a class="nav-flip" href="#sluzby" data-text="Služby"><span>Služby</span></a></li>
       </ul>
-      {/* data-magnetic + data-cta-scramble both disabled — the helper
-          functions in hero.ts stay intact for future reuse on other
-          elements. data-open-contact wires this CTA to the contact
-          form panel (slides in from the right). */}
+      {/* data-open-contact wires this CTA to the contact form
+          panel (slides in from the right). */}
       <a class="nav-cta nav-animate" href="#kontakt" data-open-contact>
         <span class="nav-cta-text">Kontaktujte nás</span>
         <svg
@@ -238,10 +236,14 @@
     font-size: 16px;
     line-height: 1;
     letter-spacing: 0.02em;
-    /* Smooth handoff between the two states. Same easing as the
-       reveal animations elsewhere on the page so it reads as part
-       of the same motion language. Padding is animated too so the
-       nav visibly "condenses" on scroll (Colette pattern). */
+    will-change: transform;
+    /* Theme switch (bg/color/padding) uses CSS transitions; the
+       transform (hide/show on scroll) is driven by GSAP from
+       scripts/nav.ts. GSAP runs through its own ticker, blends
+       in-flight tweens when the direction reverses, and uses
+       a true exponential expo.inOut curve — the same engine and
+       curve as the contact form sheet, so the motion language
+       matches across the page. */
     transition:
       background 420ms cubic-bezier(0.65, 0, 0.35, 1),
       color 420ms cubic-bezier(0.65, 0, 0.35, 1),

@@ -18,16 +18,12 @@ import { revealHero } from "./hero";
  *   2.50s  Curtain done → display:none, hero takes over.
  *
  * Safeguards:
- *   - sessionStorage("loaderShown") gate exists but is commented out
- *     for dev (loader plays every refresh). Re-enable before launch.
  *   - FAILSAFE_MS timeout force-removes the loader if anything stalls.
  *   - prefers-reduced-motion: skip animation entirely, just show + fade.
+ *
+ * Pre-launch TODO: gate the loader on sessionStorage so it only plays
+ * on the first visit per session. (Tracked in the parked-work memory.)
  */
-
-// Re-enabled when launching: used by the sessionStorage gate that
-// makes the loader play only on the first visit per session.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const SESSION_KEY = "loaderShown";
 
 // Sits just above the natural ~2.5s outro so the failsafe doesn't cut
 // the curtain rise short. Still well under any user-perceived "stuck".
@@ -43,30 +39,6 @@ export function initLoader(): void {
 
   const finish = createFinisher(root);
   const failsafeId = window.setTimeout(finish, FAILSAFE_MS);
-
-  // DEV: sessionStorage gate temporarily disabled so the loader shows on
-  // every refresh. Re-enable the block below once the design is locked in.
-  /*
-  let alreadyShown = false;
-  try {
-    alreadyShown = sessionStorage.getItem(SESSION_KEY) === "1";
-  } catch {
-    // sessionStorage may be unavailable — treat as first visit.
-  }
-
-  if (alreadyShown) {
-    window.clearTimeout(failsafeId);
-    root.style.transition = "none";
-    finish();
-    return;
-  }
-
-  try {
-    sessionStorage.setItem(SESSION_KEY, "1");
-  } catch {
-    // ignore
-  }
-  */
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced) {

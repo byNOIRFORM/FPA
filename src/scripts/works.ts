@@ -104,17 +104,25 @@ export function initWorks(): void {
   }
 
   // ===== 3. TEXT STAGGER REVEAL (every tile) =====
-  // Initial state set inline via GSAP (not CSS) so a no-JS render
-  // keeps the text visible — important for SEO / progressive
-  // enhancement. With JS on, GSAP applies the offset before the
-  // first frame paints, then animates it away.
-  if (!reduced) {
+  // Initial state is declared in CSS via [data-reveal] so the
+  // text is hidden from the first paint (no flash of unstyled
+  // content before works.ts runs). Here we tween TO the visible
+  // state, then strip the attribute so any future style rule
+  // querying [data-reveal] doesn't pick it up.
+  //
+  // Reduced motion path: just strip the attribute and let CSS
+  // fall back to defaults (visible).
+  if (reduced) {
+    tiles.forEach((tile) => {
+      tile
+        .querySelectorAll<HTMLElement>("[data-reveal]")
+        .forEach((el) => el.removeAttribute("data-reveal"));
+    });
+  } else {
     tiles.forEach((tile) => {
       const title = tile.querySelector<HTMLElement>(".work-title");
       const desc = tile.querySelector<HTMLElement>(".work-desc");
       if (!title || !desc) return;
-
-      gsap.set([title, desc], { y: 16, opacity: 0 });
 
       gsap
         .timeline({
@@ -122,6 +130,10 @@ export function initWorks(): void {
             trigger: tile,
             start: "top 75%",
             toggleActions: "play none none none",
+          },
+          onStart: () => {
+            title.removeAttribute("data-reveal");
+            desc.removeAttribute("data-reveal");
           },
         })
         .to(title, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })

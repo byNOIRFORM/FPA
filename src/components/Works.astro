@@ -86,8 +86,8 @@ const projects: Project[] = [
           <img src={projects[0].image} alt={projects[0].alt} loading="lazy" />
         </div>
         <div class="work-info">
-          <h3 class="work-title">{projects[0].title}</h3>
-          <p class="work-desc">{projects[0].description}</p>
+          <h3 class="work-title" data-reveal>{projects[0].title}</h3>
+          <p class="work-desc" data-reveal>{projects[0].description}</p>
         </div>
       </article>
       <article class="work-tile work-tile--r1r">
@@ -95,8 +95,8 @@ const projects: Project[] = [
           <img src={projects[1].image} alt={projects[1].alt} loading="lazy" />
         </div>
         <div class="work-info">
-          <h3 class="work-title">{projects[1].title}</h3>
-          <p class="work-desc">{projects[1].description}</p>
+          <h3 class="work-title" data-reveal>{projects[1].title}</h3>
+          <p class="work-desc" data-reveal>{projects[1].description}</p>
         </div>
       </article>
     </div>
@@ -108,8 +108,8 @@ const projects: Project[] = [
           <img src={projects[2].image} alt={projects[2].alt} loading="lazy" />
         </div>
         <div class="work-info">
-          <h3 class="work-title">{projects[2].title}</h3>
-          <p class="work-desc">{projects[2].description}</p>
+          <h3 class="work-title" data-reveal>{projects[2].title}</h3>
+          <p class="work-desc" data-reveal>{projects[2].description}</p>
         </div>
       </article>
       <article class="work-tile work-tile--r2r">
@@ -117,8 +117,8 @@ const projects: Project[] = [
           <img src={projects[3].image} alt={projects[3].alt} loading="lazy" />
         </div>
         <div class="work-info">
-          <h3 class="work-title">{projects[3].title}</h3>
-          <p class="work-desc">{projects[3].description}</p>
+          <h3 class="work-title" data-reveal>{projects[3].title}</h3>
+          <p class="work-desc" data-reveal>{projects[3].description}</p>
         </div>
       </article>
     </div>
@@ -130,8 +130,8 @@ const projects: Project[] = [
           <img src={projects[4].image} alt={projects[4].alt} loading="lazy" />
         </div>
         <div class="work-info">
-          <h3 class="work-title">{projects[4].title}</h3>
-          <p class="work-desc">{projects[4].description}</p>
+          <h3 class="work-title" data-reveal>{projects[4].title}</h3>
+          <p class="work-desc" data-reveal>{projects[4].description}</p>
         </div>
       </article>
       <article class="work-tile work-tile--r3">
@@ -139,8 +139,8 @@ const projects: Project[] = [
           <img src={projects[5].image} alt={projects[5].alt} loading="lazy" />
         </div>
         <div class="work-info">
-          <h3 class="work-title">{projects[5].title}</h3>
-          <p class="work-desc">{projects[5].description}</p>
+          <h3 class="work-title" data-reveal>{projects[5].title}</h3>
+          <p class="work-desc" data-reveal>{projects[5].description}</p>
         </div>
       </article>
     </div>
@@ -347,6 +347,17 @@ const projects: Project[] = [
        GSAP) are JS-driven so they share one transform channel
        without a CSS transition fighting them. */
     will-change: transform, opacity;
+  }
+
+  /* Initial pre-reveal state — declared in CSS (not GSAP) so the
+     text is hidden from the very first paint, even before
+     works.ts runs. Prevents the 1-frame flash where unstyled text
+     would be visible at full opacity before the animation begins.
+     The reveal in works.ts removes this offset. */
+  .work-title[data-reveal],
+  .work-desc[data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
   }
 
   .work-desc {
