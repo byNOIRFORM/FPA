@@ -193,16 +193,13 @@ const words = HEADLINE.split(" ");
   }
 
   /* ===== Divider =====
-     1px border line. Initial state scaleX(0) origin left — draws
-     in from the left like a CAD line. */
+     1px static border line — structural element, no entrance
+     animation. */
   .about-divider {
     width: 100%;
     max-width: 1384px;
     height: 1px;
     background: #a3a3a3;
-    transform: scaleX(0);
-    transform-origin: left center;
-    will-change: transform;
   }
 
   /* ===== Reduced motion ===== */
@@ -212,9 +209,6 @@ const words = HEADLINE.split(" ");
     }
     .about-cta {
       opacity: 1;
-      transform: none;
-    }
-    .about-divider {
       transform: none;
     }
   }

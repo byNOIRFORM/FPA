@@ -1,0 +1,485 @@
+---
+/**
+ * Works (Section 3 — "Výber prác") — selected projects grid.
+ *
+ * Figma spec (node 2637:1527):
+ *   - Container: 1384px wide, py 80px, page-edge 28px gutters
+ *   - Top label: "Výber naších prác", Switzer Medium 16px #222
+ *   - 3 rows of project pairs, 80px row gap, asymmetric widths
+ *     row 1: 445 + 914 (small left, hero right)
+ *     row 2: 680 + 680 (tall left, short right)
+ *     row 3: 680 + 680, items-center (balanced)
+ *   - Each tile: image on top, 24px gap, title (Switzer Medium
+ *     24px #222) + 8px + description (Switzer Regular 20px #666).
+ *   - Bottom CTA "Ďalšie projekty" — same dark 211×p12 button as
+ *     About/Hero, centered.
+ *
+ * No motion wired up here yet — static structure first, animation
+ * will come on a follow-up pass.
+ */
+
+interface Project {
+  title: string;
+  description: string;
+  image: string;
+  alt: string;
+}
+
+// Project content mirrors Figma 2637:1527. Three of the entries
+// (Serenity Retreat ×2, French body copy) are placeholder strings
+// straight from the design file — they'll get real copy once the
+// client photoshoot finalises.
+const projects: Project[] = [
+  {
+    title: "Dom pod korunami",
+    description:
+      "Harmonické prepojenie surového kameňa a hrejivého dreva v objatí prírody. Architektúra, ktorá rešpektuje vertikalitu okolitého lesa.",
+    image: "/images/works/work-1.jpg",
+    alt: "Dom pod korunami — exteriér v lese",
+  },
+  {
+    title: "Vila Na kopci",
+    description:
+      "Otvorená panoráma, kde sa betónová strohosť stretáva s jemnosťou horskej lúky. Navrhnuté pre splynutie s horizontom.",
+    image: "/images/works/work-2.jpg",
+    alt: "Vila Na kopci — pohľad zhora",
+  },
+  {
+    title: "Dom pri vodnej hladine",
+    description:
+      "Práca s odrazom, svetlom a mierkou. Odvážna hmota, ktorá vďaka prírodným materiálom a vodnému prvku pôsobí prirodzene a stabilne.",
+    image: "/images/works/work-3.jpg",
+    alt: "Dom pri vodnej hladine",
+  },
+  {
+    title: "Bistro Koncept",
+    description:
+      "Mestský interiér postavený na textúrach, poctivom detaile a tlmenej farebnosti. Priestor, ktorý namiesto vizuálneho smogu ponúka pokoj.",
+    image: "/images/works/work-4.jpg",
+    alt: "Bistro Koncept — mestský interiér",
+  },
+  {
+    title: "Ateliér Linea",
+    description:
+      "Prepojenie industriálnej konštrukcie s mäkkosťou interiérových detailov. Priestor definovaný prepustením prirodzeného svetla.",
+    image: "/images/works/work-5.jpg",
+    alt: "Ateliér Linea — industriálny interiér",
+  },
+  {
+    title: "Knižnica Archív",
+    description:
+      "Monumentálny interiér venovaný vedomostiam. Drevená architektúra schodiska tvorí dominantné srdce celého priestoru.",
+    image: "/images/works/work-6.jpg",
+    alt: "Knižnica Archív — drevené schodisko",
+  },
+];
+---
+
+<section class="works" id="projekty" aria-labelledby="works-heading">
+  <p class="works-label" id="works-heading">Výber naších prác</p>
+
+  <div class="works-grid">
+    {/* Row 1 — small left (445), hero right (914) */}
+    <div class="works-row works-row--1">
+      <article class="work-tile work-tile--r1l">
+        <div class="work-media">
+          <img src={projects[0].image} alt={projects[0].alt} loading="lazy" />
+        </div>
+        <div class="work-info">
+          <h3 class="work-title">{projects[0].title}</h3>
+          <p class="work-desc">{projects[0].description}</p>
+        </div>
+      </article>
+      <article class="work-tile work-tile--r1r">
+        <div class="work-media">
+          <img src={projects[1].image} alt={projects[1].alt} loading="lazy" />
+        </div>
+        <div class="work-info">
+          <h3 class="work-title">{projects[1].title}</h3>
+          <p class="work-desc">{projects[1].description}</p>
+        </div>
+      </article>
+    </div>
+
+    {/* Row 2 — tall left (680, 820h), short right (680, 498h) */}
+    <div class="works-row works-row--2">
+      <article class="work-tile work-tile--r2l">
+        <div class="work-media">
+          <img src={projects[2].image} alt={projects[2].alt} loading="lazy" />
+        </div>
+        <div class="work-info">
+          <h3 class="work-title">{projects[2].title}</h3>
+          <p class="work-desc">{projects[2].description}</p>
+        </div>
+      </article>
+      <article class="work-tile work-tile--r2r">
+        <div class="work-media">
+          <img src={projects[3].image} alt={projects[3].alt} loading="lazy" />
+        </div>
+        <div class="work-info">
+          <h3 class="work-title">{projects[3].title}</h3>
+          <p class="work-desc">{projects[3].description}</p>
+        </div>
+      </article>
+    </div>
+
+    {/* Row 3 — balanced pair (680 + 680, both 557h, items-center) */}
+    <div class="works-row works-row--3">
+      <article class="work-tile work-tile--r3">
+        <div class="work-media">
+          <img src={projects[4].image} alt={projects[4].alt} loading="lazy" />
+        </div>
+        <div class="work-info">
+          <h3 class="work-title">{projects[4].title}</h3>
+          <p class="work-desc">{projects[4].description}</p>
+        </div>
+      </article>
+      <article class="work-tile work-tile--r3">
+        <div class="work-media">
+          <img src={projects[5].image} alt={projects[5].alt} loading="lazy" />
+        </div>
+        <div class="work-info">
+          <h3 class="work-title">{projects[5].title}</h3>
+          <p class="work-desc">{projects[5].description}</p>
+        </div>
+      </article>
+    </div>
+  </div>
+
+  <a class="works-cta" href="#projekty">
+    <span class="works-cta-text">Ďalšie projekty</span>
+    <svg
+      class="works-cta-arrow"
+      width="16"
+      height="10"
+      viewBox="0 0 16 10"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+    </svg>
+  </a>
+</section>
+
+<style>
+  /* =============================================================
+     Container — 1384px content frame inside the 1440 canvas
+     (28px gutters left/right), 80px vertical breathing room.
+     ============================================================= */
+  .works {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 32px controls label → grid (tight coupling, label belongs to
+       the grid). Grid → CTA spacing is widened to 80px via an
+       explicit margin-top on .works-cta below. */
+    gap: 32px;
+    width: 100%;
+    max-width: 1384px;
+    margin: 0 auto;
+    padding: 120px 28px;
+    background: var(--bg);
+  }
+
+  /* ===== Top label ===== */
+  .works-label {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: normal;
+    color: #222;
+    margin: 0;
+  }
+
+  /* ===== Grid ===== */
+  .works-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    width: 100%;
+  }
+
+  /* Explicit 48px column gap (instead of justify-content:
+     space-between which only created a thin ~25px sliver from the
+     leftover space). Tiles use flex-grow ratios — so the gap stays
+     a constant 48px at any viewport width while tile widths scale
+     proportionally. */
+  .works-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 48px;
+    width: 100%;
+  }
+
+  /* Row 3 — pair is vertically centered relative to each other
+     (matches Figma's `items-center` on this row only). */
+  .works-row--3 {
+    align-items: center;
+  }
+
+  /* ===== Tile =====
+     Image and text are a single unit — keep them tightly coupled
+     (20px) so the caption reads as belonging to the photo, not
+     as a separate paragraph below it. */
+  .work-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* Width is expressed as flex-grow ratios so the row's 48px gap
+     stays constant across viewports. Figma ratios (basis 0,
+     grow = original px width minus its share of the gap):
+       Row 1: 437 / 899  (was 445 / 914 before subtracting gap)
+       Row 2 & 3: 1 / 1
+     Heights remain fixed (px from Figma) since they don't depend
+     on the row layout. */
+
+  /* Row 1 — asymmetric: small left, hero right.
+     Left tile has an EXPLICIT image height (540px in Figma).
+     Right tile fills its 880px container so the image swallows
+     whatever space the text doesn't use. */
+  .work-tile--r1l {
+    flex: 437 0 0;
+    min-width: 0;
+  }
+  .work-tile--r1l .work-media {
+    height: 540px;
+  }
+
+  .work-tile--r1r {
+    flex: 899 0 0;
+    min-width: 0;
+    height: 880px;
+  }
+  .work-tile--r1r .work-media {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* Row 2 — even widths, but heights are intentionally
+     mismatched: tall portrait left, low landscape right. */
+  .work-tile--r2l {
+    flex: 1 0 0;
+    min-width: 0;
+    height: 820px;
+  }
+  .work-tile--r2l .work-media {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* Row 2 right — unlike the others in this row, the tile has NO
+     fixed height; instead the image is pinned to 402px and the
+     text below grows naturally. This is what makes the right tile
+     end higher than the left (820px) — Figma's "low landscape"
+     composition. */
+  .work-tile--r2r {
+    flex: 1 0 0;
+    min-width: 0;
+  }
+  .work-tile--r2r .work-media {
+    height: 402px;
+  }
+
+  /* Row 3 — balanced pair, both 552px tall */
+  .work-tile--r3 {
+    flex: 1 0 0;
+    min-width: 0;
+    height: 552px;
+  }
+  .work-tile--r3 .work-media {
+    flex: 1 1 0;
+    min-height: 0;
+  }
+
+  /* ===== Image frame =====
+     overflow: hidden clips the 110%-tall image as it parallaxes
+     up and down within the frame, and also clips the 1.04 hover
+     scale to the tile's bounds. */
+  .work-media {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #efeeea; /* faint placeholder before image paints */
+  }
+
+  /* Image is 110% of frame height with top:-5% — the extra 10%
+     of vertical headroom is the room the parallax has to drift
+     (yPercent ±5 = 5.5% of frame height; 10% headroom keeps a
+     0.5% safety margin against edge bleed). will-change tells
+     the browser to promote this layer up front so the scrub
+     stays buttery. */
+  .work-media img {
+    position: relative;
+    top: -5%;
+    width: 100%;
+    height: 110%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  /* ===== Text block ===== */
+  .work-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .work-title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: #222;
+    margin: 0;
+    /* Both reveal (translateY via GSAP) and hover (translateX via
+       GSAP) are JS-driven so they share one transform channel
+       without a CSS transition fighting them. */
+    will-change: transform, opacity;
+  }
+
+  .work-desc {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: 16px;
+    /* 22px line-height verified from Figma metadata — three-line
+       descriptions measure exactly 66px (445px tile), two-line
+       44px (680px tile), one-line 22px (914px tile). Every
+       description box ends on a whole-number pixel. */
+    line-height: 22px;
+    letter-spacing: 0.02em;
+    color: #666;
+    margin: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ===== CTA — mirrors the About / Hero CTA pattern =====
+     margin-top adds to the parent's `gap: 32px` so the visual
+     distance from the grid bottom to the CTA is 80px — wider
+     than label→grid, which signals "end of section". */
+  .works-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 211px;
+    margin-top: 48px;
+    padding: 14px 16px;
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  .works-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .works-cta:hover::before {
+    transform: translateX(0);
+  }
+
+  .works-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .works-cta-text {
+    display: inline-block;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .works-cta:hover .works-cta-text {
+    transform: translateX(3px);
+  }
+
+  .works-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .works-cta:hover .works-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* =============================================================
+     Responsive — at narrower viewports the flex-grow ratios above
+     already scale tile widths proportionally while keeping the
+     48px gap. Below 1024px we collapse to single-column stacks.
+     ============================================================= */
+  @media (max-width: 1439px) {
+    .works {
+      max-width: 100%;
+      padding: 80px clamp(16px, 2vw, 28px);
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .works {
+      gap: 36px;
+      padding: 64px 20px;
+    }
+    .works-grid {
+      gap: 56px;
+    }
+    .works-row,
+    .works-row--3 {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 56px;
+    }
+    .work-tile--r1l,
+    .work-tile--r1r,
+    .work-tile--r2l,
+    .work-tile--r2r,
+    .work-tile--r3 {
+      flex: none;
+      width: 100%;
+      height: auto;
+    }
+    .work-tile--r1l .work-media,
+    .work-tile--r1r .work-media,
+    .work-tile--r2l .work-media,
+    .work-tile--r2r .work-media,
+    .work-tile--r3 .work-media {
+      flex: none;
+      height: auto;
+      aspect-ratio: 4 / 3;
+    }
+    .work-title {
+      font-size: 20px;
+    }
+    .work-desc {
+      font-size: 17px;
+      line-height: 1.45;
+    }
+  }
+</style>

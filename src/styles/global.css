@@ -142,11 +142,14 @@ ol {
 }
 
 /* The small square at the dead-centre — references the house cube
-   in the loader logo for thematic continuity. */
+   in the loader logo for thematic continuity. Hidden in is-view
+   state so the "POZRIEŤ" label isn't masked by it. */
 .cursor-square {
   width: 5px;
   height: 5px;
   background: #fff;
+  opacity: 1;
+  transition: opacity 240ms ease;
 }
 
 /* The ring — grows slightly on hover for subtle interactive feedback. */
@@ -165,6 +168,45 @@ ol {
   width: 46px;
   height: 46px;
   border-color: rgba(255, 255, 255, 0.95);
+}
+
+/* "Pozrieť" state — cursor expands further and reveals a label
+   centred inside the ring. Triggered from works.ts when the user
+   hovers a project tile. The label sits inside the ring as a
+   pseudo-element so no extra DOM is required; mix-blend-mode:
+   difference (on .cursor) keeps the text legible on any
+   background. The centre square is hidden in this state so it
+   doesn't sit on top of the label. */
+.cursor-ring::after {
+  content: "Pozrieť";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.95);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 280ms ease;
+  pointer-events: none;
+}
+
+.cursor.is-view .cursor-ring {
+  width: 80px;
+  height: 80px;
+  border-color: rgba(255, 255, 255, 0.95);
+}
+
+.cursor.is-view .cursor-ring::after {
+  opacity: 1;
+}
+
+.cursor.is-view .cursor-square {
+  opacity: 0;
 }
 
 /* Hide custom cursor on touch / small screens — system cursor is used. */

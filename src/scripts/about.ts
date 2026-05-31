@@ -72,31 +72,19 @@ export function initAbout(): void {
     });
   }
 
-  // 3. CTA + divider — one-shot reveals when the section enters.
-  const tl = gsap.timeline({
+  // 3. CTA one-shot reveal when section enters viewport.
+  // (Divider used to animate scaleX 0 → 1 here — removed as
+  // unnecessary; it now sits statically and reads as a
+  // structural element, not a moment.)
+  gsap.to(".about-cta", {
+    opacity: 1,
+    y: 0,
+    duration: 0.7,
+    ease: "power3.out",
     scrollTrigger: {
       trigger: section,
       start: "top 80%",
       toggleActions: "play none none none",
     },
   });
-
-  tl.to(
-    ".about-cta",
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    },
-    0.3,
-  ).to(
-    ".about-divider",
-    {
-      scaleX: 1,
-      duration: 1.0,
-      ease: "expo.inOut",
-    },
-    0.6,
-  );
 }
