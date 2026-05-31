@@ -203,6 +203,13 @@
   }
 
   /* ===== Navbar =====
+     position: fixed pins it to the viewport so it stays visible as
+     the user scrolls — same idea as Colette. Initial state is
+     transparent with white text (legible over the hero photo);
+     once the hero has scrolled off the top, the .is-scrolled
+     class (toggled in scripts/nav.ts via IntersectionObserver)
+     switches to a frosted-white panel with dark text.
+
      All text elements use line-height: 1 so their bounding boxes
      match their font-size exactly. Without this, the langs (default
      1.5 line-height = 24px tall) and the logo's italic sub line
@@ -212,22 +219,45 @@
      With line-height: 1 everywhere, every element is exactly its
      font-size in height and align-items: center works cleanly. */
   .nav {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 10;
+    z-index: 50;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 48px;
     padding: 22px 28px;
     color: #fff;
+    background: transparent;
     font-family: var(--font-sans);
-    font-weight: 600;
+    /* Medium (500) per Figma — applies to everything except the
+       logo main (explicitly Semibold) and logo sub (Italic 400). */
+    font-weight: 500;
     font-size: 16px;
     line-height: 1;
     letter-spacing: 0.02em;
+    /* Smooth handoff between the two states. Same easing as the
+       reveal animations elsewhere on the page so it reads as part
+       of the same motion language. Padding is animated too so the
+       nav visibly "condenses" on scroll (Colette pattern). */
+    transition:
+      background 420ms cubic-bezier(0.65, 0, 0.35, 1),
+      color 420ms cubic-bezier(0.65, 0, 0.35, 1),
+      box-shadow 420ms cubic-bezier(0.65, 0, 0.35, 1),
+      padding 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Scrolled state — bar matches the page background so it reads
+     as part of the page rather than a separate panel. No border,
+     no shadow: the only thing announcing the nav is the text
+     itself, floating against the same warm cream as everything
+     below it. */
+  .nav.is-scrolled {
+    background: var(--bg);
+    color: var(--ink);
+    padding: 16px 28px;
   }
 
   .nav-left {
@@ -251,6 +281,9 @@
     font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1;
+    /* Same easing as .nav so the logo and panel transition feel
+       like one motion, not two. */
+    transition: font-size 420ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
   .nav-logo-sub {
@@ -259,11 +292,20 @@
     font-weight: 400;
     letter-spacing: 0.02em;
     line-height: 1;
+    transition: font-size 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Scrolled — logo shrinks slightly (Colette pattern). The hero
+     version reads as a brand mark; the scrolled version reads as
+     a utility label. 4px isn't dramatic but it lands. */
+  .nav.is-scrolled .nav-logo-main,
+  .nav.is-scrolled .nav-logo-sub {
+    font-size: 20px;
   }
 
   .nav-clock {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.02em;
     line-height: 1;
     white-space: nowrap;
@@ -344,7 +386,7 @@
     background: #222;
     color: #fff;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 500;
     line-height: 1;
     overflow: hidden;
   }
