@@ -187,7 +187,7 @@ const projects: Project[] = [
     flex-direction: column;
     align-items: center;
     /* 32px controls label → grid (tight coupling, label belongs to
-       the grid). Grid → CTA spacing is widened to 80px via an
+       the grid). Grid → CTA spacing is widened to 48px via an
        explicit margin-top on .works-cta below. */
     gap: 32px;
     width: 100%;
@@ -297,15 +297,14 @@ const projects: Project[] = [
   }
 
   /* Row 3 left — mid-portrait, mirrors Row 1 left's width but
-     slightly taller. 445 × 500 = 0.89 aspect (gentle portrait,
-     less extreme than the previous 330×462 = 0.71). Restores
-     visual balance with the panoramic Knižnica on the right. */
+     taller. 445 × 540 = 0.82 aspect (slight portrait, balances
+     the panoramic Knižnica on the right without competing). */
   .work-tile--r3l {
     flex: 0 0 calc(445 / 1384 * 100%);
     min-width: 0;
   }
   .work-tile--r3l .work-media {
-    height: 500px;
+    height: 540px;
   }
 
   /* Row 3 right — section closer, anchored at the right page edge.
@@ -398,9 +397,8 @@ const projects: Project[] = [
   }
 
   /* ===== CTA — mirrors the About / Hero CTA pattern =====
-     margin-top adds to the parent's `gap: 32px` so the visual
-     distance from the grid bottom to the CTA is 80px — wider
-     than label→grid, which signals "end of section". */
+     margin-top (16px) adds to the parent's `gap: 32px` so the
+     visual distance from the grid bottom to the CTA is 48px. */
   .works-cta {
     position: relative;
     display: inline-flex;
@@ -408,7 +406,7 @@ const projects: Project[] = [
     justify-content: space-between;
     gap: 12px;
     width: 211px;
-    margin-top: 48px;
+    margin-top: 16px;
     padding: 14px 16px;
     background: #222;
     color: #fff;
