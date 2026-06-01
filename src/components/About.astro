@@ -102,7 +102,10 @@ const words = HEADLINE.split(" ");
     font-weight: 500;
     font-style: normal;
     font-size: clamp(28px, 3.75vw, 48px);
-    line-height: 1.2;
+    /* 1.2917 = 62/48 — Figma uses whole-number 62px line-height
+       at the desktop 48px font. Using a ratio (not px) keeps the
+       proportion intact through the responsive clamp. */
+    line-height: 1.2917;
     letter-spacing: -0.01em;
     text-align: center;
     margin: 0;

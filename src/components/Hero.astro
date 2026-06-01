@@ -18,10 +18,32 @@
 ---
 
 <section class="hero" id="hero">
+  {/* Three stacked hero images — default plus two that swap in when
+      the user hovers "hlučná" / "priestor"-"životu" in the slogan.
+      All three share .hero-media-img so the Ken Burns + scroll
+      parallax tweens animate them in lockstep (same scale, same
+      yPercent), making the opacity crossfade a clean swap with
+      no visible jump. The default image starts `is-visible`; JS
+      in initHeroImageSwap toggles the class on hover. */}
   <div class="hero-media" aria-hidden="true">
     <img
       class="hero-media-img"
+      data-image-key="default"
       src="/images/hero.jpg"
+      alt=""
+      decoding="async"
+    />
+    <img
+      class="hero-media-img"
+      data-image-key="hlucna"
+      src="/images/hero-hlucna.jpg"
+      alt=""
+      decoding="async"
+    />
+    <img
+      class="hero-media-img"
+      data-image-key="priestor"
+      src="/images/hero-priestor.jpg"
       alt=""
       decoding="async"
     />
@@ -81,13 +103,19 @@
       <span class="hero-title-mask"><span class="hero-title-word">Architektúra</span></span>
       <span class="hero-title-mask"><span class="hero-title-word">nemá</span></span>
       <span class="hero-title-mask"><span class="hero-title-word">byť</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word">hlučná.</span></span>
+      <span class="hero-title-mask"><span class="hero-title-word hero-title-hover" data-hover-image="hlucna">hlučná.</span></span>
     </span>
     <span class="hero-title-line">
       <span class="hero-title-mask"><span class="hero-title-word">Má</span></span>
       <span class="hero-title-mask"><span class="hero-title-word">dať</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word">priestor</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word">životu.</span></span>
+      {/* "priestor životu" is treated as one phrase — single hover
+          target, single underline drawing across both words. The
+          two masks inside keep their independent word-by-word
+          reveal animation on first load. */}
+      <span class="hero-title-hover hero-title-phrase" data-hover-image="priestor">
+        <span class="hero-title-mask"><span class="hero-title-word">priestor</span></span>
+        <span class="hero-title-mask"><span class="hero-title-word">životu.</span></span>
+      </span>
     </span>
   </h1>
 
@@ -138,14 +166,41 @@
     z-index: 0;
   }
 
+  /* Three stacked hero images. The crossfade is driven by GSAP
+     in scripts/hero.ts (initHeroImageSwap) — NOT by a CSS
+     transition. The reason: a simultaneous "fade out old / fade
+     in new" via CSS leaves both at opacity 0.5 in the middle,
+     showing the layers behind them through both — a dim,
+     "flickering" moment.
+     The GSAP version keeps the previous image at opacity 1
+     UNDERNEATH the new one (z-index management) while the new
+     one fades 0 → 1 on top, then snaps the old to 0 once the
+     new fully covers it. No dim, ever. */
   .hero-media-img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
     transform: scale(1.1);
     transform-origin: 50% 50%;
-    will-change: transform;
+    will-change: transform, opacity;
+  }
+
+  /* Default image always opaque — acts as the fallback layer
+     behind the two hover images. */
+  .hero-media-img[data-image-key="default"] {
+    opacity: 1;
+    z-index: 1;
+  }
+
+  /* Hover images start hidden; GSAP fades them in over the
+     default (or the previous hover image). */
+  .hero-media-img[data-image-key="hlucna"],
+  .hero-media-img[data-image-key="priestor"] {
+    opacity: 0;
+    z-index: 2;
   }
 
   /* Overlay is a SEPARATE full-screen sibling of .hero-media so it
@@ -445,11 +500,11 @@
   }
 
   /* ===== Title (bottom) =====
-     Figma spec: Switzer 64px / 400 / line-height 74px / no tracking.
+     Figma spec: Switzer 64px / 400 / line-height 72px / no tracking.
      font-size uses clamp so the slogan scales down on smaller screens
      while hitting the exact 64px on the Figma desktop viewport
      (5vw = 64px at 1280px wide).
-     line-height ratio (1.15625 = 74/64) keeps the per-line height
+     line-height ratio (1.125 = 72/64) keeps the per-line height
      proportional at every clamp step.
      IMPORTANT: font-style: normal explicitly resets the italic that
      global.css applies to all h1–h6 (those are styled with the serif
@@ -468,7 +523,7 @@
     font-weight: 400;
     font-style: normal;
     font-size: clamp(40px, 5vw, 64px);
-    line-height: 1.15625;
+    line-height: 1.125;
     letter-spacing: 0;
   }
 
@@ -478,9 +533,9 @@
     gap: 0 0.28em;
   }
 
-  /* Mask wrapper inherits the title's 1.09375 line-height = exactly
-     70px at 64px font. Switzer Regular at this size fits cleanly
-     (accents + descenders) inside 70px now that the title is no
+  /* Mask wrapper inherits the title's 1.125 line-height = exactly
+     72px at 64px font. Switzer Regular at this size fits cleanly
+     (accents + descenders) inside 72px now that the title is no
      longer being rendered italic. */
   .hero-title-mask {
     display: inline-block;
@@ -497,6 +552,53 @@
     display: inline-block;
     opacity: 0;
     will-change: transform, opacity;
+  }
+
+  /* ===== Hoverable slogan triggers =====
+     Two interactive zones in the slogan trigger the hero-image
+     swap: "hlučná." (single word) and "priestor životu." (phrase
+     spanning two words with one continuous underline). Each shows
+     a 3px underline that draws left-to-right on hover and
+     collapses back to the left on mouseleave.
+
+     For the single word, .hero-title-hover sits on .hero-title-word
+     (inside the mask). For the phrase, .hero-title-hover wraps two
+     masks so the underline spans across both. Both cases reuse
+     the same selector for consistent styling. */
+  .hero-title-hover {
+    position: relative;
+    cursor: pointer;
+  }
+
+  /* Phrase variant — two masks side by side with the same 0.28em
+     gap the surrounding flex line uses, so the visual spacing of
+     "priestor [gap] životu." is unchanged from the non-hover
+     version. The underline spans the full phrase including the gap. */
+  .hero-title-phrase {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0 0.28em;
+  }
+
+  .hero-title-hover::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0.08em;
+    /* 3.5px reads as deliberate at the 64px desktop slogan; thinner
+       (2px) looked accidental, thicker (4px+) reads as button-y.
+       The half-pixel sits cleanly on retina displays. */
+    height: 3.5px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 700ms cubic-bezier(0.65, 0, 0.35, 1);
+    pointer-events: none;
+  }
+
+  .hero-title-hover:hover::after {
+    transform: scaleX(1);
   }
 
   /* ===== Scroll cue — bottom-right, downward arrow + Switzer label.
@@ -557,6 +659,9 @@
     .nav-animate {
       transform: none;
       opacity: 1;
+    }
+    .hero-title-hover::after {
+      transition: none;
     }
     .hero-scroll {
       opacity: 1;

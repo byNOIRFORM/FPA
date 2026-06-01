@@ -2,20 +2,27 @@
 /**
  * Works (Section 3 — "Výber prác") — selected projects grid.
  *
- * Figma spec (node 2637:1527):
+ * Figma spec (node 2653:229):
  *   - Container: 1384px wide, py 80px, page-edge 28px gutters
  *   - Top label: "Výber našich prác", Switzer Medium 16px #222
- *   - 3 rows of project pairs, 80px row gap, asymmetric widths
- *     row 1: 445 + 914 (small left, hero right)
- *     row 2: 680 + 680 (tall left, short right)
- *     row 3: 680 + 680, items-center (balanced)
- *   - Each tile: image on top, 24px gap, title (Switzer Medium
- *     24px #222) + 8px + description (Switzer Regular 20px #666).
+ *   - 3 rows with asymmetric horizontal offsets (8.45% = 117/1384
+ *     "breathing" indents) that break the grid:
+ *       Row 1: [445 flush left] ... gap ... [680 — 117 inward right]
+ *       Row 2: [563 — 117 inward left] ... gap ... [563 flush right]
+ *       Row 3: [445 flush left] ... gap ... [800 flush right]
+ *           (closing panorama — wider than the others)
+ *   - 80px row gap between rows
+ *   - Each tile: image on top, 20px gap, title (Switzer Medium
+ *     20px #222) + 8px + description (Switzer Regular 16px #666,
+ *     line-height 22px verified from Figma).
  *   - Bottom CTA "Ďalšie projekty" — same dark 211×p12 button as
  *     About/Hero, centered.
  *
- * No motion wired up here yet — static structure first, animation
- * will come on a follow-up pass.
+ * Motion is wired in scripts/works.ts:
+ *   - Inner parallax on every tile (±8 yPercent on image)
+ *   - Row 1 paired clip-path reveal (curtain rising, 150ms stagger)
+ *   - Per-tile text stagger reveal (title → desc, 80ms gap)
+ *   - Hover image scale 1.04 + cursor "POZRIEŤ" state
  */
 
 interface Project {
@@ -25,10 +32,8 @@ interface Project {
   alt: string;
 }
 
-// Project content mirrors Figma 2637:1527. Three of the entries
-// (Serenity Retreat ×2, French body copy) are placeholder strings
-// straight from the design file — they'll get real copy once the
-// client photoshoot finalises.
+// Project content — Slovak titles + descriptions per client copy.
+// alt texts are descriptive (for screen readers + SEO).
 const projects: Project[] = [
   {
     title: "Dom pod korunami",
@@ -61,7 +66,7 @@ const projects: Project[] = [
   {
     title: "Ateliér Linea",
     description:
-      "Prepojenie industriálnej konštrukcie s mäkkosťou interiérových detailov. Priestor definovaný prepustením prirodzeného svetla.",
+      "Prepojenie industriálnej konštrukcie s mäkkosťou interiérových detailov.",
     image: "/images/works/work-5.jpg",
     alt: "Ateliér Linea — industriálny interiér",
   },
@@ -79,7 +84,8 @@ const projects: Project[] = [
   <p class="works-label" id="works-heading">Výber našich prác</p>
 
   <div class="works-grid">
-    {/* Row 1 — small left (445), hero right (914) */}
+    {/* Row 1 — small left hugs page edge, big right pulls inward
+        by ~117px (8.45% of grid). Asymmetric "zig". */}
     <div class="works-row works-row--1">
       <article class="work-tile work-tile--r1l">
         <div class="work-media">
@@ -101,7 +107,10 @@ const projects: Project[] = [
       </article>
     </div>
 
-    {/* Row 2 — tall left (680, 820h), short right (680, 498h) */}
+    {/* Row 2 — inverse zig: left tile pulled inward by ~117px from
+        the left edge, right tile (Bistro) hugs the page edge.
+        Bistro is now the lone tile reaching the right edge in the
+        whole section — stands out instead of aligning with Vila. */}
     <div class="works-row works-row--2">
       <article class="work-tile work-tile--r2l">
         <div class="work-media">
@@ -123,9 +132,11 @@ const projects: Project[] = [
       </article>
     </div>
 
-    {/* Row 3 — balanced pair (680 + 680, both 557h, items-center) */}
+    {/* Row 3 — mirrors Row 1's zig: small left hugs page edge,
+        big right pulls inward. Closes the section with the same
+        rhythm as the opener. */}
     <div class="works-row works-row--3">
-      <article class="work-tile work-tile--r3">
+      <article class="work-tile work-tile--r3l">
         <div class="work-media">
           <img src={projects[4].image} alt={projects[4].alt} loading="lazy" />
         </div>
@@ -134,7 +145,7 @@ const projects: Project[] = [
           <p class="work-desc" data-reveal>{projects[4].description}</p>
         </div>
       </article>
-      <article class="work-tile work-tile--r3">
+      <article class="work-tile work-tile--r3r">
         <div class="work-media">
           <img src={projects[5].image} alt={projects[5].alt} loading="lazy" />
         </div>
@@ -205,22 +216,17 @@ const projects: Project[] = [
     width: 100%;
   }
 
-  /* Explicit 48px column gap (instead of justify-content:
-     space-between which only created a thin ~25px sliver from the
-     leftover space). Tiles use flex-grow ratios — so the gap stays
-     a constant 48px at any viewport width while tile widths scale
-     proportionally. */
+  /* Each row uses justify-content: space-between with no explicit
+     gap. Tile widths + asymmetric margins (margin-left or margin-
+     right on individual tiles) consume specific shares of the row;
+     the remaining space auto-distributes as the gap between tiles.
+     This matches the Figma "broken grid" composition where every
+     row has its own breathing pattern. */
   .works-row {
     display: flex;
     align-items: flex-start;
-    gap: 48px;
+    justify-content: space-between;
     width: 100%;
-  }
-
-  /* Row 3 — pair is vertically centered relative to each other
-     (matches Figma's `items-center` on this row only). */
-  .works-row--3 {
-    align-items: center;
   }
 
   /* ===== Tile =====
@@ -233,74 +239,90 @@ const projects: Project[] = [
     gap: 20px;
   }
 
-  /* Width is expressed as flex-grow ratios so the row's 48px gap
-     stays constant across viewports. Figma ratios (basis 0,
-     grow = original px width minus its share of the gap):
-       Row 1: 437 / 899  (was 445 / 914 before subtracting gap)
-       Row 2 & 3: 1 / 1
-     Heights remain fixed (px from Figma) since they don't depend
-     on the row layout. */
+  /* Tile widths and margins are expressed as percentages of the
+     1384px grid so they scale proportionally between 1024 and 1440
+     while preserving exact Figma pixel dimensions at the desktop
+     canvas. The 117/1384 = 8.45% offsets are the "breathing rooms"
+     that break alignment between rows.
 
-  /* Row 1 — asymmetric: small left, hero right.
-     Left tile has an EXPLICIT image height (540px in Figma).
-     Right tile fills its 880px container so the image swallows
-     whatever space the text doesn't use. */
+     OFFSET MAP
+       Row 1: [445 flush left] ... gap ... [680 — 117 inward right]
+       Row 2: [563 — 117 inward left] ... gap ... [563 flush right]
+       Row 3: [445 flush left] ... gap ... [800 flush right, panoramic]
+
+     Right-edge rhythm escalates: Row 1 right indented → Row 2 right
+     anchors at edge → Row 3 right anchors at edge AND grows wider
+     (cinematic closing chord). */
+
+  /* Row 1 left — small portrait, hugs left edge. */
   .work-tile--r1l {
-    flex: 437 0 0;
+    flex: 0 0 calc(445 / 1384 * 100%);
     min-width: 0;
   }
   .work-tile--r1l .work-media {
-    height: 540px;
+    height: 478px;
   }
 
+  /* Row 1 right — large tile pulled inward from the right edge by
+     117/1384. Vila Na kopci then ends at ~1267 not 1384. */
   .work-tile--r1r {
-    flex: 899 0 0;
+    flex: 0 0 calc(680 / 1384 * 100%);
     min-width: 0;
-    height: 880px;
+    margin-right: calc(117 / 1384 * 100%);
   }
   .work-tile--r1r .work-media {
-    flex: 1 1 0;
-    min-height: 0;
+    height: 698px;
   }
 
-  /* Row 2 — even widths, but heights are intentionally
-     mismatched: tall portrait left, low landscape right. */
+  /* Row 2 left — tall portrait pulled inward from the LEFT edge.
+     Starts at ~117 instead of 0. */
   .work-tile--r2l {
-    flex: 1 0 0;
+    flex: 0 0 calc(563 / 1384 * 100%);
     min-width: 0;
-    height: 820px;
+    margin-left: calc(117 / 1384 * 100%);
   }
   .work-tile--r2l .work-media {
-    flex: 1 1 0;
-    min-height: 0;
+    height: 730px;
   }
 
-  /* Row 2 right — unlike the others in this row, the tile has NO
-     fixed height; instead the image is pinned to 402px and the
-     text below grows naturally. This is what makes the right tile
-     end higher than the left (820px) — Figma's "low landscape"
-     composition. */
+  /* Row 2 right — short landscape, hugs the right edge. The only
+     tile in the whole section that reaches 1384, which makes it
+     stand out instead of aligning with Vila above. */
   .work-tile--r2r {
-    flex: 1 0 0;
+    flex: 0 0 calc(563 / 1384 * 100%);
     min-width: 0;
   }
   .work-tile--r2r .work-media {
     height: 402px;
   }
 
-  /* Row 3 — balanced pair, both 552px tall */
-  .work-tile--r3 {
-    flex: 1 0 0;
+  /* Row 3 left — mid-portrait, mirrors Row 1 left's width but
+     slightly taller. 445 × 500 = 0.89 aspect (gentle portrait,
+     less extreme than the previous 330×462 = 0.71). Restores
+     visual balance with the panoramic Knižnica on the right. */
+  .work-tile--r3l {
+    flex: 0 0 calc(445 / 1384 * 100%);
     min-width: 0;
-    height: 552px;
   }
-  .work-tile--r3 .work-media {
-    flex: 1 1 0;
-    min-height: 0;
+  .work-tile--r3l .work-media {
+    height: 500px;
+  }
+
+  /* Row 3 right — section closer, anchored at the right page edge.
+     800 × 400 = 2:1 univisium ratio. Cinematic but not letterbox —
+     enough vertical room for Knižnica's perspective lines, stairs,
+     and bookshelf verticality to read properly. ~1.40× Ateliér's
+     visual mass keeps the hierarchy clear without overwhelming. */
+  .work-tile--r3r {
+    flex: 0 0 calc(800 / 1384 * 100%);
+    min-width: 0;
+  }
+  .work-tile--r3r .work-media {
+    height: 400px;
   }
 
   /* ===== Image frame =====
-     overflow: hidden clips the 110%-tall image as it parallaxes
+     overflow: hidden clips the oversized image as it parallaxes
      up and down within the frame, and also clips the 1.04 hover
      scale to the tile's bounds. */
   .work-media {
@@ -310,17 +332,17 @@ const projects: Project[] = [
     background: #efeeea; /* faint placeholder before image paints */
   }
 
-  /* Image is 110% of frame height with top:-5% — the extra 10%
-     of vertical headroom is the room the parallax has to drift
-     (yPercent ±5 = 5.5% of frame height; 10% headroom keeps a
-     0.5% safety margin against edge bleed). will-change tells
-     the browser to promote this layer up front so the scrub
-     stays buttery. */
+  /* Image is 122% of frame height with top:-11% — extra 22% of
+     vertical headroom (11% on each side) is the room the parallax
+     has to drift. yPercent ±8 = 8% of image height = 9.76% of
+     frame, well inside the 11% headroom (~1.24% safety buffer at
+     each extreme). will-change promotes the layer to the GPU so
+     the scrub stays buttery. */
   .work-media img {
     position: relative;
-    top: -5%;
+    top: -11%;
     width: 100%;
-    height: 110%;
+    height: 122%;
     object-fit: cover;
     display: block;
     will-change: transform;
@@ -442,9 +464,11 @@ const projects: Project[] = [
   }
 
   /* =============================================================
-     Responsive — at narrower viewports the flex-grow ratios above
-     already scale tile widths proportionally while keeping the
-     48px gap. Below 1024px we collapse to single-column stacks.
+     Responsive — at narrower viewports the percentage flex-bases
+     above scale tile widths proportionally; the auto-distributed
+     row gap (from justify-content: space-between) scales with
+     them. Below 1024px we collapse to single-column stacks and
+     drop the asymmetric margins.
      ============================================================= */
   @media (max-width: 1439px) {
     .works {
@@ -461,26 +485,29 @@ const projects: Project[] = [
     .works-grid {
       gap: 56px;
     }
-    .works-row,
-    .works-row--3 {
+    .works-row {
       flex-direction: column;
       align-items: stretch;
+      justify-content: flex-start;
       gap: 56px;
     }
     .work-tile--r1l,
     .work-tile--r1r,
     .work-tile--r2l,
     .work-tile--r2r,
-    .work-tile--r3 {
+    .work-tile--r3l,
+    .work-tile--r3r {
       flex: none;
       width: 100%;
       height: auto;
+      margin: 0;
     }
     .work-tile--r1l .work-media,
     .work-tile--r1r .work-media,
     .work-tile--r2l .work-media,
     .work-tile--r2r .work-media,
-    .work-tile--r3 .work-media {
+    .work-tile--r3l .work-media,
+    .work-tile--r3r .work-media {
       flex: none;
       height: auto;
       aspect-ratio: 4 / 3;

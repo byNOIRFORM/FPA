@@ -23,6 +23,124 @@ export function initHero(): void {
   initClock();
   initCursor();
   initHeroParallax();
+  initHeroImageSwap();
+}
+
+/**
+ * Hover over "hlučná" or "priestor životu" in the slogan and the
+ * hero image crossfades to a different one — same trick as
+ * thisisstudiox.com's retail line. Each hoverable element carries
+ * a data-hover-image attribute whose value matches a data-image-key
+ * on one of the stacked .hero-media-img elements.
+ *
+ * LAYERED CROSSFADE (no dim midpoint)
+ * The naive "fade out old + fade in new" simultaneously leaves
+ * both at opacity 0.5 in the middle, showing whatever's beneath
+ * through both — a dim, flickering moment. Instead:
+ *
+ *   1. The default image always sits at opacity 1, z-index 1 —
+ *      the permanent backdrop. Never animates.
+ *   2. The incoming image gets z-index 3 and fades 0 → 1 OVER
+ *      the previous active image (which stays at opacity 1 below).
+ *   3. After the fade-in completes, the previous active is
+ *      snapped to opacity 0 (invisible because the new one fully
+ *      covers it).
+ *
+ * Result: there's always at least one image at opacity 1 in the
+ * visible stack. No dim. No flicker.
+ *
+ * Leave is debounced (80ms) so that a fast cursor move from one
+ * hoverable trigger directly onto another doesn't briefly snap
+ * back to default — the pending "go to default" is cancelled the
+ * moment a new enter fires.
+ */
+function initHeroImageSwap(): void {
+  const words = document.querySelectorAll<HTMLElement>("[data-hover-image]");
+  const images = Array.from(
+    document.querySelectorAll<HTMLImageElement>(
+      ".hero-media-img[data-image-key]",
+    ),
+  );
+  if (!words.length || !images.length) return;
+
+  const findImage = (key: string) =>
+    images.find((img) => img.dataset.imageKey === key) ?? null;
+
+  let activeKey = "default";
+  let leaveTimeout: number | null = null;
+
+  const show = (key: string) => {
+    if (key === activeKey) return;
+
+    const target = findImage(key);
+    if (!target) return;
+
+    const previousKey = activeKey;
+    activeKey = key;
+
+    // Going back to default: fade the currently-active hover image
+    // OUT to reveal the default sitting underneath. No incoming
+    // tween because default is always at opacity 1 already.
+    if (key === "default") {
+      if (previousKey !== "default") {
+        const previous = findImage(previousKey);
+        if (previous) {
+          gsap.to(previous, {
+            opacity: 0,
+            duration: 0.8,
+            ease: "power2.inOut",
+            overwrite: "auto",
+          });
+        }
+      }
+      return;
+    }
+
+    // Going to a hover image: bring target above any previous
+    // hover image (which stays at opacity 1 underneath while
+    // target fades in), then snap previous to 0 once target is
+    // fully opaque on top.
+    target.style.zIndex = "3";
+    const previous = previousKey !== "default" ? findImage(previousKey) : null;
+    if (previous && previous !== target) {
+      previous.style.zIndex = "2";
+    }
+
+    gsap.to(target, {
+      opacity: 1,
+      duration: 0.8,
+      ease: "power2.inOut",
+      overwrite: "auto",
+      onComplete: () => {
+        // Only hide the previous if state hasn't changed back to it.
+        if (previous && activeKey !== previousKey) {
+          gsap.set(previous, { opacity: 0 });
+        }
+      },
+    });
+  };
+
+  words.forEach((word) => {
+    const key = word.dataset.hoverImage;
+    if (!key) return;
+
+    word.addEventListener("mouseenter", () => {
+      if (leaveTimeout !== null) {
+        window.clearTimeout(leaveTimeout);
+        leaveTimeout = null;
+      }
+      show(key);
+    });
+
+    word.addEventListener("mouseleave", () => {
+      // Debounce so cursor moving directly to another hoverable
+      // word doesn't briefly snap back to default in between.
+      leaveTimeout = window.setTimeout(() => {
+        show("default");
+        leaveTimeout = null;
+      }, 80);
+    });
+  });
 }
 
 /**

@@ -6,7 +6,7 @@ import { gsap } from "gsap";
  * Works section — four layers of motion:
  *
  *  1. INNER PARALLAX (every tile)
- *     Image renders 110% of frame and translates yPercent +4 → −4
+ *     Image renders 122% of frame and translates yPercent +8 → −8
  *     as the tile scrolls past viewport. Pure scrub, no easing —
  *     image appears to lag the frame, drifting up while the frame
  *     moves up faster.
@@ -24,12 +24,12 @@ import { gsap } from "gsap";
  *     description follows 80ms behind. Subtle enough to read as
  *     pacing, not animation.
  *
- *  4. HOVER ZOOM + CAPTION SHIFT + CURSOR "VIEW"
- *     Mouseenter on a tile: image scales 1.04, title shifts 4px
- *     right, and the global custom cursor enters its `is-view`
- *     state (ring expands to 80px and shows "View" label). All
- *     driven via GSAP so they compose with parallax translate
- *     on the same elements without conflict.
+ *  4. HOVER ZOOM + CURSOR "POZRIEŤ"
+ *     Mouseenter on a tile: image scales 1.04, and the global
+ *     custom cursor enters its `is-view` state (ring expands to
+ *     80px and shows the "POZRIEŤ" label via ::after). Driven via
+ *     GSAP so the scale composes with parallax translate on the
+ *     same element without conflict.
  *
  * Reduced motion: scroll-driven layers (1–3) snap to final state.
  * Hover layer (4) stays — it's interaction-triggered.
@@ -48,10 +48,12 @@ export function initWorks(): void {
   const canHover = window.matchMedia("(hover: hover)").matches;
 
   // ===== 1. INNER PARALLAX (every tile) =====
-  // ±4% drift (was ±5 — tightened per restraint-over-flair). The
-  // image's 110% height plus top:-5% gives 5% headroom each side,
-  // so ±4 yPercent (≈4.4% of container) stays safely inside it
-  // with a ~0.5% edge-bleed buffer.
+  // ±8% drift — clearly visible ambient motion, but still
+  // "image breathes within the frame", not "image is animated".
+  // The image's 122% height + top:-11% (set in Works.astro CSS)
+  // gives 11% headroom each side; ±8 yPercent = 8% of image height
+  // = 9.76% of container, staying safely inside with a ~1.24%
+  // edge-bleed buffer at each extreme.
   if (!reduced) {
     tiles.forEach((tile) => {
       const img = tile.querySelector<HTMLImageElement>(".work-media img");
@@ -59,9 +61,9 @@ export function initWorks(): void {
 
       gsap.fromTo(
         img,
-        { yPercent: 4 },
+        { yPercent: 8 },
         {
-          yPercent: -4,
+          yPercent: -8,
           ease: "none",
           scrollTrigger: {
             trigger: tile,
@@ -143,8 +145,8 @@ export function initWorks(): void {
 
   // ===== 4. HOVER — IMAGE ZOOM + CURSOR "POZRIEŤ" =====
   // Image scale 1.04 signals interactivity; the cursor's is-view
-  // state expands the ring and shows the "POZRIEŤ" label. Title
-  // hover-shift was removed (was redundant with the image scale).
+  // state expands the ring and shows the "POZRIEŤ" label (the
+  // pseudo-element label is rendered from global.css).
   if (canHover) {
     tiles.forEach((tile) => {
       const img = tile.querySelector<HTMLImageElement>(".work-media img");
