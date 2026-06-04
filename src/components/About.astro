@@ -74,8 +74,10 @@ const words = HEADLINE.split(" ");
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 120px;
-    padding: 120px 28px 0;
+    /* 120 at 1440 → 180 at 2160+. */
+    gap: clamp(80px, 8.33vw, 180px);
+    /* py-top scales like other sections; px gutter scales 28 → 48. */
+    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px) 0;
     background: var(--bg);
   }
 
@@ -84,15 +86,18 @@ const words = HEADLINE.split(" ");
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 48px;
+    /* 48 at 1440 → 72 at 2160+. */
+    gap: clamp(36px, 3.33vw, 72px);
     width: 100%;
-    max-width: 1150px;
+    /* 1150 at 1440 → 2046 at 2560+ (preserves 80% of section width). */
+    max-width: clamp(800px, 79.86vw, 2046px);
   }
 
   /* ===== Headline =====
-     Switzer Medium 48px, normal style (must explicitly reset the
-     global h1–h6 italic — see project-h1-italic-gotcha memory).
-     Clamp scales it down on smaller viewports while hitting the
+     Switzer Medium 48px → 72px (at 1920+), normal style (must
+     explicitly reset the global h1–h6 italic — see
+     project-h1-italic-gotcha memory). Clamp scales it down on
+     smaller viewports and up on larger ones while hitting the
      exact 48px on Figma's 1440 desktop canvas.
 
      Note: NO opacity/y initial state here anymore — the reveal is
@@ -101,11 +106,13 @@ const words = HEADLINE.split(" ");
     font-family: var(--font-sans);
     font-weight: 500;
     font-style: normal;
-    font-size: clamp(28px, 3.75vw, 48px);
-    /* 1.2917 = 62/48 — Figma uses whole-number 62px line-height
+    /* 48 at 1440 (Figma baseline) → 72 at 2160+. 3.33vw = 48 at
+       1440 exactly. Below 1440 scales down to 28 mobile floor. */
+    font-size: clamp(28px, 3.33vw, 72px);
+    /* 1.25 = 60/48 — Figma uses whole-number 60px line-height
        at the desktop 48px font. Using a ratio (not px) keeps the
        proportion intact through the responsive clamp. */
-    line-height: 1.2917;
+    line-height: 1.25;
     letter-spacing: -0.01em;
     text-align: center;
     margin: 0;
@@ -135,15 +142,16 @@ const words = HEADLINE.split(" ");
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    width: 211px;
-    padding: 14px 16px;
+    gap: clamp(10px, 0.83vw, 18px);
+    /* 211 at 1440 → 300 at 2160+. */
+    width: clamp(180px, 14.65vw, 300px);
+    padding: clamp(12px, 0.97vw, 20px) clamp(14px, 1.11vw, 22px);
     background: #222;
     color: #fff;
     text-decoration: none;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 16px;
+    font-size: clamp(14px, 1.11vw, 22px);
     line-height: 1;
     letter-spacing: 0.02em;
     overflow: hidden;
@@ -197,10 +205,11 @@ const words = HEADLINE.split(" ");
 
   /* ===== Divider =====
      1px static border line — structural element, no entrance
-     animation. */
+     animation. Width matches the works grid max-width so it
+     extends edge-to-edge at any viewport. */
   .about-divider {
     width: 100%;
-    max-width: 1384px;
+    max-width: 2464px;
     height: 1px;
     background: #a3a3a3;
   }
@@ -216,14 +225,6 @@ const words = HEADLINE.split(" ");
     }
   }
 
-  /* ===== Smaller screens ===== */
-  @media (max-width: 1100px) {
-    .about {
-      gap: 80px;
-      padding: 80px 20px 0;
-    }
-    .about-content {
-      gap: 36px;
-    }
-  }
+  /* The clamp() values above already scale fluidly down to mobile;
+     no smaller-screen @media override needed. */
 </style>

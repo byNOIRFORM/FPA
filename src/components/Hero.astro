@@ -280,15 +280,17 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 48px;
-    padding: 22px 28px;
+    gap: clamp(24px, 3.33vw, 72px);
+    /* py 22 / px 28 at 1440 → py 33 / px 48 at 2160-2400+. */
+    padding: clamp(16px, 1.53vw, 33px) clamp(16px, 2vw, 48px);
     color: #fff;
     background: transparent;
     font-family: var(--font-sans);
     /* Medium (500) per Figma — applies to everything except the
        logo main (explicitly Semibold) and logo sub (Italic 400). */
     font-weight: 500;
-    font-size: 16px;
+    /* 16 at 1440 → 22 at 1980+. */
+    font-size: clamp(14px, 1.11vw, 22px);
     line-height: 1;
     letter-spacing: 0.02em;
     will-change: transform;
@@ -314,13 +316,16 @@
   .nav.is-scrolled {
     background: var(--bg);
     color: var(--ink);
-    padding: 16px 28px;
+    /* Scrolled state condenses py from 22 → 16 at 1440 (or 33 → 24
+       at 2160+). px stays the same as default. */
+    padding: clamp(12px, 1.11vw, 24px) clamp(16px, 2vw, 48px);
   }
 
   .nav-left {
     display: flex;
     align-items: center;
-    gap: 80px;
+    /* 80 at 1440 → 120 at 2160+. */
+    gap: clamp(40px, 5.55vw, 120px);
   }
 
   .nav-logo {
@@ -334,7 +339,8 @@
   }
 
   .nav-logo-main {
-    font-size: 24px;
+    /* 24 at 1440 → 36 at 2160+. */
+    font-size: clamp(20px, 1.67vw, 36px);
     font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1;
@@ -344,7 +350,7 @@
   }
 
   .nav-logo-sub {
-    font-size: 24px;
+    font-size: clamp(20px, 1.67vw, 36px);
     font-style: italic;
     font-weight: 400;
     letter-spacing: 0.02em;
@@ -354,14 +360,15 @@
 
   /* Scrolled — logo shrinks slightly (Colette pattern). The hero
      version reads as a brand mark; the scrolled version reads as
-     a utility label. 4px isn't dramatic but it lands. */
+     a utility label. 4px (at 1440) isn't dramatic but it lands. */
   .nav.is-scrolled .nav-logo-main,
   .nav.is-scrolled .nav-logo-sub {
-    font-size: 20px;
+    /* 20 at 1440 → 30 at 2160+ (≈ 83% of default logo size). */
+    font-size: clamp(18px, 1.39vw, 30px);
   }
 
   .nav-clock {
-    font-size: 16px;
+    font-size: clamp(14px, 1.11vw, 22px);
     font-weight: 500;
     letter-spacing: 0.02em;
     line-height: 1;
@@ -371,7 +378,7 @@
 
   .nav-langs {
     display: flex;
-    gap: 12px;
+    gap: clamp(10px, 0.83vw, 18px);
     align-items: center;
   }
 
@@ -383,12 +390,12 @@
   .nav-right {
     display: flex;
     align-items: center;
-    gap: 80px;
+    gap: clamp(40px, 5.55vw, 120px);
   }
 
   .nav-links {
     display: flex;
-    gap: 12px;
+    gap: clamp(10px, 0.83vw, 18px);
     align-items: center;
   }
 
@@ -437,9 +444,9 @@
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    width: 211px;
-    padding: 14px 16px;
+    gap: clamp(10px, 0.83vw, 18px);
+    width: clamp(180px, 14.65vw, 300px);
+    padding: clamp(12px, 0.97vw, 20px) clamp(14px, 1.11vw, 22px);
     background: #222;
     color: #fff;
     text-decoration: none;
@@ -500,11 +507,11 @@
   }
 
   /* ===== Title (bottom) =====
-     Figma spec: Switzer 64px / 400 / line-height 72px / no tracking.
+     Figma spec: Switzer 64px / 400 / line-height 70px / no tracking.
      font-size uses clamp so the slogan scales down on smaller screens
      while hitting the exact 64px on the Figma desktop viewport
      (5vw = 64px at 1280px wide).
-     line-height ratio (1.125 = 72/64) keeps the per-line height
+     line-height ratio (1.09375 = 70/64) keeps the per-line height
      proportional at every clamp step.
      IMPORTANT: font-style: normal explicitly resets the italic that
      global.css applies to all h1–h6 (those are styled with the serif
@@ -513,17 +520,23 @@
      the actual cause of the diacritic + descender clipping. */
   .hero-title {
     position: absolute;
-    left: 28px;
-    bottom: 56px;
-    right: 28px;
-    max-width: 914px;
+    /* Side gutter scales 28 → 48 between 1440 and 2400+ viewport. */
+    left: clamp(16px, 2vw, 48px);
+    bottom: clamp(40px, 3.89vw, 96px);
+    right: clamp(16px, 2vw, 48px);
+    /* 914 at 1440 → 1626 at 2560 (1.78× growth proportional to
+       viewport scaling). */
+    max-width: clamp(700px, 63.5vw, 1626px);
     z-index: 5;
     color: #fff;
     font-family: var(--font-sans);
     font-weight: 400;
     font-style: normal;
-    font-size: clamp(40px, 5vw, 64px);
-    line-height: 1.125;
+    /* 64 at 1440 (Figma baseline) → 96 at 2160+. 4.44vw = 64 at
+       1440px viewport exactly. Below 1440 scales down; below 900
+       clamps to 40px mobile floor. */
+    font-size: clamp(40px, 4.44vw, 96px);
+    line-height: 1.09375;
     letter-spacing: 0;
   }
 
@@ -533,9 +546,9 @@
     gap: 0 0.28em;
   }
 
-  /* Mask wrapper inherits the title's 1.125 line-height = exactly
-     72px at 64px font. Switzer Regular at this size fits cleanly
-     (accents + descenders) inside 72px now that the title is no
+  /* Mask wrapper inherits the title's 1.09375 line-height = exactly
+     70px at 64px font. Switzer Regular at this size fits cleanly
+     (accents + descenders) inside 70px now that the title is no
      longer being rendered italic. */
   .hero-title-mask {
     display: inline-block;
@@ -606,13 +619,13 @@
      with an editorial / architectural mark. ===== */
   .hero-scroll {
     position: absolute;
-    bottom: 56px;
-    right: 28px;
+    bottom: clamp(40px, 3.89vw, 96px);
+    right: clamp(16px, 2vw, 48px);
     z-index: 5;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: clamp(10px, 0.83vw, 18px);
     color: #fff;
     text-decoration: none;
     opacity: 0;
@@ -635,7 +648,8 @@
 
   .hero-scroll-label {
     font-family: var(--font-sans);
-    font-size: 10px;
+    /* 10 at 1440 → 14 at 2016+. */
+    font-size: clamp(9px, 0.69vw, 14px);
     font-weight: 600;
     letter-spacing: 0.22em;
     line-height: 1;

@@ -36,11 +36,11 @@ interface Project {
 // alt texts are descriptive (for screen readers + SEO).
 const projects: Project[] = [
   {
-    title: "Dom pod korunami",
+    title: "Chata pod korunami",
     description:
       "Harmonické prepojenie surového kameňa a hrejivého dreva v objatí prírody. Architektúra, ktorá rešpektuje vertikalitu okolitého lesa.",
     image: "/images/works/work-1.jpg",
-    alt: "Dom pod korunami — exteriér v lese",
+    alt: "Chata pod korunami — exteriér v lese",
   },
   {
     title: "Vila Na kopci",
@@ -189,11 +189,16 @@ const projects: Project[] = [
     /* 32px controls label → grid (tight coupling, label belongs to
        the grid). Grid → CTA spacing is widened to 48px via an
        explicit margin-top on .works-cta below. */
-    gap: 32px;
+    gap: clamp(24px, 2.22vw, 48px);
     width: 100%;
-    max-width: 1384px;
+    /* 2464 = 2560 - 2*48 gutter. Section fills the viewport up to
+       2560 width with growing 28→48px gutters, then caps and
+       centers within bigger displays. */
+    max-width: 2464px;
     margin: 0 auto;
-    padding: 120px 28px;
+    /* py: 120 at 1440 viewport → 180 at 2160+ (clamps).
+       px: 28 at 1440 → 48 at 2400+ (clamps). */
+    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px);
     background: var(--bg);
   }
 
@@ -202,7 +207,8 @@ const projects: Project[] = [
     width: 100%;
     font-family: var(--font-sans);
     font-weight: 500;
-    font-size: 16px;
+    /* 16 at 1440 → 24 at 2160+. Scales with viewport. */
+    font-size: clamp(14px, 1.11vw, 24px);
     line-height: normal;
     color: #222;
     margin: 0;
@@ -212,7 +218,8 @@ const projects: Project[] = [
   .works-grid {
     display: flex;
     flex-direction: column;
-    gap: 80px;
+    /* 80 at 1440 → 120 at 2160+. */
+    gap: clamp(56px, 5.55vw, 120px);
     width: 100%;
   }
 
@@ -231,12 +238,12 @@ const projects: Project[] = [
 
   /* ===== Tile =====
      Image and text are a single unit — keep them tightly coupled
-     (20px) so the caption reads as belonging to the photo, not
-     as a separate paragraph below it. */
+     (20px at 1440 → 30 at 2160+) so the caption reads as belonging
+     to the photo, not as a separate paragraph below it. */
   .work-tile {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: clamp(16px, 1.39vw, 30px);
   }
 
   /* Tile widths and margins are expressed as percentages of the
@@ -254,13 +261,19 @@ const projects: Project[] = [
      anchors at edge → Row 3 right anchors at edge AND grows wider
      (cinematic closing chord). */
 
+  /* All .work-media frames use aspect-ratio (not fixed px height)
+     so they grow proportionally when the section width grows
+     beyond the 1440 baseline. Aspect numerators/denominators come
+     from the Figma px dimensions at 1440 — the ratio stays exact
+     at any viewport. */
+
   /* Row 1 left — small portrait, hugs left edge. */
   .work-tile--r1l {
     flex: 0 0 calc(445 / 1384 * 100%);
     min-width: 0;
   }
   .work-tile--r1l .work-media {
-    height: 478px;
+    aspect-ratio: 445 / 478;
   }
 
   /* Row 1 right — large tile pulled inward from the right edge by
@@ -271,7 +284,7 @@ const projects: Project[] = [
     margin-right: calc(117 / 1384 * 100%);
   }
   .work-tile--r1r .work-media {
-    height: 698px;
+    aspect-ratio: 680 / 698;
   }
 
   /* Row 2 left — tall portrait pulled inward from the LEFT edge.
@@ -282,7 +295,7 @@ const projects: Project[] = [
     margin-left: calc(117 / 1384 * 100%);
   }
   .work-tile--r2l .work-media {
-    height: 730px;
+    aspect-ratio: 563 / 730;
   }
 
   /* Row 2 right — short landscape, hugs the right edge. The only
@@ -293,7 +306,7 @@ const projects: Project[] = [
     min-width: 0;
   }
   .work-tile--r2r .work-media {
-    height: 402px;
+    aspect-ratio: 563 / 402;
   }
 
   /* Row 3 left — mid-portrait, mirrors Row 1 left's width but
@@ -304,7 +317,7 @@ const projects: Project[] = [
     min-width: 0;
   }
   .work-tile--r3l .work-media {
-    height: 540px;
+    aspect-ratio: 445 / 540;
   }
 
   /* Row 3 right — section closer, anchored at the right page edge.
@@ -317,7 +330,7 @@ const projects: Project[] = [
     min-width: 0;
   }
   .work-tile--r3r .work-media {
-    height: 400px;
+    aspect-ratio: 800 / 400;
   }
 
   /* ===== Image frame =====
@@ -351,7 +364,8 @@ const projects: Project[] = [
   .work-info {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    /* 8 at 1440 → 12 at 2160+. */
+    gap: clamp(6px, 0.56vw, 12px);
     width: 100%;
   }
 
@@ -359,7 +373,8 @@ const projects: Project[] = [
     font-family: var(--font-sans);
     font-weight: 500;
     font-style: normal;
-    font-size: 20px;
+    /* 20 at 1440 → 30 at 2160+. */
+    font-size: clamp(18px, 1.39vw, 30px);
     line-height: 1.1;
     letter-spacing: 0.02em;
     color: #222;
@@ -384,12 +399,12 @@ const projects: Project[] = [
   .work-desc {
     font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 16px;
-    /* 22px line-height verified from Figma metadata — three-line
-       descriptions measure exactly 66px (445px tile), two-line
-       44px (680px tile), one-line 22px (914px tile). Every
-       description box ends on a whole-number pixel. */
-    line-height: 22px;
+    /* 16 at 1440 → 22 at 1980+. */
+    font-size: clamp(14px, 1.11vw, 22px);
+    /* Unitless 1.375 = 22/16 — keeps line-height proportional to
+       font-size at any viewport so description boxes still land
+       on whole-number heights at the design baseline. */
+    line-height: 1.375;
     letter-spacing: 0.02em;
     color: #666;
     margin: 0;
@@ -404,16 +419,18 @@ const projects: Project[] = [
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    width: 211px;
-    margin-top: 16px;
-    padding: 14px 16px;
+    gap: clamp(10px, 0.83vw, 18px);
+    /* 211 at 1440 → 300 at 2160+. */
+    width: clamp(180px, 14.65vw, 300px);
+    margin-top: clamp(12px, 1.11vw, 24px);
+    /* 14×16 at 1440 → 20×22 at 2160+. */
+    padding: clamp(12px, 0.97vw, 20px) clamp(14px, 1.11vw, 22px);
     background: #222;
     color: #fff;
     text-decoration: none;
     font-family: var(--font-sans);
     font-weight: 600;
-    font-size: 16px;
+    font-size: clamp(14px, 1.11vw, 22px);
     line-height: 1;
     letter-spacing: 0.02em;
     overflow: hidden;
@@ -463,18 +480,10 @@ const projects: Project[] = [
 
   /* =============================================================
      Responsive — at narrower viewports the percentage flex-bases
-     above scale tile widths proportionally; the auto-distributed
-     row gap (from justify-content: space-between) scales with
-     them. Below 1024px we collapse to single-column stacks and
-     drop the asymmetric margins.
+     and clamp() values above scale fluidly down. Below 1024px we
+     collapse to single-column stacks and drop the asymmetric
+     margins.
      ============================================================= */
-  @media (max-width: 1439px) {
-    .works {
-      max-width: 100%;
-      padding: 80px clamp(16px, 2vw, 28px);
-    }
-  }
-
   @media (max-width: 1024px) {
     .works {
       gap: 36px;
