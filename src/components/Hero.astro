@@ -444,14 +444,21 @@
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: clamp(10px, 0.83vw, 18px);
-    width: clamp(180px, 14.65vw, 300px);
-    padding: clamp(12px, 0.97vw, 20px) clamp(14px, 1.11vw, 22px);
+    gap: clamp(10px, 0.83vw, 12px);
+    /* Figma spec 211×44 px — clamps cap at those values so the
+       button never grows past spec above 1440. font-size is
+       declared explicitly (overrides .nav inheritance) so it
+       caps at 16 too. */
+    width: clamp(180px, 14.65vw, 211px);
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
     background: #222;
     color: #fff;
     text-decoration: none;
+    font-family: var(--font-sans);
     font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
     line-height: 1;
+    letter-spacing: 0.02em;
     overflow: hidden;
   }
 

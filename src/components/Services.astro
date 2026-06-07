@@ -1,0 +1,458 @@
+---
+/**
+ * Services (Section 4 — "Služby") — selected services spec sheet.
+ *
+ * Figma spec (node 2886:1225):
+ *   - Container: 1384px wide, py 80px, page-edge 28px gutters
+ *   - Top label: "Služby" — Switzer Medium 24px, #222
+ *   - 5 rows in a single column, each:
+ *       [meta 327: num 01 + title]  [desc 445]  [media 328]
+ *     joined by `justify-content: space-between`. Row height is
+ *     driven by the tallest column (the media on portrait rows).
+ *   - Vertical rhythm: rows 01 and 04 carry PORTRAIT photos
+ *     (328×400, aspect ~4:5), rows 02/03/05 carry LANDSCAPE
+ *     (328×193, aspect ~16:9). That asymmetric "TALL → short
+ *     → short → TALL → short" heartbeat is the section's
+ *     editorial signature — pure spec sheet typography would
+ *     read flat without it.
+ *   - 28px vertical padding per row; 1px #A3A3A3 hairline divider
+ *     between rows. First row has no top padding; last row has no
+ *     bottom border.
+ *   - Bottom CTA "Dozvedieť sa viac" — same dark 211×p12 button
+ *     pattern as Hero / About / Works, centred. Opens the contact
+ *     panel via `data-open-contact` (consistent with nav CTA).
+ *
+ * Motion is wired in scripts/services.ts — INTENTIONALLY MINIMAL.
+ * Only Row 1 has entry animations:
+ *   - Photo: curtain clip-path reveal (inset 100% → 0)
+ *   - Text: num/title/desc stagger fade-up
+ *
+ * Rows 02–05 are STATIC — no parallax, no reveal, nothing. The
+ * spec-sheet layout itself is the choreography; layering ambient
+ * motion on every row made the section feel busy. Restraint wins:
+ * the first row "announces" the section once, then the reader
+ * scans the rest like a printed spec table.
+ */
+
+interface Service {
+  num: string;
+  title: string;
+  desc: string;
+  image: string;
+  alt: string;
+  /** Portrait rows are 328×400; landscape are 328×193. Drives
+   *  the .service-media aspect-ratio CSS class. */
+  aspect: "portrait" | "landscape";
+}
+
+const services: Service[] = [
+  {
+    num: "01",
+    title: "Urbanistická štúdia",
+    desc: "Komplexná analýza územia a návrh urbanistickej koncepcie pre rozsiahle rozvojové projekty alebo revitalizáciu existujúcich celkov. Začíname tu, keď je v hre viac než jedna budova.",
+    image: "/images/services/01-urbanisticka.jpg",
+    alt: "Urbanistická štúdia — situačný model územia",
+    aspect: "portrait",
+  },
+  {
+    num: "02",
+    title: "Architektonická štúdia",
+    desc: "Preklopenie Vašich predstáv na papier s architektonickou koordináciou.",
+    image: "/images/services/02-architektonicka.jpg",
+    alt: "Architektonická štúdia — skice a materiálové vzorky",
+    aspect: "landscape",
+  },
+  {
+    num: "03",
+    title: "Územné rozhodnutie",
+    desc: "Rozhodnutie o umiestnení stavby, ktorým sa určuje stavebný pozemok, podmienky a jeho využitie.",
+    image: "/images/services/03-uzemne.jpg",
+    alt: "Územné rozhodnutie — vymeriavanie pozemku",
+    aspect: "landscape",
+  },
+  {
+    num: "04",
+    title: "Stavebné povolenie",
+    desc: "Určuje záväzné podmienky uskutočnenia a užívania stavby a rozhodne o námietkach účastníkov konania.",
+    image: "/images/services/04-stavebne.jpg",
+    alt: "Stavebné povolenie — projektová dokumentácia",
+    aspect: "portrait",
+  },
+  {
+    num: "05",
+    title: "Realizačná dokumentácia",
+    desc: "Podrobná dokumentácia nevyhnutná pre realizáciu stavby. Obsahuje jednotlivé profesie a špecifikáciu detailov.",
+    image: "/images/services/05-realizacna.jpg",
+    alt: "Realizačná dokumentácia — detaily a špecifikácie",
+    aspect: "landscape",
+  },
+];
+---
+
+<section class="services" id="sluzby" aria-labelledby="services-heading">
+  <h2 class="services-label" id="services-heading">Služby</h2>
+
+  <ul class="services-list">
+    {services.map((s, i) => {
+      // data-reveal is applied ONLY to row 1 — rows 02–05 are
+      // static, so they render at full opacity from the first
+      // paint and don't need the JS to clear them. Undefined
+      // values are stripped from the rendered HTML by Astro.
+      const reveal = i === 0 ? "" : undefined;
+      return (
+        <li class={`service-row service-row--${i + 1}`}>
+          <div class="service-row-inner">
+            <div class="service-meta">
+              <span class="service-num" data-reveal={reveal}>{s.num}</span>
+              <h3 class="service-title" data-reveal={reveal}>{s.title}</h3>
+            </div>
+            <p class="service-desc" data-reveal={reveal}>{s.desc}</p>
+            <div class={`service-media service-media--${s.aspect}`}>
+              <img
+                src={s.image}
+                alt={s.alt}
+                loading={i === 0 ? "eager" : "lazy"}
+                decoding="async"
+              />
+            </div>
+          </div>
+        </li>
+      );
+    })}
+  </ul>
+
+  {/* data-open-contact — same wiring as the nav CTA. Opens the
+      contact form panel; no separate "service detail" page exists
+      for V1 launch (parked work memory). */}
+  <a class="services-cta" href="#kontakt" data-open-contact>
+    <span class="services-cta-text">Dozvedieť sa viac</span>
+    <svg
+      class="services-cta-arrow"
+      width="16"
+      height="10"
+      viewBox="0 0 16 10"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+    </svg>
+  </a>
+</section>
+
+<style>
+  /* ===== Section frame =====
+     Same vertical scale (clamp 60→180) and page-edge gutters as
+     About/Works so all three "documents" align to the same outer
+     ruler. Background var(--bg) cream — no dark-section break
+     (that idea was scrapped after V3 comparison). */
+  .services {
+    display: flex;
+    flex-direction: column;
+    /* 40 at 1440 → 60 at 2160+ */
+    gap: clamp(28px, 2.78vw, 60px);
+    width: 100%;
+    /* max-width + margin auto mirror the .works wrapper exactly so
+       both sections cap and centre at the same outer width; without
+       this Services kept growing past the Works canvas at large
+       viewports. */
+    max-width: 2464px;
+    margin: 0 auto;
+    /* 80 at 1440 → 180 at 2160+ vertical; 28 at 1440 → 48 at 2400+
+       horizontal — matches the works gutter exactly. */
+    padding: clamp(60px, 5.55vw, 180px) clamp(16px, 2vw, 48px);
+    background: var(--bg);
+  }
+
+  /* ===== Top label "Služby" =====
+     Fills the section's inner width (the .services parent already
+     owns the page-edge gutter); no max-width here. Size 20 at the
+     1440 baseline, capped at 20 above — every text element in the
+     section reads at the same Figma-spec 20px regardless of
+     viewport. */
+  .services-label {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 20px);
+    line-height: normal;
+    letter-spacing: 0.02em;
+    color: #222;
+  }
+
+  /* ===== Rows list =====
+     No max-width — the list inherits the section's max-width
+     (2464) so rows grow with viewport just like the .works grid.
+     Earlier 1384 cap on the list was creating extra visual gutter
+     against the section's padding at wider viewports. */
+  .services-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Hairline divider between rows. First row has no top padding
+     (it sits flush under the label gap); last row has no bottom
+     border (closes the table cleanly so the CTA isn't separated
+     by a free-floating hairline). */
+  .service-row {
+    padding: clamp(20px, 1.94vw, 36px) 0;
+    border-bottom: 1px solid #a3a3a3;
+  }
+
+  .service-row:first-child {
+    padding-top: 0;
+  }
+
+  /* Last row drops BOTH border-bottom (closes the table) AND
+     padding-bottom (zero). Without this the 28px row padding
+     stacked with the 48px CTA margin produced ~76px of optical
+     space below the last item — too much air. The CTA's own
+     margin-top owns the gap entirely. */
+  .service-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  /* The 3-column row layout. justify-content: space-between
+     distributes whatever space is left after the three fixed
+     columns claim their share — keeps the visual alignment
+     between the desc column and the media column exact. */
+  .service-row-inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: clamp(32px, 4vw, 80px);
+    width: 100%;
+  }
+
+  /* ===== Meta column — number + title ===== */
+  .service-meta {
+    flex: 0 0 calc(327 / 1384 * 100%);
+    display: flex;
+    align-items: baseline;
+    gap: clamp(28px, 4.17vw, 60px);
+    min-width: 0;
+  }
+
+  /* Every text element in this section is 20 at the 1440 baseline,
+     capped at 20 above so larger viewports never make the row
+     "shout" louder than the Figma-spec size. Mobile floor 16. */
+  .service-num {
+    flex: 0 0 auto;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 20px);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: #222;
+    font-variant-numeric: tabular-nums;
+    /* Reveal is JS-driven (translateY + opacity); no CSS transition
+       on transform so it doesn't fight the GSAP tween. */
+    will-change: transform, opacity;
+    display: inline-block;
+  }
+
+  .service-title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 20px);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    color: #222;
+    margin: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ===== Description column =====
+     Same 20px-capped clamp as the other text in the section so
+     all rows read uniformly. line-height 1.4 (= 28/20) maintains
+     the Figma reading rhythm. */
+  .service-desc {
+    flex: 0 0 calc(445 / 1384 * 100%);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 20px);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    color: #222;
+    margin: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ===== Media frame =====
+     Two aspect ratios drive the asymmetric rhythm of the section:
+       - Portrait (rows 01, 04): 328 / 400 ≈ 0.82 (taller than wide)
+       - Landscape (rows 02, 03, 05): 328 / 193 ≈ 1.70 (wide strip)
+     overflow:hidden clips the parallax-overflow image (122% tall)
+     and any future hover-scale. */
+  .service-media {
+    position: relative;
+    flex: 0 0 calc(328 / 1384 * 100%);
+    overflow: hidden;
+    background: #efeeea;
+  }
+
+  .service-media--portrait {
+    aspect-ratio: 328 / 400;
+  }
+
+  .service-media--landscape {
+    aspect-ratio: 328 / 193;
+  }
+
+  /* Image overflow trick for the parallax — identical maths to
+     Works: image is 122% of frame height with top:-11%, giving
+     11% headroom on each side for the ±8 yPercent scrub to drift
+     inside without ever revealing the frame's edge. will-change
+     promotes the layer to the GPU so the scrub stays buttery. */
+  .service-media img {
+    position: relative;
+    top: -11%;
+    width: 100%;
+    height: 122%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  /* ===== Initial reveal state (CSS-owned, pre-paint) =====
+     CSS declares the offset+opacity so the very first paint
+     hides the text — no flash of unstyled visible content
+     before services.ts runs. The script animates to the
+     visible state and removes data-reveal so the rule no
+     longer applies. */
+  .service-num[data-reveal],
+  .service-title[data-reveal],
+  .service-desc[data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  /* Row 01 photo: starts clipped from the bottom (curtain rolled
+     up). services.ts tweens to inset(0) when the row enters the
+     viewport. Matches the Works Row 1 reveal exactly so the two
+     sections share one visual technique on first scroll-in.
+     will-change is scoped to row 1 since only this row animates. */
+  .service-row--1 .service-media {
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
+
+  /* ===== CTA — mirrors About / Works / Hero CTA pattern =====
+     Dark curtain slides in from the left on hover; text shifts a
+     touch, arrow runs ahead. align-self:center is what positions
+     it as the centred "closing chord" beneath the rows. */
+  .services-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(10px, 0.83vw, 12px);
+    /* Figma spec 211×44 px — clamps cap at those values so the
+       button never grows past spec above 1440. */
+    width: clamp(180px, 14.65vw, 211px);
+    /* 48 at 1440 Figma baseline → caps at 48 above so the gap
+       below the last row stays the spec value. */
+    margin-top: clamp(24px, 3.33vw, 48px);
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    align-self: center;
+    will-change: transform;
+  }
+
+  .services-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .services-cta:hover::before {
+    transform: translateX(0);
+  }
+
+  .services-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .services-cta-text {
+    display: inline-block;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .services-cta:hover .services-cta-text {
+    transform: translateX(3px);
+  }
+
+  .services-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .services-cta:hover .services-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* =============================================================
+     Responsive — collapse to a single column on narrow viewports.
+     Keeps the photo above the text so the reading order matches
+     the desktop "scan this row" rhythm.
+     ============================================================= */
+  @media (max-width: 1024px) {
+    .services {
+      gap: 24px;
+      padding: 64px 20px;
+    }
+    .service-row {
+      padding: 24px 0;
+    }
+    .service-row-inner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 20px;
+    }
+    .service-meta,
+    .service-desc,
+    .service-media {
+      flex: none;
+      width: 100%;
+    }
+    .service-media {
+      max-width: 480px;
+      order: -1; /* push photo to top of the stack */
+    }
+  }
+
+  @media (max-width: 600px) {
+    .service-meta {
+      gap: 32px;
+    }
+  }
+</style>

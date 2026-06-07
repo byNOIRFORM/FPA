@@ -197,7 +197,10 @@ const projects: Project[] = [
     max-width: 2464px;
     margin: 0 auto;
     /* py: 120 at 1440 viewport → 180 at 2160+ (clamps).
-       px: 28 at 1440 → 48 at 2400+ (clamps). */
+       px: 28 at 1440 → 48 at 2400+ (clamps).
+       Equal top & bottom padding — Works keeps full breathing
+       room on both sides; the gap to Services below is therefore
+       Works's bottom (~120) + Services's top (~80) = ~200 at 1440. */
     padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px);
     background: var(--bg);
   }
@@ -419,18 +422,18 @@ const projects: Project[] = [
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    gap: clamp(10px, 0.83vw, 18px);
-    /* 211 at 1440 → 300 at 2160+. */
-    width: clamp(180px, 14.65vw, 300px);
+    gap: clamp(10px, 0.83vw, 12px);
+    /* Figma spec 211×44 px — clamps cap at those values so the
+       button never grows past spec above 1440. */
+    width: clamp(180px, 14.65vw, 211px);
     margin-top: clamp(12px, 1.11vw, 24px);
-    /* 14×16 at 1440 → 20×22 at 2160+. */
-    padding: clamp(12px, 0.97vw, 20px) clamp(14px, 1.11vw, 22px);
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
     background: #222;
     color: #fff;
     text-decoration: none;
     font-family: var(--font-sans);
-    font-weight: 600;
-    font-size: clamp(14px, 1.11vw, 22px);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
     line-height: 1;
     letter-spacing: 0.02em;
     overflow: hidden;
