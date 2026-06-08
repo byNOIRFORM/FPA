@@ -22,16 +22,14 @@
  *     pattern as Hero / About / Works, centred. Opens the contact
  *     panel via `data-open-contact` (consistent with nav CTA).
  *
- * Motion is wired in scripts/services.ts — INTENTIONALLY MINIMAL.
- * Only Row 1 has entry animations:
- *   - Photo: curtain clip-path reveal (inset 100% → 0)
- *   - Text: num/title/desc stagger fade-up
- *
- * Rows 02–05 are STATIC — no parallax, no reveal, nothing. The
- * spec-sheet layout itself is the choreography; layering ambient
- * motion on every row made the section feel busy. Restraint wins:
- * the first row "announces" the section once, then the reader
- * scans the rest like a printed spec table.
+ * Motion is wired in scripts/services.ts:
+ *   - Row 01 photo: curtain clip-path reveal (inset 100% → 0) on
+ *     first scroll-in, signature "section has begun" moment
+ *   - All rows: per-row text stagger reveal (num → title → desc)
+ *     as each enters viewport — prevents the "text pops in" jump
+ *     that static rows showed when scrolling past
+ *   - All photos: inner parallax ±8 yPercent on scroll (matches
+ *     Works tiles)
  */
 
 interface Service {
@@ -93,32 +91,25 @@ const services: Service[] = [
   <h2 class="services-label" id="services-heading">Služby</h2>
 
   <ul class="services-list">
-    {services.map((s, i) => {
-      // data-reveal is applied ONLY to row 1 — rows 02–05 are
-      // static, so they render at full opacity from the first
-      // paint and don't need the JS to clear them. Undefined
-      // values are stripped from the rendered HTML by Astro.
-      const reveal = i === 0 ? "" : undefined;
-      return (
-        <li class={`service-row service-row--${i + 1}`}>
-          <div class="service-row-inner">
-            <div class="service-meta">
-              <span class="service-num" data-reveal={reveal}>{s.num}</span>
-              <h3 class="service-title" data-reveal={reveal}>{s.title}</h3>
-            </div>
-            <p class="service-desc" data-reveal={reveal}>{s.desc}</p>
-            <div class={`service-media service-media--${s.aspect}`}>
-              <img
-                src={s.image}
-                alt={s.alt}
-                loading={i === 0 ? "eager" : "lazy"}
-                decoding="async"
-              />
-            </div>
+    {services.map((s, i) => (
+      <li class={`service-row service-row--${i + 1}`}>
+        <div class="service-row-inner">
+          <div class="service-meta">
+            <span class="service-num" data-reveal>{s.num}</span>
+            <h3 class="service-title" data-reveal>{s.title}</h3>
           </div>
-        </li>
-      );
-    })}
+          <p class="service-desc" data-reveal>{s.desc}</p>
+          <div class={`service-media service-media--${s.aspect}`}>
+            <img
+              src={s.image}
+              alt={s.alt}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+            />
+          </div>
+        </div>
+      </li>
+    ))}
   </ul>
 
   {/* data-open-contact — same wiring as the nav CTA. Opens the
@@ -296,11 +287,17 @@ const services: Service[] = [
        - Landscape (rows 02, 03, 05): 328 / 193 ≈ 1.70 (wide strip)
      overflow:hidden clips the parallax-overflow image (122% tall)
      and any future hover-scale. */
+  /* clip-path initial = fully clipped from top. services.ts
+     animates each row's media to inset(0) when the row enters
+     viewport, so every photo "unrolls" from below in sync with
+     its text reveal. */
   .service-media {
     position: relative;
     flex: 0 0 calc(328 / 1384 * 100%);
     overflow: hidden;
     background: #efeeea;
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
   }
 
   .service-media--portrait {
@@ -339,15 +336,6 @@ const services: Service[] = [
     transform: translateY(16px);
   }
 
-  /* Row 01 photo: starts clipped from the bottom (curtain rolled
-     up). services.ts tweens to inset(0) when the row enters the
-     viewport. Matches the Works Row 1 reveal exactly so the two
-     sections share one visual technique on first scroll-in.
-     will-change is scoped to row 1 since only this row animates. */
-  .service-row--1 .service-media {
-    clip-path: inset(100% 0 0 0);
-    will-change: clip-path;
-  }
 
   /* ===== CTA — mirrors About / Works / Hero CTA pattern =====
      Dark curtain slides in from the left on hover; text shifts a
