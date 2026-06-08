@@ -1,0 +1,395 @@
+---
+/**
+ * Leaders (Section 4 — "Lídri ateliéru") — founders cards row.
+ *
+ * Figma spec (node 2918:1794):
+ *   - Manifest text: Switzer Medium 48px / lh 60 / tracking 0.96
+ *     left-aligned, max-width 1384. Per-word color scrub from
+ *     #C8C8C8 → #222 (same pattern as About headline).
+ *   - Eyebrow "Lídri ateliéru": Switzer Medium label, same clamp
+ *     as Works/Services labels (16 at 1440).
+ *   - 3 leader cards (Pavol, Dominik, Tomáš), each 328×470 image
+ *     + 20px gap + name (20px) + 8px + description (16px #666),
+ *     matching Works tile typography exactly.
+ *   - Cards grid is RIGHT-aligned within the 1384 inner width
+ *     (asymmetric composition, intentional).
+ *   - 142px gaps between cards.
+ *   - Bottom CTA "Dozvedieť sa viac" — same dark 211×p12 button
+ *     pattern as the other sections, centred.
+ *
+ * Motion wired in scripts/leaders.ts:
+ *   - Manifest words scrub color #C8C8C8 → #222 (mirrors About).
+ *   - Cards cascade reveal L→R as the grid enters viewport:
+ *     each card runs photo curtain (clip-path inset 100% → 0)
+ *     + text fade-up (name → desc), staggered 0.2s between cards.
+ *   - Inner parallax on each photo (±8 yPercent on scroll) —
+ *     same calibration as Works tiles and Services rows.
+ */
+
+interface Leader {
+  name: string;
+  desc: string;
+  image: string;
+  alt: string;
+}
+
+const leaders: Leader[] = [
+  {
+    name: "Ing. Pavol Fotta",
+    desc: "Technický pilier ateliéru. Svojou 27-ročnou konštrukčnou praxou a nekompromisnou precíznosťou.",
+    image: "/images/leaders/pavol-fotta.jpg",
+    alt: "Ing. Pavol Fotta — portrét",
+  },
+  {
+    name: "Dominik Fotta",
+    desc: "Motor a evolúcia štúdia. Spája rodinnú tradíciu s technologickými inováciami digitálnej éry.",
+    image: "/images/leaders/dominik-fotta.jpg",
+    alt: "Dominik Fotta — portrét",
+  },
+  {
+    name: "Ing. arch. Ing. Tomáš Popadič",
+    desc: "Kreatívna sila, ktorá spája koncepčnú čistotu so zmyslom pre detail.",
+    image: "/images/leaders/tomas-popadic.jpg",
+    alt: "Ing. arch. Ing. Tomáš Popadič — portrét",
+  },
+];
+
+// Manifest broken into per-word spans for the color-scrub
+// animation (same pattern as About section). Split by whitespace
+// preserves punctuation inside each word ("generácie,").
+const MANIFEST =
+  "Dve generácie, tri pohľady a jedna nekompromisná prísnosť. Lídri ateliéru Fotta Popadič spoločne s rozrastajúcim sa tímom formujú priestor pre život.";
+const manifestWords = MANIFEST.split(" ");
+---
+
+<section class="leaders" id="lidri" aria-labelledby="leaders-heading">
+  <p class="leaders-manifest" id="leaders-heading">
+    {
+      manifestWords.map((word, i) => (
+        <>
+          <span class="leaders-word">{word}</span>
+          {i < manifestWords.length - 1 ? " " : ""}
+        </>
+      ))
+    }
+  </p>
+
+  <p class="leaders-eyebrow">Lídri ateliéru</p>
+
+  <div class="leaders-grid">
+    {leaders.map((l, i) => (
+      <article class="leader-card" data-leader={i}>
+        <div class="leader-media">
+          <img
+            src={l.image}
+            alt={l.alt}
+            loading={i === 0 ? "eager" : "lazy"}
+            decoding="async"
+          />
+        </div>
+        <div class="leader-info">
+          <h3 class="leader-name" data-reveal>{l.name}</h3>
+          <p class="leader-desc" data-reveal>{l.desc}</p>
+        </div>
+      </article>
+    ))}
+  </div>
+
+  <a class="leaders-cta" href="#kontakt" data-open-contact>
+    <span class="leaders-cta-text">Spoznajte nás</span>
+    <svg
+      class="leaders-cta-arrow"
+      width="16"
+      height="10"
+      viewBox="0 0 16 10"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+    </svg>
+  </a>
+
+  {/* Closing divider — separates Leaders from Footer. Per Figma
+      this hairline sits inside Section 4 with ~80px gap above the
+      CTA. 1px #a3a3a3 max-width 1384 (matches inner grid). */}
+  <div class="leaders-divider" aria-hidden="true"></div>
+</section>
+
+<style>
+  /* ===== Section frame =====
+     Same outer padding / max-width as Works and Services so all
+     three "documents" align to the same canvas. */
+  .leaders {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    /* Padding identical to About + Works (clamp 80→180 at 8.33vw
+       = 120 at 1440), so all sections breathe at the same scale.
+       Bottom is 0 — Footer's top padding owns the gap below the
+       divider. */
+    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px) 0;
+  }
+
+  /* ===== Manifest =====
+     Per-word color scrub anchored to viewport scroll. CSS keeps
+     every word at --ink-faint by default; leaders.ts tweens
+     color to var(--ink) with a per-word stagger. */
+  /* Manifest container is LEFT-ALIGNED (margin: 0) so its left
+     edge matches the Services content above. Only the FIRST
+     line is indented with text-indent — the editorial opening
+     for "Dve". Subsequent lines (and the second sentence after
+     <br/>) flow flush to the container's left edge.
+     3em ≈ 144px at the 48px Figma baseline, matching the
+     ~11 spaces of indent shown in the Figma source. */
+  .leaders-manifest {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(28px, 3.33vw, 72px);
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-align: left;
+    width: 100%;
+    max-width: 1384px;
+    margin: 0;
+    text-indent: 3em;
+  }
+
+  .leaders-word {
+    color: var(--ink-faint);
+    will-change: color;
+  }
+
+  /* ===== Eyebrow "Lídri ateliéru" =====
+     80px below the manifest (matches Figma py-[80px] on the
+     manifest wrapper). Same typographic register as
+     .works-label / .services-label so all section labels
+     speak with one voice. */
+  /* Eyebrow LEFT-aligned (no max-width centering) so it lines up
+     with the manifest above and the Services content elsewhere. */
+  .leaders-eyebrow {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(14px, 1.11vw, 24px);
+    line-height: normal;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    width: 100%;
+    margin: clamp(40px, 5.55vw, 120px) 0 0;
+  }
+
+  /* ===== Cards grid =====
+     NO max-width — grid spans the full inner section width so
+     cards scale proportionally with the viewport (same pattern
+     as Services rows). justify-content: end pushes the cards
+     to the right edge of that full inner width; the remaining
+     empty space (one card-width + 2 gaps worth) sits on the
+     LEFT, which gives the asymmetric "open shoulder" Figma
+     composition at any viewport. */
+  .leaders-grid {
+    display: grid;
+    grid-template-columns: repeat(3, calc(328 / 1384 * 100%));
+    gap: calc(142 / 1384 * 100%);
+    justify-content: end;
+    width: 100%;
+    margin: clamp(28px, 2.78vw, 60px) 0 0;
+  }
+
+  /* ===== Card ===== */
+  .leader-card {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 1.39vw, 30px);
+    min-width: 0;
+  }
+
+  /* ===== Photo frame =====
+     Aspect ratio 328:470 ≈ 0.7 (portrait). Initial clip-path
+     hides the photo from below; leaders.ts unmasks it as the
+     grid enters viewport. overflow:hidden clips the
+     parallax-overflowing image. */
+  .leader-media {
+    position: relative;
+    aspect-ratio: 328 / 470;
+    overflow: hidden;
+    background: #efeeea;
+    clip-path: inset(100% 0 0 0);
+    will-change: clip-path;
+  }
+
+  /* Image overflow trick for the parallax — identical maths to
+     Works and Services: image is 122% of frame height with
+     top:-11%, giving 11% headroom on each side for the ±8
+     yPercent scrub to drift inside without revealing the
+     frame's edge. */
+  .leader-media img {
+    position: relative;
+    top: -11%;
+    width: 100%;
+    height: 122%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  /* ===== Card text ===== */
+  .leader-info {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 0.56vw, 12px);
+    width: 100%;
+  }
+
+  /* Name uses the same .work-title clamp (20 at 1440 → 30 at
+     2160+) so the card reads as a sibling of a Works tile. */
+  .leader-name {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(18px, 1.39vw, 30px);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: #222;
+    margin: 0;
+    will-change: transform, opacity;
+  }
+
+  /* Description uses the same .work-desc clamp (16 at 1440 →
+     22 at 1980+) with proportional line-height. */
+  .leader-desc {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(14px, 1.11vw, 22px);
+    line-height: 1.375;
+    letter-spacing: 0.02em;
+    color: #666;
+    margin: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ===== Reveal initial state (CSS-owned, pre-paint) ===== */
+  .leader-name[data-reveal],
+  .leader-desc[data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  /* ===== CTA — same pattern as Hero/About/Works/Services ===== */
+  .leaders-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(10px, 0.83vw, 12px);
+    width: clamp(180px, 14.65vw, 211px);
+    margin-top: clamp(28px, 3.33vw, 60px);
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    align-self: center;
+    will-change: transform;
+  }
+
+  .leaders-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .leaders-cta:hover::before {
+    transform: translateX(0);
+  }
+
+  .leaders-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .leaders-cta-text {
+    display: inline-block;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .leaders-cta:hover .leaders-cta-text {
+    transform: translateX(3px);
+  }
+
+  .leaders-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .leaders-cta:hover .leaders-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* ===== Closing divider =====
+     Hairline edge-to-edge across the full inner width (no
+     max-width / no centering) so it scales with the viewport
+     like the rest of the section's content. */
+  .leaders-divider {
+    width: 100%;
+    height: 1px;
+    background: #a3a3a3;
+    margin: clamp(40px, 5.55vw, 120px) 0 0;
+  }
+
+  /* ===== Reduced motion — snap all reveals to final state ===== */
+  @media (prefers-reduced-motion: reduce) {
+    .leaders-word {
+      color: var(--ink);
+    }
+    .leader-media {
+      clip-path: inset(0% 0 0 0);
+    }
+    .leader-name[data-reveal],
+    .leader-desc[data-reveal] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* =============================================================
+     Responsive — collapse to single-column at narrow viewports.
+     Grid right-alignment is replaced with centered single column.
+     ============================================================= */
+  @media (max-width: 1024px) {
+    .leaders {
+      padding: 64px 20px;
+    }
+    .leaders-eyebrow {
+      margin-top: 48px;
+    }
+    .leaders-grid {
+      grid-template-columns: 1fr;
+      gap: 48px;
+      justify-content: center;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+</style>

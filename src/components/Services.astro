@@ -159,15 +159,16 @@ const services: Service[] = [
   }
 
   /* ===== Top label "Služby" =====
-     Fills the section's inner width (the .services parent already
-     owns the page-edge gutter); no max-width here. Size 20 at the
-     1440 baseline, capped at 20 above — every text element in the
-     section reads at the same Figma-spec 20px regardless of
-     viewport. */
+     Capped at 20px (Figma baseline) — Services intentionally
+     doesn't scale above 1440 like Works/Leaders, so every text
+     element here stays at the spec 20px even on large viewports.
+     Weight Regular 400 — every text element in this section
+     reads at the same Regular weight (unlike Works/Leaders
+     where labels/titles are Medium). */
   .services-label {
     width: 100%;
     font-family: var(--font-sans);
-    font-weight: 500;
+    font-weight: 400;
     font-style: normal;
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: normal;
@@ -233,13 +234,14 @@ const services: Service[] = [
     min-width: 0;
   }
 
-  /* Every text element in this section is 20 at the 1440 baseline,
-     capped at 20 above so larger viewports never make the row
-     "shout" louder than the Figma-spec size. Mobile floor 16. */
+  /* All text in the Services row is capped at 20px AND Regular
+     weight 400 (Figma spec). Number, title and description share
+     the same clamp + weight so the row reads as a single
+     typographic line — no Medium "headings" inside the row. */
   .service-num {
     flex: 0 0 auto;
     font-family: var(--font-sans);
-    font-weight: 500;
+    font-weight: 400;
     font-style: normal;
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.2;
@@ -254,7 +256,7 @@ const services: Service[] = [
 
   .service-title {
     font-family: var(--font-sans);
-    font-weight: 500;
+    font-weight: 400;
     font-style: normal;
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.2;
@@ -265,13 +267,12 @@ const services: Service[] = [
   }
 
   /* ===== Description column =====
-     Same 20px-capped clamp as the other text in the section so
-     all rows read uniformly. line-height 1.4 (= 28/20) maintains
-     the Figma reading rhythm. */
+     Capped at 20px like the rest of the row. line-height 1.4
+     (= 28/20) matches the Figma reading rhythm. */
   .service-desc {
     flex: 0 0 calc(445 / 1384 * 100%);
     font-family: var(--font-sans);
-    font-weight: 500;
+    font-weight: 400;
     font-style: normal;
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.4;
