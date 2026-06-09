@@ -196,12 +196,10 @@ const projects: Project[] = [
        centers within bigger displays. */
     max-width: 2464px;
     margin: 0 auto;
-    /* py: 120 at 1440 viewport → 180 at 2160+ (clamps).
+    /* py: 80 at 1440 (Figma py-80) — caps at 80 above 1440.
        px: 28 at 1440 → 48 at 2400+ (clamps).
-       Equal top & bottom padding — Works keeps full breathing
-       room on both sides; the gap to Services below is therefore
-       Works's bottom (~120) + Services's top (~80) = ~200 at 1440. */
-    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px);
+       Equal top & bottom padding per Figma spec. */
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px);
     background: var(--bg);
   }
 

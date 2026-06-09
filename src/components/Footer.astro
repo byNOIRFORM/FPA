@@ -197,11 +197,11 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     width: 100%;
     max-width: 2464px;
     margin: 0 auto;
-    /* Top padding identical to About + Works + Leaders (clamp
-       80→180 at 8.33vw = 120 at 1440). Horizontal gutter matches
-       all other sections. Bottom keeps a small breathing zone
-       before the page ends. */
-    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px) clamp(20px, 1.94vw, 36px);
+    /* py-top: 80 at 1440 — matches Works / Services / Leaders for
+       consistent rhythm against Figma reference.
+       Horizontal gutter matches all other sections.
+       Bottom 28 at 1440 — Figma footer-links sit at bottom-28. */
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px) clamp(20px, 1.94vw, 36px);
     background: var(--bg);
     color: var(--ink);
   }

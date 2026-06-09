@@ -152,9 +152,10 @@ const services: Service[] = [
        viewports. */
     max-width: 2464px;
     margin: 0 auto;
-    /* 80 at 1440 → 180 at 2160+ vertical; 28 at 1440 → 48 at 2400+
-       horizontal — matches the works gutter exactly. */
-    padding: clamp(60px, 5.55vw, 180px) clamp(16px, 2vw, 48px);
+    /* 80 at 1440 (Figma py-80) — caps at 80 above 1440 so vertical
+       rhythm stays consistent with Works/Leaders/Footer.
+       28 at 1440 → 48 at 2400+ horizontal. */
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px);
     background: var(--bg);
   }
 

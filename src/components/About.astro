@@ -74,10 +74,12 @@ const words = HEADLINE.split(" ");
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* 120 at 1440 → 180 at 2160+. */
-    gap: clamp(80px, 8.33vw, 180px);
-    /* py-top scales like other sections; px gutter scales 28 → 48. */
-    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px) 0;
+    /* gap: 80 at 1440 (Figma gap-80 between content and divider).
+       Caps at 80 above 1440 for consistent vertical rhythm. */
+    gap: clamp(48px, 5.55vw, 80px);
+    /* py-top: 100 at 1440 (Figma pt-100), scales down to 60 at
+       small viewports, caps at 100 above. px gutter scales 28 → 48. */
+    padding: clamp(60px, 6.94vw, 100px) clamp(16px, 2vw, 48px) 0;
     background: var(--bg);
   }
 

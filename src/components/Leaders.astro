@@ -141,11 +141,12 @@ const manifestWords = MANIFEST.split(" ");
     width: 100%;
     max-width: 2464px;
     margin: 0 auto;
-    /* Padding identical to About + Works (clamp 80→180 at 8.33vw
-       = 120 at 1440), so all sections breathe at the same scale.
+    /* py-top: 80 at 1440 (Figma py-80 on the inner manifest
+       container) — caps at 80 above 1440 for consistent rhythm
+       with Works / Services / Footer.
        Bottom is 0 — Footer's top padding owns the gap below the
        divider. */
-    padding: clamp(80px, 8.33vw, 180px) clamp(16px, 2vw, 48px) 0;
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px) 0;
   }
 
   /* ===== Manifest =====
