@@ -249,9 +249,9 @@ const services: Service[] = [
     letter-spacing: 0.02em;
     color: #222;
     font-variant-numeric: tabular-nums;
-    /* Reveal is JS-driven (translateY + opacity); no CSS transition
-       on transform so it doesn't fight the GSAP tween. */
-    will-change: transform, opacity;
+    /* Reveal is the same clip-path curtain as the photo —
+       services.ts animates inset(100% 0 0 0) → inset(0). */
+    will-change: clip-path;
     display: inline-block;
   }
 
@@ -264,7 +264,7 @@ const services: Service[] = [
     letter-spacing: 0.02em;
     color: #222;
     margin: 0;
-    will-change: transform, opacity;
+    will-change: clip-path;
   }
 
   /* ===== Description column =====
@@ -280,7 +280,7 @@ const services: Service[] = [
     letter-spacing: 0.02em;
     color: #222;
     margin: 0;
-    will-change: transform, opacity;
+    will-change: clip-path;
   }
 
   /* ===== Media frame =====
@@ -326,16 +326,15 @@ const services: Service[] = [
   }
 
   /* ===== Initial reveal state (CSS-owned, pre-paint) =====
-     CSS declares the offset+opacity so the very first paint
-     hides the text — no flash of unstyled visible content
-     before services.ts runs. The script animates to the
-     visible state and removes data-reveal so the rule no
-     longer applies. */
+     Pre-paint state is fully clipped from the top (matches the
+     photo's .service-media initial state). services.ts animates
+     each element's clip-path to inset(0) when the row enters
+     viewport — the text and photo "unroll" from below with the
+     same curtain motion, so the whole row reads as one family. */
   .service-num[data-reveal],
   .service-title[data-reveal],
   .service-desc[data-reveal] {
-    opacity: 0;
-    transform: translateY(16px);
+    clip-path: inset(100% 0 0 0);
   }
 
 

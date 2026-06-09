@@ -11,16 +11,13 @@ import { gsap } from "gsap";
  *      Same calibration as works.ts.
  *
  *   2. PER-ROW REVEAL (every row, single timeline)
- *      As each row enters viewport (start "top 80%"):
- *        - Photo: clip-path inset(100% 0 0 0) → inset(0)
- *          (curtain rises from below, 0.9s power3.out)
- *        - Number / title / description: fade up from y:16,
- *          opacity:0 → y:0, opacity:1 (0.7s power3.out)
- *          with small staggered start (40 / 120 ms)
- *      Both photo and text run in the SAME timeline so they feel
- *      like one coordinated entrance — otherwise the text
- *      animated while the photo just popped in, which read as
- *      uncoordinated.
+ *      As each row enters viewport (start "top 80%") every
+ *      element rises with the SAME clip-path curtain — number,
+ *      title, description, and photo all animate
+ *      inset(100% 0 0 0) → inset(0). Visually each element
+ *      "unrolls" from below; running them on one timeline with
+ *      a small L→R stagger keeps the row reading as a single
+ *      coordinated motion.
  *
  * Reduced motion: scroll-driven layers snap to final state.
  */
@@ -104,20 +101,20 @@ export function initServices(): void {
     //    │      │            │                         │
     //    0      0.06s        0.18s                     0.36s
     //
-    // The number + title in column 1 fire near-simultaneously
-    // (they're one typographic unit). Description follows after
-    // a small gap that gives the eye time to register the title.
-    // Photo lands LAST as the visual punctuation — the reveal
-    // "lands" on the image rather than racing it.
+    // Every element uses the SAME clip-path curtain so the row
+    // unrolls from below as one motion family — matches the
+    // photo's reveal so the text doesn't feel different from
+    // the image. Number + title fire near-simultaneously (same
+    // typographic unit). Description follows after a beat.
+    // Photo lands LAST as the visual punctuation.
     //
-    // fromTo + immediateRender:false locks the start state in
-    // at PLAY time so there's no race with the CSS [data-reveal]
+    // fromTo + immediateRender:false locks the start state at
+    // PLAY time so there's no race with the CSS [data-reveal]
     // rule. expo.out gives the longest, softest settle in the
     // free GSAP easing library.
-    const from = { y: 16, opacity: 0 };
+    const from = { clipPath: "inset(100% 0 0 0)" };
     const to = {
-      y: 0,
-      opacity: 1,
+      clipPath: "inset(0% 0 0 0)",
       duration: 0.9,
       ease: "expo.out",
       immediateRender: false,
@@ -131,8 +128,10 @@ export function initServices(): void {
     // the eye gets a beat to scan the heading first.
     tl.fromTo(desc, from, to, 0.18);
 
-    // Col 3 — photo curtain rises LAST. expo.out matches the text
-    // easing so the whole row reads as one motion family.
+    // Col 3 — photo lands LAST as the visual punctuation. Same
+    // clip-path target as the text; slightly longer duration
+    // (1.0s vs 0.9s) so the larger image has a hair more travel
+    // and reads as the "settle" of the row.
     tl.to(
       media,
       {
