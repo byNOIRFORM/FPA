@@ -2,34 +2,33 @@ import { gsap } from "gsap";
 // ScrollTrigger is registered globally in gsap-setup.ts.
 
 /**
- * Leaders section — three layers of motion:
+ * Leaders section — CSS-sticky pin + scrubbed sequential reveal.
  *
  *   1. PER-WORD COLOR SCRUB (manifest)
- *      Every .leaders-word starts at --ink-faint (#C8C8C8). As
- *      the user scrolls through the manifest, words darken to
- *      var(--ink) left-to-right with a small per-word stagger
- *      that spreads the transition across the scroll range.
- *      Same technique as About — keeps the two manifesto blocks
- *      in one motion family.
+ *      Words darken left-to-right as the user scrolls the
+ *      manifest. Same technique as About.
  *
- *   2. CARDS CASCADE L→R (one-shot)
- *      When the cards grid enters viewport (start "top 80%"),
- *      cards reveal in sequence — Card 1 first, Card 2 0.2s
- *      later, Card 3 0.4s after Card 1. Each card runs:
- *        - photo curtain: clip-path inset(100% 0 0 0) → inset(0)
- *        - name fade-up (y:16 → 0, opacity:0 → 1)
- *        - description fade-up (offset slightly behind name)
- *      All sub-tweens use expo.out / 0.9–1.0s for the long
- *      gliding settle that matches Services.
+ *   2. STICKY-PINNED SEQUENTIAL REVEAL
+ *      Pinning is done by NATIVE CSS (position: sticky on
+ *      .leaders-pin-wrap, inside a 300vh tall container). Native
+ *      sticky behaves correctly with Lenis smooth scroll —
+ *      GSAP's transform-based pin caused Footer content to
+ *      bleed into the viewport.
  *
- *   3. INNER PARALLAX (every photo)
- *      Each leader photo translates yPercent +8 → −8 as it
- *      scrolls past viewport. Pure scrub, same calibration as
- *      Works tiles and Services rows so all three photo-grid
- *      sections share one ambient rhythm.
+ *      ScrollTrigger drives the reveal timeline by scrubbing
+ *      against the container's scroll progress. The cards
+ *      reveal in slot sequence (Pavol → Dominik → Tomáš).
  *
- * Reduced motion: snap manifest words to dark, photos to fully
- * revealed, text to visible state.
+ *      The "Spoznajte nás" CTA lives outside the pin in normal
+ *      flow — no reveal animation, simply appears after the
+ *      pinned cards with its 48px margin-top.
+ *
+ *   3. MOBILE FALLBACK (≤ 1024px)
+ *      Pin disabled in CSS. Each card reveals via its own
+ *      scroll trigger as it enters the viewport.
+ *
+ * Reduced motion: snap manifest words to dark, all cards fully
+ * revealed.
  */
 export function initLeaders(): void {
   if (typeof window === "undefined") return;
@@ -38,9 +37,10 @@ export function initLeaders(): void {
   if (!section) return;
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const isMobile = window.matchMedia("(max-width: 1024px)").matches;
 
   // -------------------------------------------------------------
-  // 1. Manifest word color scrub — mirrors initAbout's word tween.
+  // 1. Manifest word color scrub.
   // -------------------------------------------------------------
   if (!reduced) {
     gsap.to(".leaders-word", {
@@ -56,46 +56,16 @@ export function initLeaders(): void {
     });
   }
 
-  // -------------------------------------------------------------
-  // 2. Inner parallax on every leader photo.
-  // -------------------------------------------------------------
-  if (!reduced) {
-    section
-      .querySelectorAll<HTMLElement>(".leader-card")
-      .forEach((card) => {
-        const img = card.querySelector<HTMLImageElement>(".leader-media img");
-        if (!img) return;
-
-        gsap.fromTo(
-          img,
-          { yPercent: 8 },
-          {
-            yPercent: -8,
-            ease: "none",
-            scrollTrigger: {
-              trigger: card,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          },
-        );
-      });
-  }
-
-  // -------------------------------------------------------------
-  // 3. Cards cascade reveal L→R.
-  // -------------------------------------------------------------
-  const grid = section.querySelector<HTMLElement>(".leaders-grid");
-  if (!grid) return;
-
-  const cards = grid.querySelectorAll<HTMLElement>(".leader-card");
+  const cards = section.querySelectorAll<HTMLElement>(".leader-card");
   if (cards.length === 0) return;
 
-  // Reduced-motion path: snap to final state.
+  // -------------------------------------------------------------
+  // Reduced motion — snap to final state, skip timeline.
+  // -------------------------------------------------------------
   if (reduced) {
     cards.forEach((card) => {
       const media = card.querySelector<HTMLElement>(".leader-media");
+      gsap.set(card, { y: 0, opacity: 1 });
       if (media) gsap.set(media, { clipPath: "inset(0% 0 0 0)" });
       card
         .querySelectorAll<HTMLElement>("[data-reveal]")
@@ -104,60 +74,91 @@ export function initLeaders(): void {
     return;
   }
 
-  // Single timeline triggered when the grid enters viewport.
-  // Each card gets an offset (0, 0.2, 0.4s) so the cascade
-  // reads as one motion event from left to right.
+  // -------------------------------------------------------------
+  // MOBILE — per-card scroll triggers, no sticky pin.
+  // -------------------------------------------------------------
+  if (isMobile) {
+    cards.forEach((card) => {
+      const media = card.querySelector<HTMLElement>(".leader-media");
+      const name = card.querySelector<HTMLElement>(".leader-name");
+      const desc = card.querySelector<HTMLElement>(".leader-desc");
+      if (!media || !name || !desc) return;
+
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: card,
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+          onComplete: () => {
+            name.removeAttribute("data-reveal");
+            desc.removeAttribute("data-reveal");
+          },
+        })
+        .to(card, { y: 0, opacity: 1, duration: 0.9, ease: "expo.out" }, 0)
+        .to(media, { clipPath: "inset(0% 0 0 0)", duration: 0.9, ease: "expo.out" }, 0)
+        .fromTo(
+          name,
+          { y: 16, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, ease: "expo.out", immediateRender: false },
+          0.2,
+        )
+        .fromTo(
+          desc,
+          { y: 16, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.8, ease: "expo.out", immediateRender: false },
+          0.3,
+        );
+    });
+    return;
+  }
+
+  // -------------------------------------------------------------
+  // DESKTOP — STICKY-PINNED SCRUBBED TIMELINE.
+  // -------------------------------------------------------------
   const tl = gsap.timeline({
     scrollTrigger: {
-      trigger: grid,
-      start: "top 80%",
-      toggleActions: "play none none none",
-    },
-    onComplete: () => {
-      // Strip data-reveal at the end (not onStart) so the CSS
-      // [data-reveal] opacity:0 rule stays active during the
-      // animation. GSAP's inline opacity overrides it for the
-      // duration — stripping early causes a one-frame flash.
-      grid
-        .querySelectorAll<HTMLElement>("[data-reveal]")
-        .forEach((el) => el.removeAttribute("data-reveal"));
+      trigger: ".leaders-pin-container",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 0.5,
+      invalidateOnRefresh: true,
     },
   });
 
+  // Each card occupies one "slot" of the timeline (positions
+  // 0, 1, 2). Power2.out gives a soft tail on each reveal.
   cards.forEach((card, i) => {
     const media = card.querySelector<HTMLElement>(".leader-media");
     const name = card.querySelector<HTMLElement>(".leader-name");
     const desc = card.querySelector<HTMLElement>(".leader-desc");
     if (!media || !name || !desc) return;
 
-    // 0.22s between cards — fast enough to read as one cascade,
-    // slow enough that each card is clearly its own reveal.
-    const cardOffset = i * 0.22;
+    const slot = i; // 0 = Pavol, 1 = Dominik, 2 = Tomáš
 
-    // Photo curtain rises from below.
     tl.to(
-      media,
-      {
-        clipPath: "inset(0% 0 0 0)",
-        duration: 1.0,
-        ease: "expo.out",
-      },
-      cardOffset,
+      card,
+      { y: 0, opacity: 1, ease: "power2.out", duration: 0.6 },
+      slot,
     );
 
-    // Name + desc fade up. fromTo + immediateRender:false locks
-    // the start state at PLAY time so there's no race with the
-    // CSS [data-reveal] rule.
-    const from = { y: 16, opacity: 0 };
-    const to = {
-      y: 0,
-      opacity: 1,
-      duration: 0.9,
-      ease: "expo.out",
-      immediateRender: false,
-    };
+    tl.to(
+      media,
+      { clipPath: "inset(0% 0 0 0)", ease: "power2.out", duration: 0.6 },
+      slot,
+    );
 
-    tl.fromTo(name, from, to, cardOffset + 0.18);
-    tl.fromTo(desc, from, to, cardOffset + 0.26);
+    tl.to(
+      name,
+      { y: 0, opacity: 1, ease: "power2.out", duration: 0.4 },
+      slot + 0.5,
+    );
+
+    tl.to(
+      desc,
+      { y: 0, opacity: 1, ease: "power2.out", duration: 0.4 },
+      slot + 0.6,
+    );
   });
 }

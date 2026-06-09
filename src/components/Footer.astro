@@ -17,8 +17,22 @@
  *
  * Motion is intentionally minimal — footer is functional, not a
  * stage for choreography. Just standard hover states on links and
- * the lenis-powered scroll-to-top behaviour wired in footer.ts.
+ * the lenis-powered scroll-to-top behaviour wired in footer.ts,
+ * plus a per-word fade-up reveal on the pitch paragraph.
  */
+
+// Pitch broken into per-word spans so each word can fade up
+// independently with a small stagger (same word-split technique
+// as the About / Leaders manifest scrubs). Layout-safe at any
+// resolution: each span is inline-block and wraps as a natural
+// word boundary, so line breaks follow the container width
+// exactly as they would for plain text.
+const PITCH_LINE_1 =
+  "Ak hľadáte partnera, ktorý spojí mladistvú energiu s bohatými skúsenosťami a vášňou k architektúre, ste na správnom mieste.";
+const PITCH_LINE_2 =
+  "Pre cenovú ponuku nás kontaktujte telefonicky alebo emailom.";
+const pitchLine1 = PITCH_LINE_1.split(" ");
+const pitchLine2 = PITCH_LINE_2.split(" ");
 ---
 
 <footer class="footer" aria-labelledby="footer-heading">
@@ -31,10 +45,33 @@
     <span class="footer-logo-sub">architekt</span>
   </a>
 
-  {/* PITCH — large editorial paragraph that opens the footer. */}
-  <p class="footer-pitch">
-    Ak hľadáte partnera, ktorý spojí mladistvú energiu s bohatými skúsenosťami a vášňou k architektúre, ste na správnom mieste.<br />
-    Pre cenovú ponuku nás kontaktujte telefonicky alebo emailom.
+  {/* PITCH — large editorial paragraph that opens the footer.
+      MASK REVEAL pattern from Hero — each word sits inside an
+      overflow:hidden mask so when footer.ts translates the
+      word from yPercent:110 to 0 it visibly "rises" from below
+      the line. Same parameters as the hero slogan reveal
+      (duration 1.0, expo.out, stagger 0.05).
+      Layout-safe at any resolution: mask spans are inline-block
+      and wrap as natural word boundaries — text flow is
+      identical to plain text. */}
+  <p class="footer-pitch" data-reveal>
+    {pitchLine1.map((w, i) => (
+      <>
+        <span class="footer-pitch-mask"
+          ><span class="footer-pitch-word">{w}</span></span
+        >
+        {i < pitchLine1.length - 1 ? " " : ""}
+      </>
+    ))}
+    <br />
+    {pitchLine2.map((w, i) => (
+      <>
+        <span class="footer-pitch-mask"
+          ><span class="footer-pitch-word">{w}</span></span
+        >
+        {i < pitchLine2.length - 1 ? " " : ""}
+      </>
+    ))}
   </p>
 
   {/* CTA — CENTERED below the pitch (same alignment convention as
@@ -296,6 +333,42 @@
        the page's left content edge. */
     margin: clamp(40px, 4.44vw, 96px) 0 0;
     text-wrap: pretty;
+  }
+
+  /* ===== Mask-reveal pattern (mirrors Hero slogan) =====
+     Each word sits inside .footer-pitch-mask (overflow:hidden)
+     and footer.ts translates the inner word from yPercent:110
+     to 0 — the word visibly RISES from below the line.
+
+     vertical-align:bottom keeps the masks baseline-aligned with
+     surrounding text (default baseline alignment of an inline-
+     block with overflow:hidden sits at the bottom of the box,
+     which can nudge lines; bottom alignment matches the line's
+     bottom edge consistently). */
+  .footer-pitch-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: inherit;
+    vertical-align: bottom;
+  }
+
+  /* IMPORTANT: no CSS transform here (same reasoning as
+     .hero-title-word — GSAP reads CSS translateY(%) as a pixel
+     value via matrix decomposition and stashes it in `y`, so a
+     subsequent yPercent tween would leave the pixel offset
+     uncleared and the word would never reach yPercent:0).
+     opacity:0 alone hides it until footer.ts seeds yPercent
+     and runs the reveal. */
+  .footer-pitch-word {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer-pitch-word {
+      opacity: 1;
+    }
   }
 
   /* ============================================================

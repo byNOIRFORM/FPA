@@ -74,25 +74,39 @@ const manifestWords = MANIFEST.split(" ");
     }
   </p>
 
-  <p class="leaders-eyebrow">Lídri ateliéru</p>
-
-  <div class="leaders-grid">
-    {leaders.map((l, i) => (
-      <article class="leader-card" data-leader={i}>
-        <div class="leader-media">
-          <img
-            src={l.image}
-            alt={l.alt}
-            loading={i === 0 ? "eager" : "lazy"}
-            decoding="async"
-          />
+  {/* Pin container — inside, the pin-wrap is position:sticky
+      so it locks to viewport top for the container scroll.
+      Eyebrow + cards live INSIDE the pin-wrap. The pin-wrap
+      uses align-items:flex-end so the content sits at the
+      BOTTOM of the pinned area — when sticky releases, the
+      cards are exactly at the container's bottom edge, so the
+      CTA below appears with the exact 48px gap (instead of a
+      huge gap created by empty space below center-aligned
+      content). */}
+  <div class="leaders-pin-container">
+    <div class="leaders-pin-wrap">
+      <div class="leaders-pin-content">
+        <p class="leaders-eyebrow">Lídri ateliéru</p>
+        <div class="leaders-grid">
+          {leaders.map((l, i) => (
+            <article class="leader-card" data-leader={i}>
+              <div class="leader-media">
+                <img
+                  src={l.image}
+                  alt={l.alt}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                />
+              </div>
+              <div class="leader-info">
+                <h3 class="leader-name" data-reveal>{l.name}</h3>
+                <p class="leader-desc" data-reveal>{l.desc}</p>
+              </div>
+            </article>
+          ))}
         </div>
-        <div class="leader-info">
-          <h3 class="leader-name" data-reveal>{l.name}</h3>
-          <p class="leader-desc" data-reveal>{l.desc}</p>
-        </div>
-      </article>
-    ))}
+      </div>
+    </div>
   </div>
 
   <a class="leaders-cta" href="#kontakt" data-open-contact>
@@ -113,9 +127,7 @@ const manifestWords = MANIFEST.split(" ");
     </svg>
   </a>
 
-  {/* Closing divider — separates Leaders from Footer. Per Figma
-      this hairline sits inside Section 4 with ~80px gap above the
-      CTA. 1px #a3a3a3 max-width 1384 (matches inner grid). */}
+  {/* Closing divider — separates Leaders from Footer. */}
   <div class="leaders-divider" aria-hidden="true"></div>
 </section>
 
@@ -172,8 +184,10 @@ const manifestWords = MANIFEST.split(" ");
      manifest wrapper). Same typographic register as
      .works-label / .services-label so all section labels
      speak with one voice. */
-  /* Eyebrow LEFT-aligned (no max-width centering) so it lines up
-     with the manifest above and the Services content elsewhere. */
+  /* Eyebrow LEFT-aligned (no max-width centering). Lives inside
+     .leaders-pin-content now — the 40px gap between eyebrow and
+     grid is handled by the pin-content's flex gap, so eyebrow
+     itself needs no margin. */
   .leaders-eyebrow {
     font-family: var(--font-sans);
     font-weight: 500;
@@ -183,61 +197,107 @@ const manifestWords = MANIFEST.split(" ");
     letter-spacing: 0.02em;
     color: var(--ink);
     width: 100%;
-    margin: clamp(40px, 5.55vw, 120px) 0 0;
+    margin: 0;
+  }
+
+  /* ===== Pin container =====
+     300vh tall — provides scroll space for the sticky pin scrub.
+     margin-top: 0 because the 80px gap above the eyebrow
+     (per Figma — manifest container has py-80) is owned by the
+     pin-wrap's padding-top, so the spacing is identical whether
+     the section is in initial scroll or actively pinned. */
+  .leaders-pin-container {
+    height: 300vh;
+    position: relative;
+    width: 100%;
+    margin-top: 0;
+  }
+
+  /* ===== Pin wrap (CSS sticky) =====
+     position: sticky locks this wrap to the top of the viewport
+     for the container scroll. AUTO-HEIGHT so its bottom edge
+     sits exactly under the cards — no empty sticky space
+     inflating the visible gap to the CTA below.
+
+     padding-top owns the 80px gap that Figma puts between the
+     manifest text and the eyebrow (py-80 on the manifest
+     container). Because it's a padding on the sticky wrap, the
+     80px applies both when the section is in initial scroll
+     (pushes eyebrow 80px below the manifest) AND during the
+     pin (gives eyebrow 80px breathing from the viewport top). */
+  .leaders-pin-wrap {
+    position: sticky;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: clamp(48px, 5.55vw, 80px);
+    width: 100%;
+  }
+
+  /* ===== Pin content =====
+     Stack of eyebrow + cards inside the pinned wrap.
+     40px gap between eyebrow and grid (user-requested). */
+  .leaders-pin-content {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    width: 100%;
   }
 
   /* ===== Cards grid =====
-     NO max-width — grid spans the full inner section width so
-     cards scale proportionally with the viewport (same pattern
-     as Services rows). justify-content: end pushes the cards
-     to the right edge of that full inner width; the remaining
-     empty space (one card-width + 2 gaps worth) sits on the
-     LEFT, which gives the asymmetric "open shoulder" Figma
-     composition at any viewport. */
+     Right-aligned grid with cards scaling proportionally to the
+     viewport. All three cards in the SAME row inside the pinned
+     wrap; sequencing is driven by the scroll-scrubbed timeline
+     in leaders.ts. */
   .leaders-grid {
     display: grid;
     grid-template-columns: repeat(3, calc(328 / 1384 * 100%));
     gap: calc(142 / 1384 * 100%);
     justify-content: end;
     width: 100%;
-    margin: clamp(28px, 2.78vw, 60px) 0 0;
   }
 
-  /* ===== Card ===== */
+  /* ===== Card =====
+     Pre-reveal state: opacity 0 + translated 80px below DOM
+     position. The pinned timeline in leaders.ts reveals each
+     card in sequence during the pin scroll. All cards in the
+     same row — no Y stagger needed because the sequencing is
+     done by the timeline, not by DOM position. */
   .leader-card {
     display: flex;
     flex-direction: column;
     gap: clamp(16px, 1.39vw, 30px);
     min-width: 0;
+    opacity: 0;
+    transform: translateY(80px);
+    will-change: transform, opacity;
   }
 
   /* ===== Photo frame =====
-     Aspect ratio 328:470 ≈ 0.7 (portrait). Initial clip-path
-     hides the photo from below; leaders.ts unmasks it as the
-     grid enters viewport. overflow:hidden clips the
-     parallax-overflowing image. */
+     Aspect ratio 328:460 ≈ 0.71 (portrait). Figma spec is
+     328:470; we shave 10px of height at the 1440 reference to
+     give the pinned view a touch more breathing space at the
+     bottom while keeping the wrap tall enough that the CTA
+     (which sits 48px below the pin-container) never peeks
+     into the viewport during the pin release.
+
+     Initial clip-path hides the photo from below; leaders.ts
+     scrubs it continuously based on scroll position — the
+     curtain RISES as the user scrolls. */
   .leader-media {
     position: relative;
-    aspect-ratio: 328 / 470;
+    aspect-ratio: 328 / 460;
     overflow: hidden;
     background: #efeeea;
     clip-path: inset(100% 0 0 0);
     will-change: clip-path;
   }
 
-  /* Image overflow trick for the parallax — identical maths to
-     Works and Services: image is 122% of frame height with
-     top:-11%, giving 11% headroom on each side for the ±8
-     yPercent scrub to drift inside without revealing the
-     frame's edge. */
   .leader-media img {
-    position: relative;
-    top: -11%;
     width: 100%;
-    height: 122%;
+    height: 100%;
     object-fit: cover;
     display: block;
-    will-change: transform;
   }
 
   /* ===== Card text ===== */
@@ -282,7 +342,12 @@ const manifestWords = MANIFEST.split(" ");
     transform: translateY(16px);
   }
 
-  /* ===== CTA — same pattern as Hero/About/Works/Services ===== */
+  /* ===== CTA — same pattern as Hero/About/Works/Services =====
+     Lives in normal flow AFTER the pin-container. Always visible
+     (no reveal animation). 48px margin-top — combined with the
+     pin-wrap's align-items:flex-end + padding-bottom, the cards
+     end at the container edge, so this 48px is the only space
+     between cards bottom and CTA top. */
   .leaders-cta {
     position: relative;
     display: inline-flex;
@@ -290,7 +355,7 @@ const manifestWords = MANIFEST.split(" ");
     justify-content: space-between;
     gap: clamp(10px, 0.83vw, 12px);
     width: clamp(180px, 14.65vw, 211px);
-    margin-top: clamp(28px, 3.33vw, 60px);
+    margin-top: 48px;
     padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
     background: #222;
     color: #fff;
@@ -362,6 +427,17 @@ const manifestWords = MANIFEST.split(" ");
     .leaders-word {
       color: var(--ink);
     }
+    .leaders-pin-container {
+      height: auto;
+    }
+    .leaders-pin-wrap {
+      position: static;
+      height: auto;
+    }
+    .leader-card {
+      opacity: 1;
+      transform: none;
+    }
     .leader-media {
       clip-path: inset(0% 0 0 0);
     }
@@ -382,6 +458,15 @@ const manifestWords = MANIFEST.split(" ");
     }
     .leaders-eyebrow {
       margin-top: 48px;
+    }
+    /* Mobile: disable sticky pin — cards stack vertically and
+       reveal per-card via leaders.ts mobile fallback. */
+    .leaders-pin-container {
+      height: auto;
+    }
+    .leaders-pin-wrap {
+      position: static;
+      height: auto;
     }
     .leaders-grid {
       grid-template-columns: 1fr;
