@@ -65,7 +65,7 @@ const langs = [
         <span class="sidenav-logo-sub">architekt</span>
       </a>
       <button class="sidenav-close" type="button" data-sidenav-close aria-label="Zavrieť menu">
-        Close
+        <span class="sidenav-flip" data-text="Close"><span>Close</span></span>
       </button>
     </div>
 
@@ -81,7 +81,11 @@ const langs = [
                 {...(l.contact ? { "data-sidenav-contact": true } : {})}
               >
                 <span class="sidenav-link-clip">
-                  <span class="sidenav-link-text">{l.label}</span>
+                  <span class="sidenav-link-text">
+                    <span class="sidenav-link-flip" data-text={l.label}>
+                      <span>{l.label}</span>
+                    </span>
+                  </span>
                 </span>
               </a>
             </li>
@@ -96,7 +100,7 @@ const langs = [
               class={`sidenav-lang${l.active ? " sidenav-lang--active" : ""}`}
               href={l.href}
             >
-              {l.label}
+              <span class="sidenav-flip" data-text={l.label}><span>{l.label}</span></span>
             </a>
           </li>
         ))}
@@ -183,13 +187,44 @@ const langs = [
     border: 0;
     padding: 4px 0;
     cursor: pointer;
-    opacity: 0.9;
-    transition: opacity 280ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
-  .sidenav-close:hover,
-  .sidenav-close:focus-visible {
-    opacity: 1;
+  /* Generic text roll for the Close button + language switch — same
+     "masked label swap" as the big menu links (and the desktop nav,
+     where the langs/links use .nav-flip). Inherits font-size from its
+     control (16px here). */
+  .sidenav-flip {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    line-height: 1.25;
+  }
+
+  .sidenav-flip > span {
+    display: inline-block;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .sidenav-flip::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .sidenav-close:hover .sidenav-flip > span,
+  .sidenav-close:focus-visible .sidenav-flip > span,
+  .sidenav-close:hover .sidenav-flip::after,
+  .sidenav-close:focus-visible .sidenav-flip::after,
+  .sidenav-lang:hover .sidenav-flip > span,
+  .sidenav-lang:focus-visible .sidenav-flip > span,
+  .sidenav-lang:hover .sidenav-flip::after,
+  .sidenav-lang:focus-visible .sidenav-flip::after {
+    transform: translateY(-100%);
   }
 
   /* ===== Body — links (top) + langs (bottom) ===== */
@@ -223,28 +258,61 @@ const langs = [
     color: #fff;
   }
 
+  /* Outer mask — the open-reveal rise is clipped here. */
   .sidenav-link-clip {
     display: inline-block;
     overflow: hidden;
     vertical-align: bottom;
   }
 
+  /* GSAP-owned wrapper — side-nav.ts rises this from yPercent 110 → 0
+     on open. The hover flip lives on a child so the two transforms
+     never collide. */
   .sidenav-link-text {
     display: inline-block;
+    will-change: transform;
+  }
+
+  /* Text roll-up (same hover as the desktop nav's .nav-flip — a
+     "masked label swap"): the visible label slides up out of its mask
+     while a duplicate (::after, content: attr(data-text)) rises in
+     from below. Pure CSS, fires only on a real mouse (no width gate),
+     so it behaves identically when inspecting the mobile view on a
+     desktop. */
+  .sidenav-link-flip {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
     font-family: var(--font-sans);
     font-weight: 500;
     font-style: normal;
     font-size: 36px;
-    line-height: 1.18;
+    line-height: 1.2;
     letter-spacing: 0.02em;
     color: #fff;
-    will-change: transform;
-    transition: opacity 280ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
-  .sidenav-link:hover .sidenav-link-text,
-  .sidenav-link:focus-visible .sidenav-link-text {
-    opacity: 0.55;
+  .sidenav-link-flip > span {
+    display: inline-block;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .sidenav-link-flip::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+
+  .sidenav-link:hover .sidenav-link-flip > span,
+  .sidenav-link:focus-visible .sidenav-link-flip > span,
+  .sidenav-link:hover .sidenav-link-flip::after,
+  .sidenav-link:focus-visible .sidenav-link-flip::after {
+    transform: translateY(-100%);
   }
 
   /* ===== Language switch — pinned bottom ===== */
