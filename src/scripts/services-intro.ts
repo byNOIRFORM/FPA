@@ -283,37 +283,47 @@ function initReveal(section: HTMLElement): void {
 
   if (canHover) {
     const cursorEl = document.getElementById("cursor");
+    const nav = document.querySelector<HTMLElement>(".snav");
+
+    // Cursor ↔ effect handoff, ANTICIPATORY: the handoff isn't at the
+    // nav's edge but begins APPROACH px below it — as the pointer
+    // nears the menu the custom cursor is already back and the bloom
+    // is releasing, so the menu always greets you click-ready. Driven
+    // from pointermove proximity (not nav enter/leave), so it also
+    // covers moves that start inside the zone.
+    const APPROACH = 90;
+    let cursorLeads = false;
+
+    const setLead = (lead: boolean) => {
+      if (lead === cursorLeads) return;
+      cursorLeads = lead;
+      hover = !lead;
+      if (cursorEl) cursorEl.style.opacity = lead ? "" : "0";
+    };
+
+    const nearNav = (clientY: number) => {
+      const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
+      return clientY < navBottom + APPROACH;
+    };
+
     stage.addEventListener("pointermove", (e) => {
       const rect = stage.getBoundingClientRect();
       tmx = (e.clientX - rect.left) / rect.width;
       tmy = 1 - (e.clientY - rect.top) / rect.height;
+      setLead(nearNav(e.clientY));
     });
-    stage.addEventListener("pointerenter", () => {
-      hover = true;
-      if (cursorEl) cursorEl.style.opacity = "0";
+    stage.addEventListener("pointerenter", (e) => {
+      // Force-apply on entry (setLead early-returns on equal state,
+      // but after pointerleave the visual state is "cursor visible").
+      const lead = nearNav(e.clientY);
+      cursorLeads = !lead;
+      setLead(lead);
     });
     stage.addEventListener("pointerleave", () => {
       hover = false;
+      cursorLeads = false;
       if (cursorEl) cursorEl.style.opacity = "";
     });
-    // Cursor ↔ effect handoff over the nav: entering the menu hands
-    // control back to the cursor (it fades in, the bloom gently
-    // releases); leaving the menu, the effect takes over again. The
-    // field keeps its full-frame ambient drift either way.
-    const nav = document.querySelector<HTMLElement>(".snav");
-    if (nav) {
-      nav.addEventListener("pointerenter", () => {
-        hover = false; // bloom eases out (hoverAmt lerps down)
-        if (cursorEl) cursorEl.style.opacity = "";
-      });
-      nav.addEventListener("pointerleave", () => {
-        // Back onto the stage → effect leads again. (If the pointer
-        // left the page entirely, the stage's own pointerleave fires
-        // right after this and corrects the state.)
-        hover = true;
-        if (cursorEl) cursorEl.style.opacity = "0";
-      });
-    }
   }
 
   if (blueprint.complete && photo.complete && blueprint.naturalWidth) setup();
