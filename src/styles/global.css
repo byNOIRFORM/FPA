@@ -112,9 +112,14 @@ ol {
 
 /* =============================================================
    Custom cursor — circle ring + small filled square in centre.
-   Hidden default cursor on hover-capable / large screens only.
+   Gated purely by pointer CAPABILITY (hover: hover), not viewport
+   width — so the cursor + every hover effect behave identically at
+   any width on a mouse device (e.g. a desktop window narrowed for
+   responsive inspection), while real touch devices (hover: none)
+   never see them. JS in hero.ts uses the same query so they stay
+   in sync.
    ============================================================= */
-@media (hover: hover) and (min-width: 821px) {
+@media (hover: hover) {
   body,
   a,
   button {
@@ -209,8 +214,9 @@ ol {
   opacity: 0;
 }
 
-/* Hide custom cursor on touch / small screens — system cursor is used. */
-@media (hover: none), (max-width: 820px) {
+/* Hide custom cursor on touch devices only — the system cursor is
+   used there. Width is intentionally NOT a factor (see note above). */
+@media (hover: none) {
   .cursor {
     display: none;
   }

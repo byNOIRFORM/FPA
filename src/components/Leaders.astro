@@ -450,18 +450,27 @@ const manifestWords = MANIFEST.split(" ");
   }
 
   /* =============================================================
-     Responsive — collapse to single-column at narrow viewports.
-     Grid right-alignment is replaced with centered single column.
+     Responsive
+     -----------------------------------------------------------------
+     TABLET (768–1199): no rule — the right-aligned 3-card grid +
+     sticky pin scale down proportionally (scaled-down desktop). JS
+     keeps the pin active here too (leaders.ts isMobile is also 767).
+
+     MOBILE (≤767): disable the pin and stack the cards in a single
+     centred column; each reveals on its own scroll trigger via the
+     leaders.ts mobile fallback.
      ============================================================= */
-  @media (max-width: 1024px) {
+  @media (max-width: 767px) {
     .leaders {
-      padding: 64px 20px;
+      padding: 56px 16px 0;
+    }
+    /* Editorial first-line indent reads as a typo on a narrow column. */
+    .leaders-manifest {
+      text-indent: 0;
     }
     .leaders-eyebrow {
-      margin-top: 48px;
+      margin-top: 40px;
     }
-    /* Mobile: disable sticky pin — cards stack vertically and
-       reveal per-card via leaders.ts mobile fallback. */
     .leaders-pin-container {
       height: auto;
     }
@@ -471,11 +480,24 @@ const manifestWords = MANIFEST.split(" ");
     }
     .leaders-grid {
       grid-template-columns: 1fr;
-      gap: 48px;
-      justify-content: center;
-      max-width: 480px;
-      margin-left: auto;
-      margin-right: auto;
+      gap: 40px;
+      justify-content: stretch;
+      max-width: none;
+    }
+    /* Match the Works/Figma mobile card typography. */
+    .leader-card {
+      gap: 20px;
+    }
+    .leader-info {
+      gap: 8px;
+    }
+    .leader-name {
+      font-size: 20px;
+      line-height: 1.1;
+    }
+    .leader-desc {
+      font-size: 16px;
+      line-height: 1.375;
     }
   }
 </style>

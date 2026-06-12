@@ -410,38 +410,67 @@ const services: Service[] = [
   }
 
   /* =============================================================
-     Responsive — collapse to a single column on narrow viewports.
-     Keeps the photo above the text so the reading order matches
-     the desktop "scan this row" rhythm.
+     Responsive
+     -----------------------------------------------------------------
+     TABLET (768–1199): no rule — the 3-column row + clamp() values
+     scale down proportionally (scaled-down desktop).
+
+     MOBILE (≤767): the Figma mobile layout — the number sits in a
+     narrow left column with the title + description stacked beside
+     it, and the photo runs full-width below. `display: contents` on
+     .service-meta promotes its number + title into the row grid so
+     each can take a distinct cell.
      ============================================================= */
-  @media (max-width: 1024px) {
+  @media (max-width: 767px) {
     .services {
       gap: 24px;
-      padding: 64px 20px;
+      padding: 56px 16px;
     }
     .service-row {
-      padding: 24px 0;
+      padding: 28px 0;
     }
+
     .service-row-inner {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 20px;
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      grid-template-areas:
+        "num   title"
+        "num   desc"
+        "media media";
+      column-gap: 20px;
+      row-gap: 32px;
+      align-items: start;
     }
-    .service-meta,
-    .service-desc,
-    .service-media {
+    .service-meta {
+      display: contents;
+    }
+    .service-num {
+      grid-area: num;
+    }
+    .service-title {
+      grid-area: title;
+    }
+    .service-desc {
+      grid-area: desc;
       flex: none;
       width: 100%;
     }
     .service-media {
-      max-width: 480px;
-      order: -1; /* push photo to top of the stack */
+      grid-area: media;
+      flex: none;
+      width: 100%;
+      margin-top: 8px;
     }
-  }
 
-  @media (max-width: 600px) {
-    .service-meta {
-      gap: 32px;
+    /* Figma mobile spec sheet — uniform Switzer Regular, ~18px so the
+       long descriptions stay comfortable on a narrow column. */
+    .service-num,
+    .service-title,
+    .service-desc {
+      font-size: 18px;
+    }
+    .service-desc {
+      line-height: 1.5;
     }
   }
 </style>

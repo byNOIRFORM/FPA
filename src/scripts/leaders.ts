@@ -37,7 +37,9 @@ export function initLeaders(): void {
   if (!section) return;
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const isMobile = window.matchMedia("(max-width: 1024px)").matches;
+  // ≤767 = the dedicated mobile layout (no pin). Tablet (768–1199)
+  // keeps the scaled-down desktop pin, in sync with the CSS below.
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
   // -------------------------------------------------------------
   // 1. Manifest word color scrub.

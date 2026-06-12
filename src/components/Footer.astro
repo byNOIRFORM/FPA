@@ -608,9 +608,14 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
   }
 
   /* ============================================================
-     Responsive — stack the grid below ~820px
+     Responsive — the footer is functional, so (unlike the visual
+     sections) it reflows on tablet rather than staying a cramped
+     scaled-down 4-column desktop.
+
+     TABLET (≤1024): 2-column info grid, stacked bottom row.
+     MOBILE (≤767): single-column grid, page-edge 16px gutters.
      ============================================================ */
-  @media (max-width: 820px) {
+  @media (max-width: 1024px) {
     .footer {
       padding: 56px 20px 24px;
     }
@@ -620,8 +625,6 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     .footer-cta {
       margin-top: 32px;
     }
-    /* Tablet: stack each group as 50% wide, nav-pair sub-grid
-       still keeps its tight pair gap. */
     .footer-grid {
       flex-wrap: wrap;
       gap: 40px;
@@ -639,13 +642,16 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     }
   }
 
-  @media (max-width: 480px) {
-    .footer-grid > .footer-col,
-    .footer-nav-pair {
-      flex: 0 0 100%;
+  @media (max-width: 767px) {
+    .footer {
+      padding: 56px 16px 24px;
     }
     .footer-grid {
       gap: 32px;
+    }
+    .footer-grid > .footer-col,
+    .footer-nav-pair {
+      flex: 0 0 100%;
     }
   }
 </style>

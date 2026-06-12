@@ -187,8 +187,11 @@ function initHeroParallax(): void {
 function initCursor(): void {
   const cursor = document.getElementById("cursor");
   if (!cursor) return;
-  // Match the CSS media query so the JS doesn't run on touch.
-  if (!window.matchMedia("(hover: hover) and (min-width: 821px)").matches) {
+  // Match the CSS media query so the JS doesn't run on touch. Gated
+  // by pointer capability only (no width) so the custom cursor — and
+  // the hover states that depend on it — behave the same at any width
+  // on a mouse device.
+  if (!window.matchMedia("(hover: hover)").matches) {
     return;
   }
 

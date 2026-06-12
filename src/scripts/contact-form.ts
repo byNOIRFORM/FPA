@@ -125,6 +125,11 @@ export function initContactForm(): void {
     if (e.key === "Escape" && isOpen) close();
   });
 
+  // Programmatic open — the mobile side-nav fires this after it has
+  // slid closed, so "Kontaktujte nás" hands the scroll lock straight
+  // over to the contact sheet without the two fighting over it.
+  window.addEventListener("app:open-contact", () => open());
+
   // Form submit — browser-native validation, then preventDefault and
   // log for now (no backend wired up yet).
   const form = panel.querySelector<HTMLFormElement>(".contact-form");

@@ -4,6 +4,7 @@ import "../styles/global.css";
 import "lenis/dist/lenis.css";
 import Loader from "../components/Loader.astro";
 import ContactForm from "../components/ContactForm.astro";
+import SideNav from "../components/SideNav.astro";
 
 interface Props {
   title?: string;
@@ -74,6 +75,10 @@ const {
         page can open it via [data-open-contact]. */}
     <ContactForm />
 
+    {/* Mobile side navigation (≤767px) — opened by the nav "Menu"
+        button via [data-open-menu]. Hidden on tablet/desktop. */}
+    <SideNav />
+
     <script>
       import { setupGsap } from "../scripts/gsap-setup";
       import { initLoader } from "../scripts/loader";
@@ -85,6 +90,7 @@ const {
       import { initFooter } from "../scripts/footer";
       import { initNav } from "../scripts/nav";
       import { initContactForm } from "../scripts/contact-form";
+      import { initSideNav } from "../scripts/side-nav";
       setupGsap();
       initHero();
       initAbout();
@@ -94,6 +100,7 @@ const {
       initFooter();
       initNav();
       initContactForm();
+      initSideNav();
       initLoader();
     </script>
   </body>

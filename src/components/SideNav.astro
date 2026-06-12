@@ -1,0 +1,293 @@
+---
+/**
+ * SideNav — mobile fullscreen menu (≤767px only).
+ *
+ * Figma spec (node 2458:904 "mobile:sidenavigation"):
+ *   - Fullscreen dark panel (#222), flex column space-between.
+ *   - Top bar: logo lockup (FOTTA//POPADIČ Semibold 20/26 + architekt
+ *     italic) left, "Close" (Switzer Medium 16) right.
+ *   - Menu links: Domov, O nás, Projekty, Služby, Kontaktujte nás —
+ *     Switzer Medium 36px, tracking 0.02em, white. px-16 py-4, gap 2.
+ *   - Language switch pinned to the bottom (pb-68): Slovenčina (SK),
+ *     Česky (CZ), English (EN) — Switzer Medium 16px, px-24 py-12.
+ *
+ * Open/close + reveal choreography is wired in scripts/side-nav.ts:
+ *   - Panel slides in from the right (xPercent 100 → 0, expo.inOut
+ *     0.8s — same engine/curve as the contact-form sheet).
+ *   - Each link rises out of an overflow mask (yPercent 110 → 0)
+ *     with a 60ms stagger — the same reveal language as the hero
+ *     slogan + footer pitch.
+ *   - "Kontaktujte nás" hands off to the contact panel (via the
+ *     `app:open-contact` event) so the two sheets don't fight over
+ *     the scroll lock.
+ *
+ * Lives at the layout level (like ContactForm) so the nav "Menu"
+ * button on any section can open it. Hidden ≥768px — tablet/desktop
+ * use the scaled inline nav instead.
+ */
+
+interface MenuLink {
+  label: string;
+  href: string;
+  /** Contact links hand off to the contact panel instead of scrolling. */
+  contact?: boolean;
+}
+
+const links: MenuLink[] = [
+  { label: "Domov", href: "#hero" },
+  { label: "O nás", href: "#o-nas" },
+  { label: "Projekty", href: "#projekty" },
+  { label: "Služby", href: "#sluzby" },
+  { label: "Kontaktujte nás", href: "#kontakt", contact: true },
+];
+
+const langs = [
+  { label: "Slovenčina (SK)", href: "/", active: true },
+  { label: "Česky (CZ)", href: "/cz", active: false },
+  { label: "English (EN)", href: "/en", active: false },
+];
+---
+
+<div
+  class="sidenav"
+  id="sidenav"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Navigácia"
+  aria-hidden="true"
+>
+  <div class="sidenav-panel">
+    {/* Top bar — mirrors the closed mobile nav so the logo stays in
+        place and "Menu" appears to swap to "Close" on open. */}
+    <div class="sidenav-bar">
+      <a class="sidenav-logo" href="#hero" data-sidenav-link aria-label="Fotta // Popadič — domov">
+        <span class="sidenav-logo-main">FOTTA//POPADIČ</span>
+        <span class="sidenav-logo-sub">architekt</span>
+      </a>
+      <button class="sidenav-close" type="button" data-sidenav-close aria-label="Zavrieť menu">
+        Close
+      </button>
+    </div>
+
+    <div class="sidenav-body">
+      <nav class="sidenav-nav" aria-label="Hlavné menu">
+        <ul class="sidenav-links">
+          {links.map((l) => (
+            <li class="sidenav-item">
+              <a
+                class="sidenav-link"
+                href={l.href}
+                data-sidenav-link
+                {...(l.contact ? { "data-sidenav-contact": true } : {})}
+              >
+                <span class="sidenav-link-clip">
+                  <span class="sidenav-link-text">{l.label}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <ul class="sidenav-langs" aria-label="Jazyk">
+        {langs.map((l) => (
+          <li>
+            <a
+              class={`sidenav-lang${l.active ? " sidenav-lang--active" : ""}`}
+              href={l.href}
+            >
+              {l.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ===== Panel shell =====
+     Parent toggles visibility (no flash before the script seeds the
+     transform); the inner .sidenav-panel carries the GSAP slide.
+     z-index sits above the nav (50) but below the contact panel
+     (1000) so "Kontaktujte nás" can open the contact sheet on top. */
+  .sidenav {
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    visibility: hidden;
+    /* Mobile-only surface — desktop/tablet never see it, but keep it
+       inert there too. */
+    display: none;
+  }
+
+  .sidenav[aria-hidden="false"] {
+    visibility: visible;
+  }
+
+  .sidenav-panel {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: #222;
+    color: #fff;
+    /* GSAP owns the transform (seeded xPercent:100 in side-nav.ts). */
+    will-change: transform;
+  }
+
+  /* ===== Top bar — logo + Close ===== */
+  .sidenav-bar {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    /* Top padding clears the device status bar / notch; matches the
+       mobile nav so the logo lockup sits at the same Y on open. */
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
+  }
+
+  .sidenav-logo {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: #fff;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .sidenav-logo-main {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-style: normal;
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .sidenav-logo-sub {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.1;
+  }
+
+  .sidenav-close {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 16px;
+    letter-spacing: 0.02em;
+    line-height: 22px;
+    color: #fff;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: opacity 280ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .sidenav-close:hover,
+  .sidenav-close:focus-visible {
+    opacity: 1;
+  }
+
+  /* ===== Body — links (top) + langs (bottom) ===== */
+  .sidenav-body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    /* ~80px breathing room below the top bar so the links sit toward
+       the vertical centre rather than hugging the logo. */
+    padding-top: 80px;
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    min-height: 0;
+  }
+
+  .sidenav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  /* Link — px-16 py-4 hit area. The text rises out of a clip on
+     open; reset between opens by side-nav.ts. */
+  .sidenav-link {
+    display: block;
+    padding: 4px 16px;
+    text-decoration: none;
+    color: #fff;
+  }
+
+  .sidenav-link-clip {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+
+  .sidenav-link-text {
+    display: inline-block;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 36px;
+    line-height: 1.18;
+    letter-spacing: 0.02em;
+    color: #fff;
+    will-change: transform;
+    transition: opacity 280ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .sidenav-link:hover .sidenav-link-text,
+  .sidenav-link:focus-visible .sidenav-link-text {
+    opacity: 0.55;
+  }
+
+  /* ===== Language switch — pinned bottom ===== */
+  .sidenav-langs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sidenav-lang {
+    display: block;
+    padding: 12px 24px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.55);
+    transition: color 280ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .sidenav-lang--active,
+  .sidenav-lang:hover,
+  .sidenav-lang:focus-visible {
+    color: #fff;
+  }
+
+  /* ===== Mobile only ===== */
+  @media (max-width: 767px) {
+    .sidenav {
+      display: block;
+    }
+  }
+
+  /* Reduced motion — the script skips the slide/stagger; make sure
+     the masked text isn't left clipped if JS seeds nothing. */
+  @media (prefers-reduced-motion: reduce) {
+    .sidenav-link-text {
+      transform: none !important;
+    }
+  }
+</style>

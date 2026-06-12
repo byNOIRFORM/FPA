@@ -228,6 +228,24 @@ const words = HEADLINE.split(" ");
     }
   }
 
-  /* The clamp() values above already scale fluidly down to mobile;
-     no smaller-screen @media override needed. */
+  /* =============================================================
+     TABLET (768–1199): the clamp() values scale the centred headline
+     down proportionally — no rule needed.
+
+     MOBILE (≤767): match the Figma mobile spec — Switzer Medium 32px
+     centred headline, 40px gap to the CTA, page-edge gutters.
+     ============================================================= */
+  @media (max-width: 767px) {
+    .about {
+      gap: 48px;
+      padding: 56px 16px 0;
+    }
+    .about-content {
+      gap: 40px;
+    }
+    .about-headline {
+      font-size: clamp(28px, 8vw, 32px);
+      line-height: 1.25;
+    }
+  }
 </style>
