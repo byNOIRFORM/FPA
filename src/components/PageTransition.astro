@@ -1,0 +1,53 @@
+---
+/**
+ * Page transition curtain — a dark panel that sweeps UP over the page
+ * on internal navigation (exit), and continues up and away once the
+ * next page has loaded (enter). Reads as one continuous wipe; the
+ * upward motion + #222 panel match the loader curtain / side-nav
+ * language.
+ *
+ * Wiring lives in scripts/page-transition.ts. The covering arrival
+ * state is set synchronously by an inline <head> script in BaseLayout
+ * (html[data-pt]) so the new document's first paint is already dark —
+ * no flash between pages.
+ */
+---
+
+<div class="pt" id="page-transition" aria-hidden="true"></div>
+
+<style>
+  .pt {
+    position: fixed;
+    inset: 0;
+    /* Above everything — contact panel is 1000, side-nav 900. */
+    z-index: 2000;
+    background: #222;
+    /* Resting: covering but invisible + untouchable. GSAP owns the
+       transform (yPercent) during the sweeps — no CSS transform here
+       (the translate-vs-yPercent matrix trap). */
+    visibility: hidden;
+    pointer-events: none;
+    will-change: transform;
+  }
+
+  /* Arrival — html[data-pt] is set in <head> before first paint.
+     IMPORTANT: the cover must NOT depend on the curtain element
+     itself — on long documents (the landing) the browser paints
+     progressively before the parser reaches this element at the end
+     of <body>, which flashed the cream page. So the attribute hides
+     the whole body and darkens the root; page-transition.ts makes the
+     body visible only once the curtain (inline GSAP state) is
+     actually holding the screen. */
+  :global(html[data-pt]) {
+    background: #222;
+  }
+
+  :global(html[data-pt] body) {
+    visibility: hidden;
+  }
+
+  /* The curtain re-enables its own visibility under the hidden body. */
+  :global(html[data-pt]) .pt {
+    visibility: visible;
+  }
+</style>

@@ -1,5 +1,6 @@
 import { gsap } from "gsap";
 import { revealHero } from "./hero";
+import { isTransitionArrival } from "./page-transition";
 
 /**
  * Intro loader — isometric house + FOTTA//POPADIČ / architekt lockup.
@@ -34,6 +35,19 @@ export function initLoader(): void {
 
   const root = document.getElementById("loader");
   if (!root) return;
+
+  // Arriving under the page-transition curtain — skip the house intro
+  // entirely. The curtain owns this entrance; replaying the full
+  // intro on every internal navigation would wear thin. The hero
+  // reveal still plays underneath the lifting curtain.
+  // (isTransitionArrival is captured at import time, so this works
+  // regardless of when page-transition.ts clears the attribute.)
+  if (isTransitionArrival) {
+    document.body.removeAttribute("data-loader-active");
+    root.remove();
+    revealHero();
+    return;
+  }
 
   document.body.setAttribute("data-loader-active", "");
 

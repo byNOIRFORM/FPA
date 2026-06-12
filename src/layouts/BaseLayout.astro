@@ -5,6 +5,7 @@ import "lenis/dist/lenis.css";
 import Loader from "../components/Loader.astro";
 import ContactForm from "../components/ContactForm.astro";
 import SideNav from "../components/SideNav.astro";
+import PageTransition from "../components/PageTransition.astro";
 
 interface Props {
   title?: string;
@@ -30,6 +31,28 @@ const {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    {/* Page-transition arrival flag — must run synchronously BEFORE
+        first paint so the new document is dark from its very first
+        frame. The cover is applied via INLINE styles + an injected
+        <style> element (NOT the bundled stylesheet): the dev server
+        loads CSS through JS after first paint, which is what caused
+        the white flash between pages. page-transition.ts cleans all
+        of this up once its curtain holds the screen. */}
+    <script is:inline>
+      try {
+        if (sessionStorage.getItem("fpa:pt")) {
+          sessionStorage.removeItem("fpa:pt");
+          var d = document.documentElement;
+          d.setAttribute("data-pt", "");
+          d.style.background = "#222";
+          var s = document.createElement("style");
+          s.id = "pt-boot";
+          s.textContent = "body{visibility:hidden}";
+          document.head.appendChild(s);
+        }
+      } catch (e) {}
+    </script>
 
     {/* Favicon — SVG house from the loader. Embedded
         prefers-color-scheme rule inverts the stroke on dark browser
@@ -84,6 +107,10 @@ const {
         button via [data-open-menu]. Hidden on tablet/desktop. */}
     <SideNav />
 
+    {/* Page-transition curtain — sweeps over the page on internal
+        navigation; see scripts/page-transition.ts. */}
+    <PageTransition />
+
     <script>
       import { setupGsap } from "../scripts/gsap-setup";
       import { initLoader } from "../scripts/loader";
@@ -96,6 +123,7 @@ const {
       import { initNav } from "../scripts/nav";
       import { initContactForm } from "../scripts/contact-form";
       import { initSideNav } from "../scripts/side-nav";
+      import { initPageTransition } from "../scripts/page-transition";
       setupGsap();
       initHero();
       initAbout();
@@ -106,6 +134,7 @@ const {
       initNav();
       initContactForm();
       initSideNav();
+      initPageTransition();
       initLoader();
     </script>
   </body>
