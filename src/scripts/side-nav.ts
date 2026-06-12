@@ -96,7 +96,7 @@ export function initSideNav(): void {
    *   the scroll-unlock so the contact sheet keeps the page locked.
    * @param opts.scrollTo  Element to Lenis-scroll to once closed.
    */
-  const close = (opts: { transferContact?: boolean; scrollTo?: Element | null } = {}) => {
+  const close = (opts: { transferContact?: boolean; scrollTo?: Element | "top" | null } = {}) => {
     if (!isOpen) return;
     isOpen = false;
 
@@ -119,8 +119,14 @@ export function initSideNav(): void {
 
       if (opts.scrollTo) {
         const lenis = getLenis();
-        if (lenis) lenis.scrollTo(opts.scrollTo as HTMLElement, { offset: 0 });
-        else opts.scrollTo.scrollIntoView({ behavior: "smooth" });
+        if (opts.scrollTo === "top") {
+          if (lenis) lenis.scrollTo(0);
+          else window.scrollTo({ top: 0, behavior: "smooth" });
+        } else if (lenis) {
+          lenis.scrollTo(opts.scrollTo as HTMLElement, { offset: 0 });
+        } else {
+          (opts.scrollTo as Element).scrollIntoView({ behavior: "smooth" });
+        }
       }
     };
 
@@ -155,18 +161,38 @@ export function initSideNav(): void {
     });
   });
 
-  // Links — contact hands off to the contact panel; everything else
-  // closes then Lenis-scrolls to its in-page target.
+  // Links:
+  //   - contact → hand off to the contact panel.
+  //   - in-page anchor that exists here → close + Lenis smooth-scroll.
+  //   - "Domov" (/) while on the landing → close + scroll to top.
+  //   - anything else (/sluzby, or an anchor that lives on another
+  //     page) → let the browser navigate normally.
   panel.querySelectorAll<HTMLAnchorElement>("[data-sidenav-link]").forEach((link) => {
     link.addEventListener("click", (e) => {
-      e.preventDefault();
       if (link.hasAttribute("data-sidenav-contact")) {
+        e.preventDefault();
         close({ transferContact: true });
         return;
       }
-      const hash = link.getAttribute("href") || "";
-      const target = hash.startsWith("#") ? document.querySelector(hash) : null;
-      close({ scrollTo: target });
+      const href = link.getAttribute("href") || "";
+      const hashIndex = href.indexOf("#");
+      const hash = hashIndex >= 0 ? href.slice(hashIndex) : "";
+      const onLanding = location.pathname === "/" || location.pathname === "";
+
+      if (hash) {
+        const target = document.querySelector(hash);
+        if (target) {
+          e.preventDefault();
+          close({ scrollTo: target });
+        }
+        // else: the section lives on another page → browser navigates.
+        return;
+      }
+      if (href === "/" && onLanding) {
+        e.preventDefault();
+        close({ scrollTo: "top" });
+      }
+      // Otherwise (e.g. /sluzby) → normal navigation, no preventDefault.
     });
   });
 

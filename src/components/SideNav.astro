@@ -34,10 +34,10 @@ interface MenuLink {
 }
 
 const links: MenuLink[] = [
-  { label: "Domov", href: "#hero" },
-  { label: "O nás", href: "#o-nas" },
-  { label: "Projekty", href: "#projekty" },
-  { label: "Služby", href: "#sluzby" },
+  { label: "Domov", href: "/" },
+  { label: "O nás", href: "/#o-nas" },
+  { label: "Projekty", href: "/#projekty" },
+  { label: "Služby", href: "/sluzby" },
   { label: "Kontaktujte nás", href: "#kontakt", contact: true },
 ];
 
@@ -60,7 +60,7 @@ const langs = [
     {/* Top bar — mirrors the closed mobile nav so the logo stays in
         place and "Menu" appears to swap to "Close" on open. */}
     <div class="sidenav-bar">
-      <a class="sidenav-logo" href="#hero" data-sidenav-link aria-label="Fotta // Popadič — domov">
+      <a class="sidenav-logo" href="/" data-sidenav-link aria-label="Fotta // Popadič — domov">
         <span class="sidenav-logo-main">FOTTA//POPADIČ</span>
         <span class="sidenav-logo-sub">architekt</span>
       </a>

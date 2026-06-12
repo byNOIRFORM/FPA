@@ -9,11 +9,16 @@ import SideNav from "../components/SideNav.astro";
 interface Props {
   title?: string;
   description?: string;
+  /** Show the intro house-loader. True on the landing; subpages
+   *  (e.g. /sluzby) pass false so they don't replay the full intro
+   *  on every navigation. */
+  loader?: boolean;
 }
 
 const {
   title = "Atelier",
   description = "Architektonický ateliér",
+  loader = true,
 } = Astro.props;
 ---
 
@@ -59,8 +64,8 @@ const {
         without bitmap decoding hitching on first paint. */}
     <link rel="preload" as="image" href="/images/hero.jpg" />
   </head>
-  <body data-loader-active>
-    <Loader />
+  <body data-loader-active={loader ? "" : undefined}>
+    {loader && <Loader />}
 
     {/* Custom cursor — circle ring + small square in the centre.
         Hidden on touch / small screens via CSS in global.css. */}

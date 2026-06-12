@@ -1,0 +1,410 @@
+---
+/**
+ * Služby — intro ("peel back to the blueprint").
+ *
+ * Figma node 3019:3681. The finished dusk PHOTO sits on top of the
+ * technical BLUEPRINT of the same house; moving the cursor reveals the
+ * blueprint underneath (see scripts/services-intro.ts). Photo-on-top
+ * keeps the nav legible (the blueprint is white) and presents the
+ * result first, letting the visitor look beneath to the precise plan.
+ *
+ * Self-contained nav (`.snav`) for this page — light over the photo,
+ * dark-on-cream once scrolled. The mobile "Menu" opens the global
+ * SideNav; the CTA opens the global contact panel.
+ */
+---
+
+<section class="sintro" data-nav-observe aria-label="Služby">
+  <div class="sintro-stage">
+    {/* Bottom layer — the technical drawing revealed beneath. */}
+    {/* Blueprint — texture source for the reveal. */}
+    <img
+      class="sintro-layer sintro-blueprint"
+      src="/images/services-intro/intro-blueprint.png"
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+    />
+    {/* Finished photo — also the no-WebGL / reduced-motion fallback. */}
+    <img
+      class="sintro-layer sintro-photo"
+      src="/images/services-intro/intro-photo.jpg"
+      alt="Dokončený rodinný dom za súmraku — výsledok projektu ateliéru."
+      decoding="async"
+    />
+    {/* WebGL surface — an organic, self-animating opening (torn edge)
+        through which the undistorted drawing shows beneath. */}
+    <canvas class="sintro-layer sintro-canvas" aria-hidden="true"></canvas>
+    {/* Top scrim — keeps the light nav legible. */}
+    <div class="sintro-scrim" aria-hidden="true"></div>
+
+    <nav class="snav" aria-label="Hlavná navigácia">
+      <div class="snav-left">
+        <a class="snav-logo" href="/" aria-label="Fotta // Popadič — domov">
+          <span class="snav-logo-main">FOTTA//POPADIČ</span>
+          <span class="snav-logo-sub">architekt</span>
+        </a>
+        <span class="snav-clock" data-clock>Bardejov --:--</span>
+      </div>
+
+      <ul class="snav-langs" aria-label="Jazyk">
+        <li><a class="snav-flip snav-lang snav-lang--active" href="/" data-text="SK,"><span>SK,</span></a></li>
+        <li><a class="snav-flip snav-lang" href="/cz" data-text="CZ,"><span>CZ,</span></a></li>
+        <li><a class="snav-flip snav-lang" href="/en" data-text="EN"><span>EN</span></a></li>
+      </ul>
+
+      <div class="snav-right">
+        <ul class="snav-links">
+          <li><a class="snav-flip" href="/#o-nas" data-text="O nás,"><span>O nás,</span></a></li>
+          <li><a class="snav-flip" href="/#projekty" data-text="Projekty,"><span>Projekty,</span></a></li>
+          <li><a class="snav-flip snav-link--active" href="/sluzby" aria-current="page" data-text="Služby"><span>Služby</span></a></li>
+        </ul>
+        <a class="snav-cta" href="#kontakt" data-open-contact>
+          <span class="snav-cta-text">Kontaktujte nás</span>
+          <svg class="snav-cta-arrow" width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+          </svg>
+        </a>
+      </div>
+
+      <button class="snav-menu" type="button" data-open-menu aria-label="Otvoriť menu">
+        <span class="snav-flip" data-text="Menu"><span>Menu</span></span>
+      </button>
+    </nav>
+  </div>
+</section>
+
+{/* Title band — leads from the photo into the services documentation. */}
+<section class="sintro-title">
+  <p class="sintro-title-text">
+    Každý úspešný projekt začína precíznym výkresom a končí trvácnou
+    architektúrou. Vypracujeme kompletnú projektovú dokumentáciu pre:
+  </p>
+</section>
+
+<style>
+  /* ===== Reveal stage ===== */
+  .sintro {
+    position: relative;
+  }
+
+  .sintro-stage {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    overflow: hidden;
+    background: #0e0d0b;
+  }
+
+  .sintro-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  /* Blueprint — texture source, sits behind the photo (hidden until
+     the shader reveals it). */
+  .sintro-blueprint {
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  /* Finished photo — the no-WebGL / reduced-motion fallback. */
+  .sintro-photo {
+    object-fit: cover;
+    z-index: 2;
+  }
+
+  /* WebGL surface — renders the photo with an organic, self-animating
+     opening through which the undistorted drawing shows. Opaque once
+     live; covers the fallback photo. */
+  .sintro-canvas {
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 360ms ease;
+  }
+  .sintro-canvas.is-ready {
+    opacity: 1;
+  }
+
+  /* Top scrim — keeps the light nav legible even when a white
+     blueprint region drifts beneath it (the reveal runs full-frame). */
+  .sintro-scrim {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 220px;
+    z-index: 4;
+    pointer-events: none;
+    background: linear-gradient(rgba(0, 0, 0, 0.42), rgba(0, 0, 0, 0));
+  }
+
+  /* ===== Nav ===== */
+  .snav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(24px, 3.33vw, 72px);
+    padding: clamp(16px, 1.53vw, 33px) clamp(16px, 2vw, 48px);
+    color: #fff;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 22px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transition:
+      background 420ms cubic-bezier(0.65, 0, 0.35, 1),
+      color 420ms cubic-bezier(0.65, 0, 0.35, 1),
+      padding 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Once the hero has scrolled away → dark-on-cream state. */
+  .snav.is-scrolled {
+    background: var(--bg);
+    color: var(--ink);
+    padding: clamp(12px, 1.11vw, 24px) clamp(16px, 2vw, 48px);
+  }
+
+  .snav-left {
+    display: flex;
+    align-items: center;
+    gap: clamp(40px, 5.55vw, 120px);
+  }
+
+  .snav-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    text-decoration: none;
+    color: inherit;
+    line-height: 1;
+  }
+
+  .snav-logo-main,
+  .snav-logo-sub {
+    font-size: clamp(20px, 1.67vw, 36px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    transition: font-size 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .snav-logo-main {
+    font-weight: 600;
+  }
+  .snav-logo-sub {
+    font-style: italic;
+    font-weight: 400;
+  }
+  .snav.is-scrolled .snav-logo-main,
+  .snav.is-scrolled .snav-logo-sub {
+    font-size: clamp(18px, 1.39vw, 30px);
+  }
+
+  .snav-clock {
+    font-weight: 500;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .snav-langs,
+  .snav-links {
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 0.83vw, 18px);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .snav-right {
+    display: flex;
+    align-items: center;
+    gap: clamp(40px, 5.55vw, 120px);
+  }
+
+  .snav-link--active {
+    opacity: 0.55; /* current page — de-emphasised */
+    pointer-events: none;
+  }
+
+  /* Text roll — same masked label swap as the home nav. */
+  .snav-flip {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    line-height: 1.15;
+    color: inherit;
+    text-decoration: none;
+  }
+  .snav-flip > span {
+    display: inline-block;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+  .snav-flip::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+  .snav-flip:hover > span,
+  .snav-flip:hover::after,
+  .snav-menu:hover .snav-flip > span,
+  .snav-menu:hover .snav-flip::after {
+    transform: translateY(-100%);
+  }
+
+  /* CTA — dark curtain hover (mirrors the home CTA). */
+  .snav-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(10px, 0.83vw, 12px);
+    width: clamp(180px, 14.65vw, 211px);
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
+    background: #222;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
+    line-height: 1;
+    overflow: hidden;
+  }
+  .snav-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #000;
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    z-index: 0;
+  }
+  .snav-cta:hover::before {
+    transform: translateX(0);
+  }
+  .snav-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+  .snav-cta-text {
+    color: #fff;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .snav-cta:hover .snav-cta-text {
+    transform: translateX(3px);
+  }
+  .snav-cta-arrow {
+    flex: 0 0 auto;
+    color: #fff;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+  .snav-cta:hover .snav-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* Mobile menu trigger — hidden until ≤767px. */
+  .snav-menu {
+    display: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 22px;
+    letter-spacing: 0.02em;
+    color: inherit;
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+  }
+
+  /* ===== Title band ===== */
+  .sintro-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(56px, 6.94vw, 100px) clamp(16px, 2vw, 48px);
+    background: var(--bg);
+  }
+  .sintro-title-text {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(28px, 3.33vw, 48px);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: #222;
+    text-align: center;
+    max-width: 1150px;
+    margin: 0;
+  }
+
+  /* ===== Tablet (768–1199) — scaled-down desktop nav ===== */
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .snav {
+      gap: clamp(20px, 3vw, 48px);
+    }
+    .snav-left,
+    .snav-right {
+      gap: clamp(24px, 3.5vw, 56px);
+    }
+    .snav-clock {
+      display: none;
+    }
+    .snav-cta {
+      width: auto;
+    }
+  }
+
+  /* ===== Mobile (≤767) — logo + Menu ===== */
+  @media (max-width: 767px) {
+    .snav {
+      gap: 16px;
+      padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
+      align-items: flex-start;
+    }
+    .snav.is-scrolled {
+      padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
+    }
+    .snav-clock,
+    .snav-langs,
+    .snav-links,
+    .snav-cta {
+      display: none;
+    }
+    .snav-menu {
+      display: inline-block;
+    }
+    .snav-logo-main,
+    .snav-logo-sub,
+    .snav.is-scrolled .snav-logo-main,
+    .snav.is-scrolled .snav-logo-sub {
+      font-size: 20px;
+      line-height: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .snav-flip > span,
+    .snav-flip::after {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { initServicesIntro } from "../scripts/services-intro";
+  initServicesIntro();
+</script>
