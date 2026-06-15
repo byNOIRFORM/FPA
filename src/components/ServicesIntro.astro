@@ -16,26 +16,28 @@
 
 <section class="sintro" data-nav-observe aria-label="Služby">
   <div class="sintro-stage">
-    {/* Bottom layer — the technical drawing revealed beneath. */}
-    {/* Blueprint — texture source for the reveal. */}
-    <img
-      class="sintro-layer sintro-blueprint"
-      src="/images/services-intro/intro-blueprint.png"
-      alt=""
-      aria-hidden="true"
-      decoding="async"
-    />
-    {/* Finished photo — also the no-WebGL / reduced-motion fallback. */}
-    <img
-      class="sintro-layer sintro-photo"
-      src="/images/services-intro/intro-photo.jpg"
-      alt="Dokončený rodinný dom za súmraku — výsledok projektu ateliéru."
-      decoding="async"
-    />
-    {/* WebGL surface — an organic, self-animating opening (torn edge)
-        through which the undistorted drawing shows beneath. */}
-    <canvas class="sintro-layer sintro-canvas" aria-hidden="true"></canvas>
-    {/* Top scrim — keeps the light nav legible. */}
+    {/* The picture: blueprint (bottom) + finished photo (top). Both
+        ride the frame's intro transform together, so they stay aligned
+        while it rises and zooms to full-bleed. */}
+    <div class="sintro-frame">
+      {/* Blueprint — shown first; the drawing the project starts from. */}
+      <img
+        class="sintro-layer sintro-blueprint"
+        src="/images/services-intro/intro-blueprint.png"
+        alt=""
+        aria-hidden="true"
+        decoding="async"
+      />
+      {/* Finished photo — veils in over the blueprint on scroll; also
+          the reduced-motion fallback (shown straight away). */}
+      <img
+        class="sintro-layer sintro-photo"
+        src="/images/services-intro/intro-photo.jpg"
+        alt="Dokončený rodinný dom za súmraku — výsledok projektu ateliéru."
+        decoding="async"
+      />
+    </div>
+    {/* Top scrim — keeps the light nav legible over both layers. */}
     <div class="sintro-scrim" aria-hidden="true"></div>
 
     <nav class="snav" aria-label="Hlavná navigácia">
@@ -84,17 +86,35 @@
 
 <style>
   /* ===== Reveal stage ===== */
+  /* Extra height gives the scroll distance for the veil while the stage
+     stays pinned (sticky). */
   .sintro {
     position: relative;
+    height: 220vh;
   }
 
   .sintro-stage {
-    position: relative;
+    position: sticky;
+    top: 0;
     width: 100%;
     height: 100vh;
     min-height: 600px;
     overflow: hidden;
-    background: #0e0d0b;
+    /* Cream surround behind the 80% intro frame (matches the page). */
+    background: var(--bg);
+  }
+
+  /* Frame holds BOTH layers and carries the whole intro motion. GSAP
+     owns the transform (see services-intro.ts) — do NOT set a CSS
+     transform here; opacity:0 only, to avoid a pre-JS flash. */
+  .sintro-frame {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    transform-origin: center center;
+    opacity: 0;
+    overflow: hidden;
+    will-change: transform, opacity;
   }
 
   .sintro-layer {
@@ -105,33 +125,22 @@
     display: block;
   }
 
-  /* Blueprint — texture source, sits behind the photo (hidden until
-     the shader reveals it). */
+  /* Blueprint — shown first, sits beneath the photo. */
   .sintro-blueprint {
     object-fit: cover;
     z-index: 1;
   }
 
-  /* Finished photo — the no-WebGL / reduced-motion fallback. */
+  /* Finished photo — veils in over the blueprint top → bottom on
+     scroll (clip-path bottom inset 100% → 0%). */
   .sintro-photo {
     object-fit: cover;
     z-index: 2;
+    clip-path: inset(0 0 100% 0);
   }
 
-  /* WebGL surface — renders the photo with an organic, self-animating
-     opening through which the undistorted drawing shows. Opaque once
-     live; covers the fallback photo. */
-  .sintro-canvas {
-    z-index: 3;
-    opacity: 0;
-    transition: opacity 360ms ease;
-  }
-  .sintro-canvas.is-ready {
-    opacity: 1;
-  }
-
-  /* Top scrim — keeps the light nav legible even when a white
-     blueprint region drifts beneath it (the reveal runs full-frame). */
+  /* Top scrim — keeps the light nav legible over both the white
+     blueprint and the photo. */
   .sintro-scrim {
     position: absolute;
     top: 0;
