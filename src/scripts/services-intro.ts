@@ -26,6 +26,44 @@ export function initServicesIntro(): void {
 
   initNavTheme(section);
   initReveal(section);
+  initTitleReveal();
+}
+
+/**
+ * Title band — words scrub colour from grey (--ink-faint) to #222 as the
+ * user scrolls through, staggered left-to-right. Same reveal as the home
+ * About headline (.about-word).
+ */
+function initTitleReveal(): void {
+  const title = document.querySelector<HTMLElement>(".sintro-title");
+  if (!title) return;
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) {
+    gsap.set(".sintro-word", { color: "#222" });
+    return;
+  }
+
+  // Ensure the plugin is registered (this script runs before gsap-setup
+  // on the page) before building a scrollTrigger-driven tween.
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Same range as the home About headline. The Služby section below the
+  // title band isn't built yet, so on this short page the reveal won't
+  // fully complete (you can't scroll far enough) — that's fine; once the
+  // rest of the section exists beneath it, there's scroll room and the
+  // word-by-word reveal completes exactly like home, no change needed.
+  gsap.to(".sintro-word", {
+    color: "#222",
+    ease: "none",
+    stagger: { each: 0.4 },
+    scrollTrigger: {
+      trigger: title,
+      start: "top 80%",
+      end: "bottom 70%",
+      scrub: 0.6,
+    },
+  });
 }
 
 /** Light nav over the photo → dark-on-cream once the hero leaves. */

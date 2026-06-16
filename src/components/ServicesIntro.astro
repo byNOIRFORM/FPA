@@ -1,17 +1,19 @@
 ---
 /**
- * Služby — intro ("peel back to the blueprint").
+ * Služby — intro ("drawing becomes reality").
  *
- * Figma node 3019:3681. The finished dusk PHOTO sits on top of the
- * technical BLUEPRINT of the same house; moving the cursor reveals the
- * blueprint underneath (see scripts/services-intro.ts). Photo-on-top
- * keeps the nav legible (the blueprint is white) and presents the
- * result first, letting the visitor look beneath to the precise plan.
+ * The technical BLUEPRINT shows first and, on load, rises + zooms to the
+ * full-bleed hero; the finished PHOTO then veils in top→bottom on scroll
+ * (see scripts/services-intro.ts). The title band below reveals word by
+ * word as you scroll — the same colour scrub as the home About section.
  *
  * Self-contained nav (`.snav`) for this page — light over the photo,
  * dark-on-cream once scrolled. The mobile "Menu" opens the global
  * SideNav; the CTA opens the global contact panel.
  */
+const titleText =
+  "Každý úspešný projekt začína precíznym výkresom a končí trvácnou architektúrou. Vypracujeme kompletnú projektovú dokumentáciu pre:";
+const titleWords = titleText.split(" ");
 ---
 
 <section class="sintro" data-nav-observe aria-label="Služby">
@@ -79,8 +81,14 @@
 {/* Title band — leads from the photo into the services documentation. */}
 <section class="sintro-title">
   <p class="sintro-title-text">
-    Každý úspešný projekt začína precíznym výkresom a končí trvácnou
-    architektúrou. Vypracujeme kompletnú projektovú dokumentáciu pre:
+    {
+      titleWords.map((word, i) => (
+        <>
+          <span class="sintro-word">{word}</span>
+          {i < titleWords.length - 1 ? " " : ""}
+        </>
+      ))
+    }
   </p>
 </section>
 
@@ -358,6 +366,13 @@
     text-align: center;
     max-width: 1150px;
     margin: 0;
+  }
+
+  /* Per-word span — starts greyed out, GSAP scrubs colour to #222 as
+     the user scrolls (same reveal as the home About headline). */
+  .sintro-word {
+    color: var(--ink-faint);
+    will-change: color;
   }
 
   /* ===== Tablet (768–1199) — scaled-down desktop nav ===== */
