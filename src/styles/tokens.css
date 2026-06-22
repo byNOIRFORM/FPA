@@ -37,7 +37,6 @@
 
   /* ---------- Accent + scrims ---------- */
   --accent: #C73E2C;      /* error / accent red */
-  --accent-red: #C73E2C;  /* legacy alias */
   --backdrop: rgba(34, 34, 34, 0.6); /* modal scrim */
 
   /* ---------- Spacing scale (8pt-ish) ---------- */
@@ -61,8 +60,6 @@
   /* ---------- Motion ---------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  /* Theme crossfade — bg/text ease together when [data-theme] flips. */
-  --theme-fade: 360ms;
 
   /* ---------- Layout ---------- */
   --maxw: 1680px;
@@ -105,7 +102,6 @@
   --field-border-hover: #6A6A6A;
 
   --accent: #E0573F;      /* brand red — kept across themes */
-  --accent-red: #E0573F;
   --backdrop: rgba(0, 0, 0, 0.72);
 
   color-scheme: dark;
