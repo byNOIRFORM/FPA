@@ -704,9 +704,15 @@ const pitchLine2 = t.footer.pitch2.split(" ");
   /* HOVER STATE — a location block (Bardejov or Košice) hovered:
        1. reveal the media layer (its 10% black wash),
        2. fade in that location's matching photo,
-       3. flip the foreground to white,
-       4. fade EVERYTHING else out so only the place text remains. */
-  .footer:has([data-footer-image]:hover) {
+       3. flip ONLY the location blocks to white,
+       4. fade EVERYTHING else out so only the place text remains.
+
+     The white flip is scoped to .footer-location (not the whole footer)
+     on purpose: if the fading elements also turned white they'd gain
+     contrast on the darkening photo and linger, so they'd appear to
+     leave AFTER the CTA (which never flips). Keeping them on their ink
+     colour means they all just drop opacity together. */
+  .footer:has([data-footer-image]:hover) .footer-location {
     --footer-fg: #fff;
     --footer-fg-mute: rgba(255, 255, 255, 0.72);
   }
