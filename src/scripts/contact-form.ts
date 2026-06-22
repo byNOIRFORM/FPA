@@ -45,7 +45,14 @@ export function initContactForm(): void {
     lastFocus = document.activeElement as HTMLElement | null;
 
     panel.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+    // `overflow: clip` — NOT `hidden`. Both lock page scroll, but
+    // `hidden` turns <body> into a scroll container, which reparents
+    // every `position: sticky` descendant to it: on /sluzby that made
+    // the pinned `.sintro-stage` jump out of view (the photo vanished
+    // behind the panel). `clip` forbids scrolling WITHOUT creating a
+    // scroll container, so sticky elements keep referencing the
+    // viewport and stay put. lenis.stop() handles the smooth-scroll lock.
+    document.body.style.overflow = "clip";
     const lenis = getLenis();
     if (lenis) lenis.stop();
 
