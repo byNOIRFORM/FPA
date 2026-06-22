@@ -1,18 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import About from "../components/About.astro";
-import Works from "../components/Works.astro";
-import Services from "../components/Services.astro";
-import Leaders from "../components/Leaders.astro";
-import Footer from "../components/Footer.astro";
+import Home from "../components/Home.astro";
 ---
 
-<BaseLayout title="Fotta // Popadič — architekt">
-  <Hero />
-  <About />
-  <Works />
-  <Services />
-  <Leaders />
-  <Footer />
+<BaseLayout
+  title="Fotta // Popadič — architekt"
+  description="Architektonický ateliér Fotta // Popadič — minimalizmus, precíznosť a svetlo ako materiál. Ateliéry v Bardejove a Košiciach."
+  lang="sk"
+>
+  <Home lang="sk" />
 </BaseLayout>

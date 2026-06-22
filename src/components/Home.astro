@@ -1,0 +1,27 @@
+---
+/**
+ * Home — the landing page body (all six sections), parameterised by
+ * language. Each /, /cz, /en route renders this inside BaseLayout with
+ * the matching `lang`, so there's a single source of truth for the page
+ * composition while the copy comes from the i18n dictionary (home.ts).
+ */
+import Hero from "./Hero.astro";
+import About from "./About.astro";
+import Works from "./Works.astro";
+import Services from "./Services.astro";
+import Leaders from "./Leaders.astro";
+import Footer from "./Footer.astro";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+---
+
+<Hero lang={lang} />
+<About lang={lang} />
+<Works lang={lang} />
+<Services lang={lang} />
+<Leaders lang={lang} />
+<Footer lang={lang} />

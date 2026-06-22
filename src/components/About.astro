@@ -17,12 +17,19 @@
  *   - CTA + divider: one-shot reveals after section enters viewport.
  */
 
+import { home, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
 // Words pre-rendered as individual spans — needed for per-word color
 // stagger. "247" gets `about-counter` class for the value scrub
-// (project count, scrubs 000 → 247 as the user scrolls).
-const HEADLINE =
-  "Na to myslíme pri každom zadaní už od roku 1998. Za 27 rokov sme dali reálnu tvár 247 projektom naprieč Slovenskom a Českom — bez hlučných gest, no s rešpektom k detailu. Dnes už tvoríme z dvoch ateliérov: v Bardejove a Košiciach.";
-const words = HEADLINE.split(" ");
+// (project count, scrubs 000 → 247 as the user scrolls). Every
+// translation keeps "247" as a standalone word so the match holds.
+const words = t.about.headline.split(" ");
 ---
 
 <section class="about" id="o-nas" aria-labelledby="about-heading">
@@ -47,7 +54,7 @@ const words = HEADLINE.split(" ");
     </h2>
 
     <a class="about-cta" href="#about">
-      <span class="about-cta-text">Spoznajte nás</span>
+      <span class="about-cta-text">{t.about.cta}</span>
       <svg
         class="about-cta-arrow"
         width="16"

@@ -183,7 +183,10 @@ ol {
    background. The centre square is hidden in this state so it
    doesn't sit on top of the label. */
 .cursor-ring::after {
-  content: "Pozrieť";
+  /* Localised per page language — set on .cursor-ring as
+     data-view-label in BaseLayout (home.ts → cursorView). Rendered
+     uppercase by text-transform below. */
+  content: attr(data-view-label);
   position: absolute;
   top: 50%;
   left: 50%;

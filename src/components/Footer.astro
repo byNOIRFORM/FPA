@@ -27,22 +27,37 @@
 // resolution: each span is inline-block and wraps as a natural
 // word boundary, so line breaks follow the container width
 // exactly as they would for plain text.
-const PITCH_LINE_1 =
-  "Ak hľadáte partnera, ktorý spojí mladistvú energiu s bohatými skúsenosťami a vášňou k architektúre, ste na správnom mieste.";
-const PITCH_LINE_2 =
-  "Pre cenovú ponuku nás kontaktujte telefonicky alebo emailom.";
-const pitchLine1 = PITCH_LINE_1.split(" ");
-const pitchLine2 = PITCH_LINE_2.split(" ");
+import { home, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
+const pitchLine1 = t.footer.pitch1.split(" ");
+const pitchLine2 = t.footer.pitch2.split(" ");
 ---
 
 <footer class="footer" aria-labelledby="footer-heading">
   <h2 class="visually-hidden" id="footer-heading">Pätička</h2>
 
+  {/* IMAGE REVEAL LAYER — full-bleed photo that fades in when the
+      a location address block is hovered (see .footer-media CSS,
+      driven purely by :has()). One stacked photo per location —
+      only the matching one fades in. Photos live in
+      public/images/footer/. Decorative → aria-hidden. */}
+  <div class="footer-media" aria-hidden="true">
+    <img class="footer-media-img" data-image="bardejov" src="/images/footer/bardejov.jpg" alt="" decoding="async" loading="lazy" />
+    <img class="footer-media-img" data-image="kosice" src="/images/footer/kosice.jpg" alt="" decoding="async" loading="lazy" />
+    <div class="footer-media-overlay"></div>
+  </div>
+
   {/* TOP — brand lockup alone on the left (matches Figma where
       the logo sits at top-7556 with the CTA much lower at 7828). */}
   <a class="footer-logo" href="/" aria-label="Fotta // Popadič — architekt — domov">
     <span class="footer-logo-main">FOTTA//POPADIČ</span>
-    <span class="footer-logo-sub">architekt</span>
+    <span class="footer-logo-sub">{t.footer.architekt}</span>
   </a>
 
   {/* PITCH — large editorial paragraph that opens the footer.
@@ -79,7 +94,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
       spec to all other primary CTAs (211×44, font-weight 500,
       curtain hover + text/arrow shift). */}
   <a class="footer-cta" href="#kontakt" data-open-contact>
-    <span class="footer-cta-text">Kontaktujte nás</span>
+    <span class="footer-cta-text">{t.footer.cta}</span>
     <svg
       class="footer-cta-arrow"
       width="16"
@@ -100,24 +115,24 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
   <div class="footer-grid">
     {/* Col 1 — Locations */}
     <section class="footer-col">
-      <h3 class="footer-col-label">Kde nás najdete</h3>
+      <h3 class="footer-col-label">{t.footer.labels.locations}</h3>
       <div class="footer-locations">
-        <address class="footer-location">
+        <address class="footer-location" data-footer-image="bardejov">
           <p class="footer-location-name">Bardejov</p>
-          <p>Priemyselná 3767, 085 01 Bardejov, Slovensko</p>
-          <p>Telefón: <a href="tel:+421907183302">+421 907 183 302</a></p>
-          <p>Email: <a href="mailto:atelier@fottapopadic.sk">atelier@fottapopadic.sk</a></p>
+          <p>Priemyselná 3767, 085 01 Bardejov, {t.footer.country}</p>
+          <p>{t.footer.phone} <a href="tel:+421907183302">+421 907 183 302</a></p>
+          <p>{t.footer.email} <a href="mailto:atelier@fottapopadic.sk">atelier@fottapopadic.sk</a></p>
         </address>
-        <address class="footer-location">
+        <address class="footer-location" data-footer-image="kosice">
           <p class="footer-location-name">Košice</p>
-          <p>Dominikánske námestie 590/6, 040 01 Staré Mesto, Slovensko</p>
+          <p>Dominikánske námestie 590/6, 040 01 Staré Mesto, {t.footer.country}</p>
         </address>
       </div>
     </section>
 
     {/* Col 2 — Company info */}
     <section class="footer-col">
-      <h3 class="footer-col-label">Informácie</h3>
+      <h3 class="footer-col-label">{t.footer.labels.info}</h3>
       <p class="footer-company">
         Fotta Popadič Architekt s.r.o.<br />
         IČO: 53802012<br />
@@ -131,27 +146,27 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
         address/info columns). */}
     <div class="footer-nav-pair">
       <section class="footer-col">
-        <h3 class="footer-col-label">Navigácia</h3>
+        <h3 class="footer-col-label">{t.footer.labels.navigation}</h3>
         <ul class="footer-links">
-          <li><a href="/" class="nav-flip" data-text="Domov"><span>Domov</span></a></li>
-          <li><a href="#o-nas" class="nav-flip" data-text="O nás"><span>O nás</span></a></li>
-          <li><a href="#projekty" class="nav-flip" data-text="Projekty"><span>Projekty</span></a></li>
-          <li><a href="#sluzby" class="nav-flip" data-text="Služby"><span>Služby</span></a></li>
-          <li><a href="#kariera" class="nav-flip" data-text="Kariéra"><span>Kariéra</span></a></li>
+          <li><a href="/" class="nav-flip" data-text={t.footer.nav.home}><span>{t.footer.nav.home}</span></a></li>
+          <li><a href="#o-nas" class="nav-flip" data-text={t.footer.nav.about}><span>{t.footer.nav.about}</span></a></li>
+          <li><a href="#projekty" class="nav-flip" data-text={t.footer.nav.projects}><span>{t.footer.nav.projects}</span></a></li>
+          <li><a href="#sluzby" class="nav-flip" data-text={t.footer.nav.services}><span>{t.footer.nav.services}</span></a></li>
+          <li><a href="#kariera" class="nav-flip" data-text={t.footer.nav.careers}><span>{t.footer.nav.careers}</span></a></li>
         </ul>
       </section>
 
       <section class="footer-col">
-        <h3 class="footer-col-label">Sociálne siete</h3>
+        <h3 class="footer-col-label">{t.footer.labels.social}</h3>
         <ul class="footer-links">
           <li>
-            <a class="nav-flip" data-text="Facebook" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer">
+            <a class="nav-flip" data-text="Facebook" href="https://www.facebook.com/fotta.popadic" target="_blank" rel="noopener noreferrer">
               <span>Facebook</span>
             </a>
           </li>
           <li>
-            <a class="nav-flip" data-text="Linkedin" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer">
-              <span>Linkedin</span>
+            <a class="nav-flip" data-text="Instagram" href="https://www.instagram.com/fotta_popadic_architekt?igshid=OGQ5ZDc2ODk2ZA%3D%3D" target="_blank" rel="noopener noreferrer">
+              <span>Instagram</span>
             </a>
           </li>
         </ul>
@@ -164,10 +179,10 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
       the Navigation column above and the Hero nav links. */}
   <div class="footer-bottom">
     <span class="footer-copyright">All rights reserved</span>
-    <button class="footer-totop nav-flip" type="button" data-back-to-top data-text="Späť na vrch">
-      <span>Späť na vrch</span>
+    <button class="footer-totop nav-flip" type="button" data-back-to-top data-text={t.footer.backToTop}>
+      <span>{t.footer.backToTop}</span>
     </button>
-    <a class="footer-credit" href="https://noirform.com" target="_blank" rel="noopener noreferrer">
+    <a class="footer-credit" href="https://www.instagram.com/michal.horvath_/" target="_blank" rel="noopener noreferrer">
       Made by NOIRFØRM
     </a>
   </div>
@@ -192,6 +207,13 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
      Same outer padding / max-width as other sections so the
      footer aligns to the same canvas. */
   .footer {
+    /* relative + isolate so the full-bleed .footer-media layer can
+       be absolutely positioned behind the content in a self-
+       contained stacking context. overflow:hidden clips the photo
+       to the footer box. */
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -203,7 +225,14 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
        Bottom 28 at 1440 — Figma footer-links sit at bottom-28. */
     padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px) clamp(20px, 1.94vw, 36px);
     background: var(--bg);
-    color: var(--ink);
+    /* Themeable foreground — defaults to the normal ink colours.
+       Every footer text element reads its colour from these two
+       custom properties, so the :has() hover rule below only needs
+       to flip them to white and the whole footer crossfades in
+       unison when the Bardejov block is hovered. */
+    --footer-fg: var(--ink);
+    --footer-fg-mute: var(--ink-mute);
+    color: var(--footer-fg);
   }
 
   /* ============================================================
@@ -216,7 +245,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     display: flex;
     flex-direction: column;
     text-decoration: none;
-    color: var(--ink);
+    color: var(--footer-fg);
     line-height: 1;
     letter-spacing: 0.02em;
     margin: 0;
@@ -235,7 +264,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     font-style: italic;
     font-size: clamp(18px, 1.67vw, 26px);
     line-height: 1.08;
-    color: var(--ink);
+    color: var(--footer-fg);
   }
 
   /* ===== CTA — CENTERED below the pitch, 48px above (matches
@@ -325,7 +354,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     font-size: clamp(22px, 2.22vw, 32px);
     line-height: 1.25;
     letter-spacing: 0.01em;
-    color: var(--ink);
+    color: var(--footer-fg);
     max-width: 1024px;
     width: 100%;
     /* Left-aligned to the inner section edge — no margin-left
@@ -427,7 +456,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     font-size: clamp(13px, 1.11vw, 18px);
     line-height: 1.2;
     letter-spacing: 0.02em;
-    color: var(--ink-mute);
+    color: var(--footer-fg-mute);
     margin: 0;
   }
 
@@ -449,7 +478,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
        address text (Switzer Regular 20px). */
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.5;
-    color: var(--ink);
+    color: var(--footer-fg);
   }
 
   .footer-location p {
@@ -462,18 +491,18 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     font-weight: 500;
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.3;
-    color: var(--ink);
+    color: var(--footer-fg);
     margin-bottom: clamp(4px, 0.42vw, 8px) !important;
   }
 
   .footer-location a {
-    color: var(--ink);
+    color: var(--footer-fg);
     text-decoration: none;
     transition: color 280ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
   .footer-location a:hover {
-    color: var(--ink-mute);
+    color: var(--footer-fg-mute);
   }
 
   /* ===== Company info ===== */
@@ -483,7 +512,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     /* Match address + nav-link size — 20 at 1440. */
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.5;
-    color: var(--ink);
+    color: var(--footer-fg);
     margin: 0;
   }
 
@@ -550,7 +579,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     font-size: clamp(16px, 1.39vw, 20px);
     line-height: 1.4;
     letter-spacing: 0.02em;
-    color: var(--ink);
+    color: var(--footer-fg);
     text-decoration: none;
   }
 
@@ -575,7 +604,7 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
     font-size: clamp(14px, 1.39vw, 20px);
     line-height: 1.4;
     letter-spacing: 0.02em;
-    color: var(--ink);
+    color: var(--footer-fg);
   }
 
   .footer-copyright {
@@ -599,12 +628,119 @@ const pitchLine2 = PITCH_LINE_2.split(" ");
 
   .footer-credit {
     text-decoration: none;
-    color: var(--ink);
+    color: var(--footer-fg);
     transition: color 280ms cubic-bezier(0.65, 0, 0.35, 1);
   }
 
   .footer-credit:hover {
-    color: var(--ink-mute);
+    color: var(--footer-fg-mute);
+  }
+
+  /* ============================================================
+     LOCATION IMAGE REVEAL — hover the Bardejov address block and a
+     full-bleed photo fades in behind the entire footer (the same
+     thisisstudiox.com move as the hero image swap). The footer
+     EVERYTHING ELSE in the footer fades out — only the hovered
+     location block (Bardejov) stays, in white, sitting on the photo
+     over a 10% black wash. Pure CSS via :has() — no JS, in keeping
+     with the footer's intentionally minimal motion.
+     ============================================================ */
+
+  /* Full-coverage media layer — sits behind all footer content
+     (content is lifted to z-index:1 below). Hidden until hover. */
+  .footer-media {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 600ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Stacked location photos — all start hidden; the hover rules
+     below fade in only the one matching the hovered location. The
+     parent .footer-media opacity reveals the shared 10% wash. */
+  .footer-media-img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 600ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* 10% black wash over the photo for text legibility. */
+  .footer-media-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Lift every real child above the media layer. */
+  .footer > *:not(.footer-media) {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Smooth fade for the content that disappears on hover, plus a
+     colour crossfade for the surviving location block (its address
+     <p>/<a> children inherit / own their own transition). */
+  .footer-logo,
+  .footer-pitch,
+  .footer-cta,
+  .footer-bottom,
+  .footer-grid > .footer-col,
+  .footer-nav-pair,
+  .footer-col-label,
+  .footer-location,
+  .footer-location-name {
+    transition:
+      opacity 480ms cubic-bezier(0.65, 0, 0.35, 1),
+      color 480ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* HOVER STATE — a location block (Bardejov or Košice) hovered:
+       1. reveal the media layer (its 10% black wash),
+       2. fade in that location's matching photo,
+       3. flip the foreground to white,
+       4. fade EVERYTHING else out so only the place text remains. */
+  .footer:has([data-footer-image]:hover) {
+    --footer-fg: #fff;
+    --footer-fg-mute: rgba(255, 255, 255, 0.72);
+  }
+
+  .footer:has([data-footer-image]:hover) .footer-media {
+    opacity: 1;
+  }
+
+  /* Pick the photo that matches the hovered location. */
+  .footer:has([data-footer-image="bardejov"]:hover) .footer-media-img[data-image="bardejov"],
+  .footer:has([data-footer-image="kosice"]:hover) .footer-media-img[data-image="kosice"] {
+    opacity: 1;
+  }
+
+  /* Everything that must disappear, leaving only the hovered
+     location block (and its ancestor chain) visible. The last two
+     selectors hide whichever location is NOT being hovered. */
+  .footer:has([data-footer-image]:hover) .footer-logo,
+  .footer:has([data-footer-image]:hover) .footer-pitch,
+  .footer:has([data-footer-image]:hover) .footer-cta,
+  .footer:has([data-footer-image]:hover) .footer-bottom,
+  .footer:has([data-footer-image]:hover) .footer-grid > .footer-col:not(:has([data-footer-image])),
+  .footer:has([data-footer-image]:hover) .footer-nav-pair,
+  .footer:has([data-footer-image]:hover) .footer-col:has([data-footer-image]) .footer-col-label,
+  .footer:has([data-footer-image="bardejov"]:hover) .footer-location[data-footer-image="kosice"],
+  .footer:has([data-footer-image="kosice"]:hover) .footer-location[data-footer-image="bardejov"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .footer-media {
+      transition-duration: 1ms;
+    }
   }
 
   /* ============================================================

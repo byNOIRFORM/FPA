@@ -33,33 +33,28 @@ interface Leader {
   alt: string;
 }
 
-const leaders: Leader[] = [
-  {
-    name: "Ing. Pavol Fotta",
-    desc: "Technický pilier ateliéru. Svojou 27-ročnou konštrukčnou praxou a nekompromisnou precíznosťou.",
-    image: "/images/leaders/pavol-fotta.jpg",
-    alt: "Ing. Pavol Fotta — portrét",
-  },
-  {
-    name: "Dominik Fotta",
-    desc: "Motor a evolúcia štúdia. Spája rodinnú tradíciu s technologickými inováciami digitálnej éry.",
-    image: "/images/leaders/dominik-fotta.jpg",
-    alt: "Dominik Fotta — portrét",
-  },
-  {
-    name: "Ing. arch. Ing. Tomáš Popadič",
-    desc: "Kreatívna sila, ktorá spája koncepčnú čistotu so zmyslom pre detail.",
-    image: "/images/leaders/tomas-popadic.jpg",
-    alt: "Ing. arch. Ing. Tomáš Popadič — portrét",
-  },
+import { home, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
+// Founder names + portraits are language-agnostic and stay here;
+// descriptions and alt come from the i18n dictionary (home.ts →
+// leaders.people), zipped in render order.
+const meta = [
+  { name: "Ing. Pavol Fotta", image: "/images/leaders/pavol-fotta.jpg" },
+  { name: "Dominik Fotta", image: "/images/leaders/dominik-fotta.jpg" },
+  { name: "Ing. arch. Ing. Tomáš Popadič", image: "/images/leaders/tomas-popadic.jpg" },
 ];
+const leaders: Leader[] = t.leaders.people.map((p, i) => ({ ...meta[i], ...p }));
 
 // Manifest broken into per-word spans for the color-scrub
 // animation (same pattern as About section). Split by whitespace
 // preserves punctuation inside each word ("generácie,").
-const MANIFEST =
-  "Dve generácie, tri pohľady a jedna nekompromisná prísnosť. Lídri ateliéru Fotta Popadič spoločne s rozrastajúcim sa tímom formujú priestor pre život.";
-const manifestWords = MANIFEST.split(" ");
+const manifestWords = t.leaders.manifest.split(" ");
 ---
 
 <section class="leaders" id="lidri" aria-labelledby="leaders-heading">
@@ -86,7 +81,7 @@ const manifestWords = MANIFEST.split(" ");
   <div class="leaders-pin-container">
     <div class="leaders-pin-wrap">
       <div class="leaders-pin-content">
-        <p class="leaders-eyebrow">Lídri ateliéru</p>
+        <p class="leaders-eyebrow">{t.leaders.eyebrow}</p>
         <div class="leaders-grid">
           {leaders.map((l, i) => (
             <article class="leader-card" data-leader={i}>
@@ -110,7 +105,7 @@ const manifestWords = MANIFEST.split(" ");
   </div>
 
   <a class="leaders-cta" href="#kontakt" data-open-contact>
-    <span class="leaders-cta-text">Spoznajte nás</span>
+    <span class="leaders-cta-text">{t.leaders.cta}</span>
     <svg
       class="leaders-cta-arrow"
       width="16"

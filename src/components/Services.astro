@@ -43,52 +43,29 @@ interface Service {
   aspect: "portrait" | "landscape";
 }
 
-const services: Service[] = [
-  {
-    num: "01",
-    title: "Urbanistická štúdia",
-    desc: "Komplexná analýza územia a návrh urbanistickej koncepcie pre rozsiahle rozvojové projekty alebo revitalizáciu existujúcich celkov. Začíname tu, keď je v hre viac než jedna budova.",
-    image: "/images/services/01-urbanisticka.jpg",
-    alt: "Urbanistická štúdia — situačný model územia",
-    aspect: "portrait",
-  },
-  {
-    num: "02",
-    title: "Architektonická štúdia",
-    desc: "Preklopenie Vašich predstáv na papier s architektonickou koordináciou.",
-    image: "/images/services/02-architektonicka.jpg",
-    alt: "Architektonická štúdia — skice a materiálové vzorky",
-    aspect: "landscape",
-  },
-  {
-    num: "03",
-    title: "Územné rozhodnutie",
-    desc: "Rozhodnutie o umiestnení stavby, ktorým sa určuje stavebný pozemok, podmienky a jeho využitie.",
-    image: "/images/services/03-uzemne.jpg",
-    alt: "Územné rozhodnutie — vymeriavanie pozemku",
-    aspect: "landscape",
-  },
-  {
-    num: "04",
-    title: "Stavebné povolenie",
-    desc: "Určuje záväzné podmienky uskutočnenia a užívania stavby a rozhodne o námietkach účastníkov konania.",
-    image: "/images/services/04-stavebne.jpg",
-    alt: "Stavebné povolenie — projektová dokumentácia",
-    aspect: "portrait",
-  },
-  {
-    num: "05",
-    title: "Realizačná dokumentácia",
-    desc: "Podrobná dokumentácia nevyhnutná pre realizáciu stavby. Obsahuje jednotlivé profesie a špecifikáciu detailov.",
-    image: "/images/services/05-realizacna.jpg",
-    alt: "Realizačná dokumentácia — detaily a špecifikácie",
-    aspect: "landscape",
-  },
+import { home, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
+// num / image / aspect are language-agnostic and stay here; titles,
+// descriptions and alt come from the i18n dictionary (home.ts →
+// services.items), zipped in render order.
+const meta = [
+  { num: "01", image: "/images/services/01-urbanisticka.jpg", aspect: "portrait" as const },
+  { num: "02", image: "/images/services/02-architektonicka.jpg", aspect: "landscape" as const },
+  { num: "03", image: "/images/services/03-uzemne.jpg", aspect: "landscape" as const },
+  { num: "04", image: "/images/services/04-stavebne.jpg", aspect: "portrait" as const },
+  { num: "05", image: "/images/services/05-realizacna.jpg", aspect: "landscape" as const },
 ];
+const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }));
 ---
 
 <section class="services" id="sluzby" aria-labelledby="services-heading">
-  <h2 class="services-label" id="services-heading">Služby</h2>
+  <h2 class="services-label" id="services-heading">{t.services.label}</h2>
 
   <ul class="services-list">
     {services.map((s, i) => (
@@ -116,7 +93,7 @@ const services: Service[] = [
       contact form panel; no separate "service detail" page exists
       for V1 launch (parked work memory). */}
   <a class="services-cta" href="/sluzby">
-    <span class="services-cta-text">Dozvedieť sa viac</span>
+    <span class="services-cta-text">{t.services.cta}</span>
     <svg
       class="services-cta-arrow"
       width="16"

@@ -15,6 +15,13 @@
  *
  * Live clock + custom cursor wired in scripts/hero.ts → initHero().
  */
+import { home, langHref, langLabel, LANGS, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
 ---
 
 <section class="hero" id="hero">
@@ -65,21 +72,30 @@
     </div>
 
     <ul class="nav-langs nav-animate" aria-label="Jazyk">
-      <li><a href="/" class="nav-flip nav-lang nav-lang--active" data-text="SK,"><span>SK,</span></a></li>
-      <li><a href="/cz" class="nav-flip nav-lang" data-text="CZ,"><span>CZ,</span></a></li>
-      <li><a href="/en" class="nav-flip nav-lang" data-text="EN"><span>EN</span></a></li>
+      {LANGS.map((l) => (
+        <li>
+          <a
+            href={langHref[l]}
+            class={`nav-flip nav-lang${l === lang ? " nav-lang--active" : ""}`}
+            data-text={langLabel[l]}
+            aria-current={l === lang ? "true" : undefined}
+          >
+            <span>{langLabel[l]}</span>
+          </a>
+        </li>
+      ))}
     </ul>
 
     <div class="nav-right">
       <ul class="nav-links nav-animate">
-        <li><a class="nav-flip" href="#o-nas" data-text="O nás,"><span>O nás,</span></a></li>
-        <li><a class="nav-flip" href="#projekty" data-text="Projekty,"><span>Projekty,</span></a></li>
-        <li><a class="nav-flip" href="/sluzby" data-text="Služby"><span>Služby</span></a></li>
+        <li><a class="nav-flip" href="#o-nas" data-text={t.nav.links.about}><span>{t.nav.links.about}</span></a></li>
+        <li><a class="nav-flip" href="#projekty" data-text={t.nav.links.projects}><span>{t.nav.links.projects}</span></a></li>
+        <li><a class="nav-flip" href="/sluzby" data-text={t.nav.links.services}><span>{t.nav.links.services}</span></a></li>
       </ul>
       {/* data-open-contact wires this CTA to the contact form
           panel (slides in from the right). */}
       <a class="nav-cta nav-animate" href="#kontakt" data-open-contact>
-        <span class="nav-cta-text">Kontaktujte nás</span>
+        <span class="nav-cta-text">{t.nav.cta}</span>
         <svg
           class="nav-cta-arrow"
           width="16"
@@ -100,30 +116,38 @@
     {/* Mobile-only trigger (≤767px) — opens the fullscreen side
         navigation (SideNav.astro) via [data-open-menu]. Hidden on
         tablet/desktop, which show the inline nav above instead. */}
-    <button class="nav-menu nav-animate" type="button" data-open-menu aria-label="Otvoriť menu">
-      <span class="nav-flip" data-text="Menu"><span>Menu</span></span>
+    <button class="nav-menu nav-animate" type="button" data-open-menu aria-label={t.nav.menuAria}>
+      <span class="nav-flip" data-text={t.nav.menu}><span>{t.nav.menu}</span></span>
     </button>
   </nav>
 
+  {/* Title is generated from the structured i18n entry (home.ts →
+      hero.title): each line is an array of word tokens, a token with
+      `hover` becomes an image-swap trigger, and a `phrase` groups
+      several words under ONE hover target + underline. Word masks
+      (overflow:hidden) and the per-word reveal are preserved exactly;
+      .hero-title-line's flex `gap` owns the inter-word spacing, so no
+      whitespace handling is needed between mapped items. */}
   <h1 class="hero-title">
-    <span class="hero-title-line">
-      <span class="hero-title-mask"><span class="hero-title-word">Architektúra</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word">nemá</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word">byť</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word hero-title-hover" data-hover-image="hlucna">hlučná.</span></span>
-    </span>
-    <span class="hero-title-line">
-      <span class="hero-title-mask"><span class="hero-title-word">Má</span></span>
-      <span class="hero-title-mask"><span class="hero-title-word">dať</span></span>
-      {/* "priestor životu" is treated as one phrase — single hover
-          target, single underline drawing across both words. The
-          two masks inside keep their independent word-by-word
-          reveal animation on first load. */}
-      <span class="hero-title-hover hero-title-phrase" data-hover-image="priestor">
-        <span class="hero-title-mask"><span class="hero-title-word">priestor</span></span>
-        <span class="hero-title-mask"><span class="hero-title-word">životu.</span></span>
+    {t.hero.title.map((line) => (
+      <span class="hero-title-line">
+        {line.map((part) =>
+          "phrase" in part ? (
+            <span class="hero-title-hover hero-title-phrase" data-hover-image={part.hover}>
+              {part.phrase.map((w) => (
+                <span class="hero-title-mask"><span class="hero-title-word">{w}</span></span>
+              ))}
+            </span>
+          ) : part.hover ? (
+            <span class="hero-title-mask"
+              ><span class="hero-title-word hero-title-hover" data-hover-image={part.hover}>{part.t}</span></span
+            >
+          ) : (
+            <span class="hero-title-mask"><span class="hero-title-word">{part.t}</span></span>
+          ),
+        )}
       </span>
-    </span>
+    ))}
   </h1>
 
   {/* Scroll cue — informational only. NOT clickable: it tells the

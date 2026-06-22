@@ -16,14 +16,17 @@
  * while the content scrolls. Hover state rotates the icon 90°.
  */
 
-const SERVICES = [
-  "Urbanistická štúdia",
-  "Architektonická štúdia",
-  "Územné rozhodnutie",
-  "Stavebné povolenie",
-  "Realizačná dokumentácia",
-  "Iné",
-];
+import { home, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
+// First five pills mirror the Services section titles exactly (so a
+// visitor selects the same service they read about); the 6th is "Iné".
+const SERVICES = [...t.services.items.map((s) => s.title), t.contact.serviceOther];
 ---
 
 <aside
@@ -41,7 +44,7 @@ const SERVICES = [
       type="button"
       class="contact-close"
       data-contact-close
-      aria-label="Zavrieť formulár"
+      aria-label={t.contact.closeAria}
     >
       <svg
         width="20"
@@ -65,16 +68,12 @@ const SERVICES = [
     <div class="contact-scroll" data-lenis-prevent>
       <form class="contact-form" novalidate={false}>
         <header class="contact-section contact-section--header">
-          <h2 class="contact-title" id="contact-heading">Kontaktujte nás</h2>
-          <p class="contact-intro">
-            Na úvod by sme vás chceli požiadať, aby ste nám poskytli
-            základné informácie o vašom projekte, ktoré nám pomôžu
-            lepšie pochopiť vaše potreby.
-          </p>
+          <h2 class="contact-title" id="contact-heading">{t.contact.title}</h2>
+          <p class="contact-intro">{t.contact.intro}</p>
         </header>
 
         <section class="contact-section">
-          <h3 class="contact-section-label">O akú službu máte záujem</h3>
+          <h3 class="contact-section-label">{t.contact.serviceLabel}</h3>
           <div class="contact-section-content contact-services">
             {
               SERVICES.map((label, i) => (
@@ -93,10 +92,10 @@ const SERVICES = [
         </section>
 
         <section class="contact-section">
-          <h3 class="contact-section-label">Vaše kontaktné údaje</h3>
+          <h3 class="contact-section-label">{t.contact.detailsLabel}</h3>
           <div class="contact-section-content contact-fields">
             <label class="contact-field">
-              <span class="contact-field-label">Meno</span>
+              <span class="contact-field-label">{t.contact.fields.name}</span>
               <input
                 type="text"
                 name="name"
@@ -106,7 +105,7 @@ const SERVICES = [
               />
             </label>
             <label class="contact-field">
-              <span class="contact-field-label">Emailová adresa</span>
+              <span class="contact-field-label">{t.contact.fields.email}</span>
               <input
                 type="email"
                 name="email"
@@ -116,7 +115,7 @@ const SERVICES = [
               />
             </label>
             <label class="contact-field">
-              <span class="contact-field-label">Telefónne číslo</span>
+              <span class="contact-field-label">{t.contact.fields.phone}</span>
               <input
                 type="tel"
                 name="phone"
@@ -125,7 +124,7 @@ const SERVICES = [
               />
             </label>
             <label class="contact-field">
-              <span class="contact-field-label">Vaša správa</span>
+              <span class="contact-field-label">{t.contact.fields.message}</span>
               <textarea
                 name="message"
                 required
@@ -134,7 +133,7 @@ const SERVICES = [
             </label>
 
             <button type="submit" class="contact-submit">
-              <span>Odoslať</span>
+              <span>{t.contact.submit}</span>
               <svg
                 width="16"
                 height="10"
@@ -153,11 +152,11 @@ const SERVICES = [
         </section>
 
         <section class="contact-section contact-section--last">
-          <h3 class="contact-section-label">Kde nás nájdete</h3>
+          <h3 class="contact-section-label">{t.contact.locationsLabel}</h3>
           <div class="contact-section-content contact-locations">
             <address class="contact-location">
               <h4>Bardejov</h4>
-              <p>Priemyselná 3767, 085 01 Bardejov, Slovensko</p>
+              <p>Priemyselná 3767, 085 01 Bardejov, {t.footer.country}</p>
               <p>
                 <a href="mailto:atelier@fottapopadic.sk">atelier@fottapopadic.sk</a>
               </p>
@@ -168,7 +167,7 @@ const SERVICES = [
             <address class="contact-location">
               <h4>Košice</h4>
               <p>
-                Dominikánske námestie 590/6, 040 01 Staré Mesto, Slovensko
+                Dominikánske námestie 590/6, 040 01 Staré Mesto, {t.footer.country}
               </p>
               <p>
                 <a href="tel:+421950321154">+421 950 321 154</a>

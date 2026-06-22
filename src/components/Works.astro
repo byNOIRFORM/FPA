@@ -32,56 +32,33 @@ interface Project {
   alt: string;
 }
 
-// Project content — Slovak titles + descriptions per client copy.
-// alt texts are descriptive (for screen readers + SEO).
-const projects: Project[] = [
-  {
-    title: "Chata pod korunami",
-    description:
-      "Harmonické prepojenie surového kameňa a hrejivého dreva v objatí prírody. Architektúra, ktorá rešpektuje vertikalitu okolitého lesa.",
-    image: "/images/works/work-1.jpg",
-    alt: "Chata pod korunami — exteriér v lese",
-  },
-  {
-    title: "Vila Na kopci",
-    description:
-      "Otvorená panoráma, kde sa betónová strohosť stretáva s jemnosťou horskej lúky. Navrhnuté pre splynutie s horizontom.",
-    image: "/images/works/work-2.jpg",
-    alt: "Vila Na kopci — pohľad zhora",
-  },
-  {
-    title: "Dom pri vodnej hladine",
-    description:
-      "Práca s odrazom, svetlom a mierkou. Odvážna hmota, ktorá vďaka prírodným materiálom a vodnému prvku pôsobí prirodzene a stabilne.",
-    image: "/images/works/work-3.jpg",
-    alt: "Dom pri vodnej hladine",
-  },
-  {
-    title: "Bistro Koncept",
-    description:
-      "Mestský interiér postavený na textúrach, poctivom detaile a tlmenej farebnosti. Priestor, ktorý namiesto vizuálneho smogu ponúka pokoj.",
-    image: "/images/works/work-4.jpg",
-    alt: "Bistro Koncept — mestský interiér",
-  },
-  {
-    title: "Ateliér Linea",
-    description:
-      "Prepojenie industriálnej konštrukcie s mäkkosťou interiérových detailov.",
-    image: "/images/works/work-5.jpg",
-    alt: "Ateliér Linea — industriálny interiér",
-  },
-  {
-    title: "Knižnica Archív",
-    description:
-      "Monumentálny interiér venovaný vedomostiam. Drevená architektúra schodiska tvorí dominantné srdce celého priestoru.",
-    image: "/images/works/work-6.jpg",
-    alt: "Knižnica Archív — drevené schodisko",
-  },
+import { home, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
+// Images are language-agnostic; titles / descriptions / alt come from
+// the i18n dictionary (home.ts → works.projects), zipped together in
+// the same order the grid renders them.
+const images = [
+  "/images/works/work-1.jpg",
+  "/images/works/work-2.jpg",
+  "/images/works/work-3.jpg",
+  "/images/works/work-4.jpg",
+  "/images/works/work-5.jpg",
+  "/images/works/work-6.jpg",
 ];
+const projects: Project[] = t.works.projects.map((p, i) => ({
+  ...p,
+  image: images[i],
+}));
 ---
 
 <section class="works" id="projekty" aria-labelledby="works-heading">
-  <p class="works-label" id="works-heading">Výber našich prác</p>
+  <p class="works-label" id="works-heading">{t.works.label}</p>
 
   <div class="works-grid">
     {/* Row 1 — small left hugs page edge, big right pulls inward
@@ -158,7 +135,7 @@ const projects: Project[] = [
   </div>
 
   <a class="works-cta" href="#projekty">
-    <span class="works-cta-text">Ďalšie projekty</span>
+    <span class="works-cta-text">{t.works.cta}</span>
     <svg
       class="works-cta-arrow"
       width="16"

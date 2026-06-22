@@ -26,6 +26,14 @@
  * use the scaled inline nav instead.
  */
 
+import { home, langHref, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+
 interface MenuLink {
   label: string;
   href: string;
@@ -33,19 +41,24 @@ interface MenuLink {
   contact?: boolean;
 }
 
+// Home / section links point at the CURRENT language's homepage so the
+// mobile menu keeps you in-language; Služby stays the (SK-only) subpage.
+const base = langHref[lang];
 const links: MenuLink[] = [
-  { label: "Domov", href: "/" },
-  { label: "O nás", href: "/#o-nas" },
-  { label: "Projekty", href: "/#projekty" },
-  { label: "Služby", href: "/sluzby" },
-  { label: "Kontaktujte nás", href: "#kontakt", contact: true },
+  { label: t.footer.nav.home, href: base },
+  { label: t.footer.nav.about, href: `${base}#o-nas` },
+  { label: t.footer.nav.projects, href: `${base}#projekty` },
+  { label: t.footer.nav.services, href: "/sluzby" },
+  { label: t.nav.cta, href: "#kontakt", contact: true },
 ];
 
+// Language names stay in their own tongue (a switcher convention); only
+// the active marker follows the current page language.
 const langs = [
-  { label: "Slovenčina (SK)", href: "/", active: true },
-  { label: "Česky (CZ)", href: "/cz", active: false },
-  { label: "English (EN)", href: "/en", active: false },
-];
+  { label: "Slovenčina (SK)", code: "sk", href: langHref.sk },
+  { label: "Česky (CZ)", code: "cz", href: langHref.cz },
+  { label: "English (EN)", code: "en", href: langHref.en },
+] as const;
 ---
 
 <div
@@ -97,8 +110,9 @@ const langs = [
         {langs.map((l) => (
           <li>
             <a
-              class={`sidenav-lang${l.active ? " sidenav-lang--active" : ""}`}
+              class={`sidenav-lang${l.code === lang ? " sidenav-lang--active" : ""}`}
               href={l.href}
+              aria-current={l.code === lang ? "true" : undefined}
             >
               <span class="sidenav-flip" data-text={l.label}><span>{l.label}</span></span>
             </a>

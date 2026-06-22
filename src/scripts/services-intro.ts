@@ -18,11 +18,20 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getLenis } from "./lenis";
+import { setupGsap } from "./gsap-setup";
 
 export function initServicesIntro(): void {
   if (typeof window === "undefined") return;
   const section = document.querySelector<HTMLElement>(".sintro");
   if (!section) return;
+
+  // This component's inline <script> runs BEFORE BaseLayout's bootstrap
+  // <script> (the slot is emitted earlier in the document), so Lenis is
+  // not created yet when the intro locks scroll. setupGsap() is
+  // idempotent (isSetup guard) — calling it here guarantees the Lenis
+  // instance exists, so lock()'s lenis.stop() actually stops it instead
+  // of being a no-op on null (which let the page scroll mid-animation).
+  setupGsap();
 
   initNavTheme(section);
   initReveal(section);
