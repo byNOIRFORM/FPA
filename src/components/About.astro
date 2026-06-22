@@ -127,10 +127,12 @@ const words = t.about.headline.split(" ");
     margin: 0;
   }
 
-  /* Per-word span — each starts in "disabled" grey, GSAP scrubs
-     color to #222 as user scrolls through the section. */
+  /* Per-word span — colour is a mix between the faint (disabled) and
+     full ink tone, driven by --reveal (0 → 1) which about.ts scrubs on
+     scroll. Pulling both ends from theme tokens means dark mode reveals
+     from faint-dark to off-white with no JS colour changes. */
   .about-word {
-    color: var(--ink-faint);
+    color: color-mix(in srgb, var(--ink) calc(var(--reveal, 0) * 100%), var(--ink-faint));
     will-change: color;
   }
 
@@ -156,8 +158,8 @@ const words = t.about.headline.split(" ");
        button never grows past spec above 1440. */
     width: clamp(180px, 14.65vw, 211px);
     padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
-    background: #222;
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
     text-decoration: none;
     font-family: var(--font-sans);
     font-weight: 500;
@@ -176,7 +178,7 @@ const words = t.about.headline.split(" ");
     content: "";
     position: absolute;
     inset: 0;
-    background: #000;
+    background: var(--btn-bg-hover);
     transform: translateX(-101%);
     transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
     will-change: transform;
@@ -221,13 +223,13 @@ const words = t.about.headline.split(" ");
     width: 100%;
     max-width: 2464px;
     height: 1px;
-    background: #a3a3a3;
+    background: var(--line);
   }
 
   /* ===== Reduced motion ===== */
   @media (prefers-reduced-motion: reduce) {
     .about-word {
-      color: #222;
+      --reveal: 1;
     }
     .about-cta {
       opacity: 1;

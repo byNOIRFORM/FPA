@@ -45,8 +45,12 @@ export function initLeaders(): void {
   // 1. Manifest word color scrub.
   // -------------------------------------------------------------
   if (!reduced) {
+    // Scrub --reveal (0 → 1), not colour — the visible tone is a
+    // theme-token color-mix in CSS, so a theme flip recolours mid-scroll
+    // with no stale hardcoded value. See about.ts for the same pattern.
+    gsap.set(".leaders-word", { "--reveal": 0 });
     gsap.to(".leaders-word", {
-      color: "#222",
+      "--reveal": 1,
       ease: "none",
       stagger: { each: 0.4 },
       scrollTrigger: {

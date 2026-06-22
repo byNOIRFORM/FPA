@@ -29,11 +29,16 @@ export function initAbout(): void {
     return;
   }
 
-  // 1. Word color scrub — greyed-out headline darkens left-to-right
-  //    as the user scrolls through the section. The stagger spreads
-  //    each word's transition across the scroll range.
+  // 1. Word reveal scrub — greyed-out headline "ignites" to full ink
+  //    left-to-right as the user scrolls. We animate the CSS variable
+  //    --reveal (0 → 1), not the color itself: the visible colour is a
+  //    color-mix between --ink-faint and --ink in CSS, so flipping the
+  //    theme instantly recolours every word at its current progress
+  //    (no stale hardcoded #222 left dark-on-dark). Seed 0 first so
+  //    GSAP has a numeric start value.
+  gsap.set(".about-word", { "--reveal": 0 });
   gsap.to(".about-word", {
-    color: "#222",
+    "--reveal": 1,
     ease: "none",
     stagger: { each: 0.4 },
     scrollTrigger: {

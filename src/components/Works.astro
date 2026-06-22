@@ -188,7 +188,7 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
     /* 16 at 1440 → 24 at 2160+. Scales with viewport. */
     font-size: clamp(14px, 1.11vw, 24px);
     line-height: normal;
-    color: #222;
+    color: var(--ink);
     margin: 0;
   }
 
@@ -319,7 +319,7 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
     position: relative;
     width: 100%;
     overflow: hidden;
-    background: #efeeea; /* faint placeholder before image paints */
+    background: var(--surface); /* faint placeholder before image paints */
   }
 
   /* Image is 122% of frame height with top:-11% — extra 22% of
@@ -355,7 +355,7 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
     font-size: clamp(18px, 1.39vw, 30px);
     line-height: 1.1;
     letter-spacing: 0.02em;
-    color: #222;
+    color: var(--ink);
     margin: 0;
     /* Both reveal (translateY via GSAP) and hover (translateX via
        GSAP) are JS-driven so they share one transform channel
@@ -384,7 +384,7 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
        on whole-number heights at the design baseline. */
     line-height: 1.375;
     letter-spacing: 0.02em;
-    color: #666;
+    color: var(--text-mute);
     margin: 0;
     will-change: transform, opacity;
   }
@@ -403,8 +403,8 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
     width: clamp(180px, 14.65vw, 211px);
     margin-top: clamp(12px, 1.11vw, 24px);
     padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
-    background: #222;
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
     text-decoration: none;
     font-family: var(--font-sans);
     font-weight: 500;
@@ -419,7 +419,7 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
     content: "";
     position: absolute;
     inset: 0;
-    background: #000;
+    background: var(--btn-bg-hover);
     transform: translateX(-101%);
     transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
     will-change: transform;

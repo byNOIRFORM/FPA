@@ -1,18 +1,44 @@
 /* =============================================================
    Design tokens — single source of truth for colors, type,
    spacing, motion and layout. Themed via [data-theme] on <html>.
+
+   COLOR MODEL — semantic roles, not raw hex. Components reference
+   these so a single [data-theme="dark"] override re-skins the whole
+   site. Dark values are AA-checked against their backgrounds (body
+   text ≥ 4.5:1, large/secondary ≥ 3:1). See the dark block below.
    ============================================================= */
 
 :root {
-  /* ---------- Color (light, default) ---------- */
-  --bg: #FAF9F6;
-  --bg-soft: #F0EDE3;
-  --ink: #1A1A1A;
-  --ink-soft: #3D3D3D;
-  --ink-mute: #7A7A7A;
-  --ink-faint: #C8C8C8;
-  --line-faint: #E0DDD3;
-  --accent-red: #C73E2C;
+  /* ---------- Surfaces ---------- */
+  --bg: #FAF9F6;          /* page background (warm cream) */
+  --bg-soft: #F0EDE3;     /* slightly deeper bg */
+  --surface: #EFEEEA;     /* image placeholders / subtle panels */
+  --sheet: #F7F8F9;       /* contact panel sheet */
+
+  /* ---------- Text ---------- */
+  --ink: #222222;         /* primary text + icons */
+  --ink-soft: #3D3D3D;    /* secondary headings */
+  --text-mute: #666666;   /* body copy / descriptions (AA on --bg) */
+  --ink-mute: #707070;    /* small labels / hints (AA 4.7:1 on --bg) */
+  --ink-faint: #C8C8C8;   /* disabled / pre-reveal scrub start */
+
+  /* ---------- Lines ---------- */
+  --line: #A3A3A3;        /* dividers / field borders */
+  --line-faint: #E0DDD3;  /* subtle hairlines */
+
+  /* ---------- Primary button (CTA) ---------- */
+  --btn-bg: #222222;      /* button fill */
+  --btn-fg: #FFFFFF;      /* button label */
+  --btn-bg-hover: #000000;/* curtain that slides in on hover */
+
+  /* ---------- Form fields ---------- */
+  --field-border: #A3A3A3;
+  --field-border-hover: #555555;
+
+  /* ---------- Accent + scrims ---------- */
+  --accent: #C73E2C;      /* error / accent red */
+  --accent-red: #C73E2C;  /* legacy alias */
+  --backdrop: rgba(34, 34, 34, 0.6); /* modal scrim */
 
   /* ---------- Spacing scale (8pt-ish) ---------- */
   --s-1:  4px;
@@ -35,6 +61,8 @@
   /* ---------- Motion ---------- */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  /* Theme crossfade — bg/text ease together when [data-theme] flips. */
+  --theme-fade: 360ms;
 
   /* ---------- Layout ---------- */
   --maxw: 1680px;
@@ -44,17 +72,41 @@
   color-scheme: light;
 }
 
-/* ---------- Color (dark) ---------- */
+/* =============================================================
+   DARK — neutral charcoal anchored on #222, the SAME tone as the
+   page-transition curtain (PageTransition.astro) and loader, so the
+   bottom-up wipe lands seamlessly on the dark page (curtain == bg).
+   Deliberately NOT pure black, mirroring how light --bg is an
+   off-white. Contrast vs --bg (#222222): --ink 13.5:1, --text-mute
+   6.9:1, --ink-mute 4.9:1, --accent 4.3:1 (border use), --btn-fg on
+   --btn-bg 13.5:1 — all ≥ AA. Surfaces step up for elevation.
+   ============================================================= */
 [data-theme="dark"] {
-  --bg: #0E0D0B;
-  --bg-soft: #16140F;
-  --ink: #EFEBE0;
-  --ink-soft: #C0BBAD;
-  --ink-mute: #7B7669;
-  --ink-faint: #2E2B23;
-  /* line-faint intentionally inherits/echoes ink-faint in dark */
-  --line-faint: #2E2B23;
-  /* accent kept identical for brand consistency across themes */
+  --bg: #222222;          /* page — matches the transition curtain */
+  --bg-soft: #2A2A2A;     /* slightly lifted soft sections */
+  --surface: #2F2F2F;     /* elevated panels / image placeholders */
+  --sheet: #2A2A2A;       /* contact panel sheet */
+
+  --ink: #ECECEC;         /* neutral off-white */
+  --ink-soft: #C2C2C2;
+  --text-mute: #ABABAB;   /* AA body copy on dark */
+  --ink-mute: #8E8E8E;    /* AA labels on dark */
+  --ink-faint: #3A3A3A;   /* faint pre-reveal scrub start */
+
+  --line: #3D3D3D;
+  --line-faint: #2E2E2E;
+
+  /* Primary button inverts: light fill, dark label. */
+  --btn-bg: #ECECEC;
+  --btn-fg: #222222;
+  --btn-bg-hover: #FFFFFF;
+
+  --field-border: #3D3D3D;
+  --field-border-hover: #6A6A6A;
+
+  --accent: #E0573F;      /* brand red — kept across themes */
+  --accent-red: #E0573F;
+  --backdrop: rgba(0, 0, 0, 0.72);
 
   color-scheme: dark;
 }

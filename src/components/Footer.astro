@@ -279,8 +279,8 @@ const pitchLine2 = t.footer.pitch2.split(" ");
     width: clamp(180px, 14.65vw, 211px);
     margin-top: clamp(24px, 3.33vw, 48px);
     padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
-    background: #222;
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
     text-decoration: none;
     font-family: var(--font-sans);
     font-weight: 500;
@@ -296,7 +296,7 @@ const pitchLine2 = t.footer.pitch2.split(" ");
     content: "";
     position: absolute;
     inset: 0;
-    background: #000;
+    background: var(--btn-bg-hover);
     transform: translateX(-101%);
     transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
     will-change: transform;
@@ -721,20 +721,24 @@ const pitchLine2 = t.footer.pitch2.split(" ");
     opacity: 1;
   }
 
-  /* Everything that must disappear, leaving only the hovered
-     location block (and its ancestor chain) visible. The last two
-     selectors hide whichever location is NOT being hovered. */
+  /* Everything else fades out, leaving the locations column. */
   .footer:has([data-footer-image]:hover) .footer-logo,
   .footer:has([data-footer-image]:hover) .footer-pitch,
   .footer:has([data-footer-image]:hover) .footer-cta,
   .footer:has([data-footer-image]:hover) .footer-bottom,
   .footer:has([data-footer-image]:hover) .footer-grid > .footer-col:not(:has([data-footer-image])),
   .footer:has([data-footer-image]:hover) .footer-nav-pair,
-  .footer:has([data-footer-image]:hover) .footer-col:has([data-footer-image]) .footer-col-label,
-  .footer:has([data-footer-image="bardejov"]:hover) .footer-location[data-footer-image="kosice"],
-  .footer:has([data-footer-image="kosice"]:hover) .footer-location[data-footer-image="bardejov"] {
+  .footer:has([data-footer-image]:hover) .footer-col:has([data-footer-image]) .footer-col-label {
     opacity: 0;
     pointer-events: none;
+  }
+
+  /* The location that is NOT being hovered stays on the photo but
+     dimmed — a subtle "disabled" variant, while the hovered one reads
+     as active (full white). It stays interactive, so moving the cursor
+     onto it swaps the active location (and its photo). */
+  .footer:has([data-footer-image]:hover) .footer-location[data-footer-image]:not(:hover) {
+    opacity: 0.4;
   }
 
   @media (prefers-reduced-motion: reduce) {

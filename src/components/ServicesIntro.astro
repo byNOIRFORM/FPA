@@ -283,7 +283,10 @@ const titleWords = titleText.split(" ");
     transform: translateY(-100%);
   }
 
-  /* CTA — dark curtain hover (mirrors the home CTA). */
+  /* CTA — themed button tokens (mirrors the home CTAs) so it stays
+     visible against the page bg once the sticky nav scrolls past the
+     photo: in dark mode the bg is #222, so a fixed #222 button would
+     vanish — var(--btn-bg) inverts it to a light fill instead. */
   .snav-cta {
     position: relative;
     display: inline-flex;
@@ -292,8 +295,8 @@ const titleWords = titleText.split(" ");
     gap: clamp(10px, 0.83vw, 12px);
     width: clamp(180px, 14.65vw, 211px);
     padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
-    background: #222;
-    color: #fff;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
     text-decoration: none;
     font-weight: 500;
     font-size: clamp(14px, 1.11vw, 16px);
@@ -304,7 +307,7 @@ const titleWords = titleText.split(" ");
     content: "";
     position: absolute;
     inset: 0;
-    background: #000;
+    background: var(--btn-bg-hover);
     transform: translateX(-101%);
     transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
     z-index: 0;
@@ -317,7 +320,7 @@ const titleWords = titleText.split(" ");
     z-index: 1;
   }
   .snav-cta-text {
-    color: #fff;
+    color: var(--btn-fg);
     transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
   }
   .snav-cta:hover .snav-cta-text {
@@ -325,7 +328,7 @@ const titleWords = titleText.split(" ");
   }
   .snav-cta-arrow {
     flex: 0 0 auto;
-    color: #fff;
+    color: var(--btn-fg);
     transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
   }
   .snav-cta:hover .snav-cta-arrow {
@@ -362,16 +365,17 @@ const titleWords = titleText.split(" ");
     font-size: clamp(28px, 3.33vw, 48px);
     line-height: 1.25;
     letter-spacing: -0.01em;
-    color: #222;
+    color: var(--ink);
     text-align: center;
     max-width: 1150px;
     margin: 0;
   }
 
-  /* Per-word span — starts greyed out, GSAP scrubs colour to #222 as
-     the user scrolls (same reveal as the home About headline). */
+  /* Per-word span — colour is a token color-mix driven by --reveal
+     (0 → 1, scrubbed in services-intro.ts), so it reveals correctly in
+     both themes. Same pattern as the home About headline. */
   .sintro-word {
-    color: var(--ink-faint);
+    color: color-mix(in srgb, var(--ink) calc(var(--reveal, 0) * 100%), var(--ink-faint));
     will-change: color;
   }
 

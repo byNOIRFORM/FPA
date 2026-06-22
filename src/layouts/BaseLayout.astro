@@ -6,6 +6,7 @@ import Loader from "../components/Loader.astro";
 import ContactForm from "../components/ContactForm.astro";
 import SideNav from "../components/SideNav.astro";
 import PageTransition from "../components/PageTransition.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
 import { home, type Lang } from "../i18n/home";
 
 interface Props {
@@ -35,6 +36,22 @@ const {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    {/* THEME — resolve light/dark BEFORE first paint to avoid a flash.
+        Order of truth: explicit stored choice → OS preference → light.
+        Sets data-theme on <html> synchronously; theme-toggle.ts keeps
+        it in sync afterwards. */}
+    <script is:inline>
+      try {
+        var stored = localStorage.getItem("fpa:theme");
+        var theme =
+          stored ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (e) {}
+    </script>
 
     {/* Page-transition arrival flag — must run synchronously BEFORE
         first paint so the new document is dark from its very first
@@ -115,8 +132,12 @@ const {
         navigation; see scripts/page-transition.ts. */}
     <PageTransition />
 
+    {/* Light/dark switch — fixed bottom-right, on every page. */}
+    <ThemeToggle lang={lang} />
+
     <script>
       import { setupGsap } from "../scripts/gsap-setup";
+      import { initThemeToggle } from "../scripts/theme-toggle";
       import { initLoader } from "../scripts/loader";
       import { initHero } from "../scripts/hero";
       import { initAbout } from "../scripts/about";
@@ -139,6 +160,7 @@ const {
       initContactForm();
       initSideNav();
       initPageTransition();
+      initThemeToggle();
       initLoader();
     </script>
   </body>

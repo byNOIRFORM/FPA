@@ -49,7 +49,7 @@ function initTitleReveal(): void {
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduced) {
-    gsap.set(".sintro-word", { color: "#222" });
+    gsap.set(".sintro-word", { "--reveal": 1 });
     return;
   }
 
@@ -62,8 +62,11 @@ function initTitleReveal(): void {
   // fully complete (you can't scroll far enough) — that's fine; once the
   // rest of the section exists beneath it, there's scroll room and the
   // word-by-word reveal completes exactly like home, no change needed.
+  // Scrub --reveal (0 → 1) — the colour itself is a theme-token
+  // color-mix in CSS, so a theme flip recolours the band live.
+  gsap.set(".sintro-word", { "--reveal": 0 });
   gsap.to(".sintro-word", {
-    color: "#222",
+    "--reveal": 1,
     ease: "none",
     stagger: { each: 0.4 },
     scrollTrigger: {
