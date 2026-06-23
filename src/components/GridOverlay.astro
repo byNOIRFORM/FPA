@@ -1,0 +1,119 @@
+---
+/**
+ * GridOverlay — "reveal the drawing beneath the building" easter egg.
+ *
+ * Press-and-hold a [data-grid-trigger] logo for 2s (see grid-reveal.ts)
+ * and the site's real 12-column editorial grid draws in. Move the cursor
+ * near a line and it bends toward it like a plucked string (magnetic
+ * resonance), then springs back.
+ *
+ * ALIGNMENT — the lines sit on the SAME 12-col grid every section is
+ * composed on. Reverse-engineered from the layout (Works tiles 445=4col,
+ * 680=6col; Footer 327=3col): on the 1384 content width that's 12 cols ×
+ * 92.5px with 25px gutters and 28px margins. So column i's LEFT edge sits
+ * at i × (92.5+25)/1384 = i × 8.4899% of the content — NOT i/12 (8.33%),
+ * which is why the old evenly-spaced lines drifted off to the right.
+ *
+ * The SVG fills the section content box (max-width 2464 minus the same
+ * clamp() gutters); grid-reveal.ts sets the viewBox + path geometry in
+ * px so the bend maths stay 1:1 with the screen.
+ */
+// Real 12-col grid with gutters, derived + corroborated from the layout
+// (Works 445=4col, 680=6col; Footer 327=3col; nav CTA 211=2col → column
+// 92.5, gutter 25). Normalised so the columns fill the content [0…1]
+// exactly: every block edge — LEFT *and* RIGHT — lands on a line, so the
+// gutter no longer throws things off (e.g. the 2-col "Kontaktujte nás").
+const COLW = 0.0667872; // column width, fraction of content
+const PITCH = 0.0848378; // column + gutter
+const positions: number[] = [];
+for (let i = 0; i < 12; i++) {
+  positions.push(Number((i * PITCH).toFixed(5))); // column left edge
+  positions.push(Number((i * PITCH + COLW).toFixed(5))); // column right edge
+}
+positions[positions.length - 1] = 1; // snap last right edge to content right
+---
+
+<div class="grid-overlay" id="grid-overlay" aria-hidden="true">
+  {/* Click anywhere dismisses. */}
+  <div class="grid-overlay-catch"></div>
+
+  {/* Content box — identical max-width + gutters to the sections. */}
+  <div class="grid-overlay-cols">
+    <svg class="grid-svg" preserveAspectRatio="none" aria-hidden="true">
+      {/* fill/stroke set as ATTRIBUTES (not scoped CSS): Astro's style
+          scoping is unreliable on SVG children in dev, and a path's
+          default fill is solid black — that was filling the bent curves
+          into black wedges. stroke=currentColor reads --line (set on the
+          parent), so it stays subtle + theme-aware. */}
+      {positions.map((p) => (
+        <path
+          class="grid-line"
+          data-pos={p}
+          d=""
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.2"
+          vector-effect="non-scaling-stroke"
+        />
+      ))}
+    </svg>
+  </div>
+</div>
+
+<style>
+  .grid-overlay {
+    position: fixed;
+    inset: 0;
+    /* Above content + nav (50), below side-nav (900) / contact (1000)
+       / page-transition curtain (2000). */
+    z-index: 800;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+      opacity 320ms var(--ease-in-out),
+      visibility 320ms var(--ease-in-out);
+  }
+
+  .grid-overlay[data-active] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .grid-overlay-catch {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Same canvas as the sections: centred, max-width 2464, responsive
+     gutters. The SVG fills the content box INSIDE those gutters, so
+     path x=0 is the content's left edge and x=width its right edge. */
+  .grid-overlay-cols {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(100%, 2464px);
+    padding-inline: clamp(16px, 2vw, 48px);
+    box-sizing: border-box;
+    /* Structural red — architects mark new / load-bearing structure in
+       red on technical drawings. The paths stroke currentColor, so this
+       sets it (theme-aware: --accent is the brand red, brighter in dark). */
+    color: var(--accent);
+  }
+
+  .grid-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .grid-overlay {
+      transition: none;
+    }
+  }
+</style>

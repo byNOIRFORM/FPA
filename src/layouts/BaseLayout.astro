@@ -7,6 +7,7 @@ import ContactForm from "../components/ContactForm.astro";
 import SideNav from "../components/SideNav.astro";
 import PageTransition from "../components/PageTransition.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
+import GridOverlay from "../components/GridOverlay.astro";
 import { home, type Lang } from "../i18n/home";
 
 interface Props {
@@ -135,9 +136,14 @@ const {
     {/* Light/dark switch — fixed bottom-right, on every page. */}
     <ThemeToggle lang={lang} />
 
+    {/* Structure easter egg — press-and-hold the logo to reveal the
+        12-column grid (see GridOverlay + scripts/grid-reveal.ts). */}
+    <GridOverlay />
+
     <script>
       import { setupGsap } from "../scripts/gsap-setup";
       import { initThemeToggle } from "../scripts/theme-toggle";
+      import { initGridReveal } from "../scripts/grid-reveal";
       import { initLoader } from "../scripts/loader";
       import { initHero } from "../scripts/hero";
       import { initAbout } from "../scripts/about";
@@ -161,6 +167,7 @@ const {
       initSideNav();
       initPageTransition();
       initThemeToggle();
+      initGridReveal();
       initLoader();
     </script>
   </body>
