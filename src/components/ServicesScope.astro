@@ -1,0 +1,218 @@
+---
+/**
+ * Služby — scope ("Vypracujeme kompletnú projektovú dokumentáciu pre").
+ *
+ * A scattered, broken-grid collage: a left label sits on the same top
+ * line as the first tile, then four category tiles (Novostavby,
+ * Rekonštrukcie, Interiéry, Urbanizmus) are placed at varied vertical
+ * offsets — the editorial "asymetria, rôzne mierky" rhythm.
+ *
+ * Motion (scripts/services-scope.ts) — two layers, like the Works tiles:
+ * the image inside each frame runs an inner parallax (±8%, identical to
+ * works.ts), and the whole tile carries a gentle per-tile card drift on
+ * top, so the scattered collage gains depth (the fluid.glass feel)
+ * without overpowering the inner parallax. Both are symmetric (± around
+ * the Figma position), so at mid-scroll the layout matches the design.
+ *
+ * Layout maths mirror the Figma 1440 canvas: left + width are % of the
+ * 1384 content frame, top is % of the 1241 collage height, all driven by
+ * an aspect-ratio container so the whole composition scales with the
+ * viewport like every other section (same 80px top/bottom rhythm).
+ * Desktop/tablet keep the scatter (scaled-down desktop); mobile (≤767)
+ * stacks the tiles in a single column.
+ */
+interface Tile {
+  name: string;
+  image: string;
+  alt: string;
+  /** vertical parallax drift in yPercent (± around the Figma position) */
+  speed: number;
+}
+
+// Order matches the visual stagger (--1 … --4) positioned in CSS.
+const tiles: Tile[] = [
+  { name: "Novostavby",    image: "/images/services-scope/novostavby.png",    alt: "Novostavba rodinného domu vo svahu za súmraku",   speed: 6 },
+  { name: "Rekonštrukcie", image: "/images/services-scope/rekonstrukcie.png", alt: "Drevený model rekonštrukcie nad výkresom",        speed: 10 },
+  { name: "Interiéry",     image: "/images/services-scope/interiery.png",     alt: "Interiér s dreveným obkladom a výhľadom do mesta", speed: 5 },
+  { name: "Urbanizmus",    image: "/images/services-scope/urbanizmus.png",    alt: "Urbanistický model územia na stole pri okne",     speed: 8 },
+];
+---
+
+<section class="sscope" aria-labelledby="sscope-label">
+  <div class="sscope-grid">
+    {/* Mobile breaks the label after "projektovú": the tail (display:block
+        ≤767) drops "dokumentáciu pre" onto its own second line. */}
+    <p class="sscope-label" id="sscope-label">Vypracujeme kompletnú projektovú <span class="sscope-label-tail">dokumentáciu pre</span></p>
+
+    {tiles.map((t, i) => (
+      <div class={`sscope-tile sscope-tile--${i + 1}`} data-speed={t.speed}>
+        <img src={t.image} alt={t.alt} loading="lazy" decoding="async" />
+        <span class="sscope-tile-label">{t.name}</span>
+      </div>
+    ))}
+  </div>
+</section>
+
+<style>
+  /* ===== Section frame =====
+     Same outer max-width / gutters as Works / Services so the collage
+     aligns to the shared canvas. 80px top & bottom (clamp caps at 80 at
+     1440) — the page-wide vertical rhythm. */
+  .sscope {
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px);
+    background: var(--bg);
+  }
+
+  /* ===== Collage container =====
+     aspect-ratio reproduces the Figma collage box (1384 × 1241) so the
+     whole scatter scales proportionally with the viewport. Children are
+     absolutely placed: left + width as % of width, top as % of height. */
+  .sscope-grid {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1384 / 1241;
+  }
+
+  /* ===== Left label =====
+     Sits at the top-left, on the same top line as tile 1 (Figma: both at
+     top 1162). Switzer Medium 20px @1440, scales with the section. */
+  .sscope-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(445 / 1384 * 100%);
+    margin: 0;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 24px);
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  /* ===== Category tile =====
+     Fixed 328 × 448 portrait (aspect-ratio) so height derives from the
+     scaled width. overflow:hidden clips the image. Two motion layers
+     (services-scope.ts): the tile carries a gentle card drift, the image
+     inside carries the inner parallax — same as the Works tiles. */
+  .sscope-tile {
+    position: absolute;
+    width: calc(328 / 1384 * 100%);
+    aspect-ratio: 328 / 448;
+    overflow: hidden;
+    background: var(--surface); /* faint placeholder before image paints */
+    will-change: transform;
+  }
+
+  /* Image is 122% of the frame with top:-11% — 11% headroom each side so
+     the ±8% inner parallax drifts inside without ever revealing the frame
+     edge. Identical maths to the Works tiles. */
+  .sscope-tile img {
+    position: absolute;
+    top: -11%;
+    left: 0;
+    width: 100%;
+    height: 122%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  /* 40% dark wash so the white label stays legible on any photo. */
+  .sscope-tile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1;
+  }
+
+  /* Centred white category label — theme-independent (sits on the photo
+     over the dark wash), so #fff is intentional, not a token. */
+  .sscope-tile-label {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 16px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(24px, 2.5vw, 54px); /* 36 @1440 */
+    line-height: 1.1;
+    letter-spacing: 0;
+    color: #fff;
+  }
+
+  /* ===== Scatter map (% of the 1384 × 1241 collage box) =====
+       1 Novostavby    left 469  top 0     (grid col 4)
+       2 Rekonštrukcie left 1056 top 194   (grid col 9, hugs the right edge)
+       3 Interiéry     left 117  top 793   (grid col 1, low-left)
+       4 Urbanizmus    left 587  top 556   (grid col 5, centre)
+     Every tile's LEFT edge lands on a 12-col grid column; the vertical
+     cascade is what breaks the rhythm, not off-grid x. */
+  .sscope-tile--1 { left: calc(469 / 1384 * 100%);  top: 0; }
+  .sscope-tile--2 { left: calc(1056 / 1384 * 100%); top: calc(194 / 1241 * 100%); }
+  .sscope-tile--3 { left: calc(117 / 1384 * 100%);  top: calc(793 / 1241 * 100%); }
+  /* 587 = grid col 5 left (5 × pitch). Figma's +39px nudge left this one
+     mid-gutter; snapped onto the column so it aligns like the other three. */
+  .sscope-tile--4 { left: calc(587 / 1384 * 100%);  top: calc(556 / 1241 * 100%); }
+
+  /* =============================================================
+     TABLET (768–1199): no rule — exactly like the Works ("Výber našich
+     prác") section, the % widths + aspect-ratio simply scale the whole
+     scatter down proportionally (scaled-down desktop, NOT a reflowed
+     grid). Card drift + inner parallax both keep running (JS gates the
+     card drift to ≥768).
+
+     MOBILE (≤767): the scatter collapses to a single full-width column
+     (like Works); card drift is off there, only the inner image
+     parallax runs.
+     ============================================================= */
+  @media (max-width: 767px) {
+    .sscope {
+      padding: 56px 16px;
+    }
+    /* Controlled two-line break: "dokumentáciu pre" → its own line. */
+    .sscope-label-tail {
+      display: block;
+    }
+    .sscope-grid {
+      position: static;
+      aspect-ratio: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .sscope-label {
+      position: static;
+      width: 100%;
+      margin-bottom: 24px;
+      font-size: 18px;
+    }
+    /* left/top:auto override the per-tile --N scatter offsets; relative
+       keeps the absolute image + label contained. */
+    .sscope-tile {
+      position: relative;
+      left: auto;
+      top: auto;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+    }
+    .sscope-tile-label {
+      font-size: 28px;
+    }
+  }
+</style>
+
+<script>
+  import { initServicesScope } from "../scripts/services-scope";
+  initServicesScope();
+</script>

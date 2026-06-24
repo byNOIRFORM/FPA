@@ -33,7 +33,6 @@ export function initServicesIntro(): void {
   // of being a no-op on null (which let the page scroll mid-animation).
   setupGsap();
 
-  initNavTheme(section);
   initReveal(section);
   initTitleReveal();
 }
@@ -76,22 +75,6 @@ function initTitleReveal(): void {
       scrub: 0.6,
     },
   });
-}
-
-/** Light nav over the photo → dark-on-cream once the hero leaves. */
-function initNavTheme(section: HTMLElement): void {
-  const nav = document.querySelector<HTMLElement>(".snav");
-  if (!nav) return;
-
-  if (typeof IntersectionObserver === "undefined") {
-    nav.classList.add("is-scrolled");
-    return;
-  }
-  const observer = new IntersectionObserver(
-    ([entry]) => nav.classList.toggle("is-scrolled", !entry.isIntersecting),
-    { rootMargin: "-60px 0px 0px 0px", threshold: 0 },
-  );
-  observer.observe(section);
 }
 
 function initReveal(section: HTMLElement): void {

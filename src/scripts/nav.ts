@@ -2,49 +2,41 @@ import { gsap } from "gsap";
 import { getLenis } from "./lenis";
 
 /**
- * Nav — two scroll behaviours, both driven from a single Lenis
- * scroll subscription so they stay frame-locked with the page:
+ * Nav behaviour — shared by every page (the single Nav.astro component).
+ * Two behaviours, both frame-locked to Lenis scroll:
  *
  *  1. THEME SWITCH (is-scrolled, CSS-driven)
- *     IntersectionObserver on .hero. Once the hero has scrolled
- *     off the top of the viewport, the nav swaps to the dark-text
- *     state (background var(--bg), color var(--ink), shrunk logo).
+ *     IntersectionObserver on the nav's BOUNDARY element — the selector
+ *     lives in `data-nav-boundary-target` on the nav so each page points
+ *     it at whatever sits behind the bar at the top (homepage → .hero,
+ *     /sluzby → .sintro). Once that element has scrolled off the top,
+ *     the nav swaps to the cream panel (dark text, shrunk logo). This is
+ *     why the bar now behaves identically on every page.
  *
  *  2. AUTO-HIDE (GSAP-driven yPercent tween)
- *     The nav slides off the top of the screen on scroll-down and
- *     slides back the moment the user scrolls up. Same engine and
- *     curve as the contact form sheet (GSAP, expo.inOut, 800ms) so
- *     the motion language is consistent across the page.
+ *     The nav slides off on scroll-down and back on scroll-up — same
+ *     engine/curve as the contact sheet (expo.inOut, 800ms) so the
+ *     motion language is consistent. overwrite:"auto" blends mid-flight
+ *     when the user reverses direction.
  *
- *     Using GSAP instead of a CSS class toggle gives three wins:
- *       - True exponential expo.inOut (CSS cubic-bezier can only
- *         approximate it; the start-slow / accel / end-slow shape
- *         is what makes the contact form feel premium)
- *       - GSAP blends mid-flight when the user reverses direction
- *         instead of restarting from the current position with a
- *         fresh curve (which is what made the CSS version feel
- *         "chunky" — restart events stacking)
- *       - overwrite: "auto" auto-kills the previous tween so we
- *         never have two competing animations on the same property
+ *     Guards: TOP_BUFFER (80px) forces it visible near the top;
+ *     DELTA_THRESHOLD (12px) ignores inertial wobble.
  *
- *     Guards against twitchy behaviour:
- *       - TOP_BUFFER (80px): within this distance of the page top,
- *         the nav is forced visible. First impressions matter.
- *       - DELTA_THRESHOLD (12px): small scrolls don't flip state.
- *         Stops momentum/inertial wobble from triggering hide.
- *
- * Reduced motion: auto-hide is skipped entirely. The theme switch
- * still runs because it's a state change, not motion.
+ * Reduced motion: auto-hide is skipped; the theme switch still runs (it
+ * is a state change, not motion).
  */
 export function initNav(): void {
   if (typeof window === "undefined") return;
 
   const nav = document.querySelector<HTMLElement>(".nav");
-  const hero = document.querySelector<HTMLElement>(".hero");
-  if (!nav || !hero) return;
+  if (!nav) return;
 
   // ===== 1. THEME SWITCH =====
-  if (typeof IntersectionObserver === "undefined") {
+  const boundarySel = nav.dataset.navBoundaryTarget || ".hero";
+  const boundary = document.querySelector<HTMLElement>(boundarySel);
+
+  if (!boundary || typeof IntersectionObserver === "undefined") {
+    // No boundary to watch (or no IO support) → just show the panel.
     nav.classList.add("is-scrolled");
   } else {
     const observer = new IntersectionObserver(
@@ -56,7 +48,7 @@ export function initNav(): void {
         threshold: 0,
       },
     );
-    observer.observe(hero);
+    observer.observe(boundary);
   }
 
   // ===== 2. AUTO-HIDE =====

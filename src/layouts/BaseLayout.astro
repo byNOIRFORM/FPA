@@ -8,6 +8,7 @@ import SideNav from "../components/SideNav.astro";
 import PageTransition from "../components/PageTransition.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import GridOverlay from "../components/GridOverlay.astro";
+import Nav from "../components/Nav.astro";
 import { home, type Lang } from "../i18n/home";
 
 interface Props {
@@ -19,6 +20,10 @@ interface Props {
   loader?: boolean;
   /** Document language for <html lang> — SK / CZ / EN landing pages. */
   lang?: Lang;
+  /** Shared nav variant — "home" (landing) or "sub" (subpages). */
+  navVariant?: "home" | "sub";
+  /** Marks the current-page primary nav link on subpages. */
+  navActive?: "about" | "projects" | "services";
 }
 
 const {
@@ -26,6 +31,8 @@ const {
   description = "Architektonický ateliér",
   loader = true,
   lang = "sk",
+  navVariant = "home",
+  navActive,
 } = Astro.props;
 ---
 
@@ -111,6 +118,12 @@ const {
   </head>
   <body data-loader-active={loader ? "" : undefined}>
     {loader && <Loader />}
+
+    {/* Shared site nav — rendered at the page ROOT so it is never trapped
+        inside a section's stacking context (e.g. the sticky intro on
+        /sluzby, where a nested nav rendered under later sections). One
+        nav for the whole site. */}
+    <Nav lang={lang} variant={navVariant} active={navActive} />
 
     {/* Custom cursor — circle ring + small square in the centre.
         Hidden on touch / small screens via CSS in global.css. */}

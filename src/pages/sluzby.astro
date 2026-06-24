@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ServicesIntro from "../components/ServicesIntro.astro";
+import ServicesScope from "../components/ServicesScope.astro";
 ---
 
 {/* Subpage — no intro loader (it only plays on the landing). */}
@@ -8,6 +9,9 @@ import ServicesIntro from "../components/ServicesIntro.astro";
   title="Služby — Fotta // Popadič"
   description="Od precízneho výkresu po trvácnu architektúru — kompletná projektová dokumentácia ateliéru Fotta // Popadič."
   loader={false}
+  navVariant="sub"
+  navActive="services"
 >
   <ServicesIntro />
+  <ServicesScope />
 </BaseLayout>

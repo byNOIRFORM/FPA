@@ -15,7 +15,7 @@
  *
  * Live clock + custom cursor wired in scripts/hero.ts → initHero().
  */
-import { home, langHref, langLabel, LANGS, type Lang } from "../i18n/home";
+import { home, type Lang } from "../i18n/home";
 
 interface Props {
   lang?: Lang;
@@ -61,65 +61,6 @@ const t = home[lang];
       Sit above the image+overlay, below content. */}
   <div class="hero-vignette" aria-hidden="true"></div>
   <div class="hero-grain" aria-hidden="true"></div>
-
-  <nav class="nav" aria-label="Hlavná navigácia">
-    <div class="nav-left">
-      <a class="nav-logo nav-animate" href="/" data-grid-trigger>
-        <span class="nav-logo-main">FOTTA//POPADIČ</span>
-        <span class="nav-logo-sub">architekt</span>
-      </a>
-      <span class="nav-clock nav-animate" data-clock>Bardejov --:--</span>
-    </div>
-
-    <ul class="nav-langs nav-animate" aria-label="Jazyk">
-      {LANGS.map((l) => (
-        <li>
-          <a
-            href={langHref[l]}
-            class={`nav-flip nav-lang${l === lang ? " nav-lang--active" : ""}`}
-            data-text={langLabel[l]}
-            aria-current={l === lang ? "true" : undefined}
-          >
-            <span>{langLabel[l]}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-
-    <div class="nav-right">
-      <ul class="nav-links nav-animate">
-        <li><a class="nav-flip" href="#o-nas" data-text={t.nav.links.about}><span>{t.nav.links.about}</span></a></li>
-        <li><a class="nav-flip" href="#projekty" data-text={t.nav.links.projects}><span>{t.nav.links.projects}</span></a></li>
-        <li><a class="nav-flip" href="/sluzby" data-text={t.nav.links.services}><span>{t.nav.links.services}</span></a></li>
-      </ul>
-      {/* data-open-contact wires this CTA to the contact form
-          panel (slides in from the right). */}
-      <a class="nav-cta nav-animate" href="#kontakt" data-open-contact>
-        <span class="nav-cta-text">{t.nav.cta}</span>
-        <svg
-          class="nav-cta-arrow"
-          width="16"
-          height="10"
-          viewBox="0 0 16 10"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M0 5 H14 M10 1 L14 5 L10 9" />
-        </svg>
-      </a>
-    </div>
-
-    {/* Mobile-only trigger (≤767px) — opens the fullscreen side
-        navigation (SideNav.astro) via [data-open-menu]. Hidden on
-        tablet/desktop, which show the inline nav above instead. */}
-    <button class="nav-menu nav-animate" type="button" data-open-menu aria-label={t.nav.menuAria}>
-      <span class="nav-flip" data-text={t.nav.menu}><span>{t.nav.menu}</span></span>
-    </button>
-  </nav>
 
   {/* Title is generated from the structured i18n entry (home.ts →
       hero.title): each line is an array of word tokens, a token with
@@ -286,287 +227,6 @@ const t = home[lang];
     100% { background-position: 0 0; }
   }
 
-  /* ===== Navbar =====
-     position: fixed pins it to the viewport so it stays visible as
-     the user scrolls — same idea as Colette. Initial state is
-     transparent with white text (legible over the hero photo);
-     once the hero has scrolled off the top, the .is-scrolled
-     class (toggled in scripts/nav.ts via IntersectionObserver)
-     switches to a frosted-white panel with dark text.
-
-     All text elements use line-height: 1 so their bounding boxes
-     match their font-size exactly. Without this, the langs (default
-     1.5 line-height = 24px tall) and the logo's italic sub line
-     (default 1.5 = 36px tall) had different heights, and even though
-     align-items: center technically centered each element, the
-     visual centers landed at different Y positions in the row.
-     With line-height: 1 everywhere, every element is exactly its
-     font-size in height and align-items: center works cleanly. */
-  .nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 50;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(24px, 3.33vw, 72px);
-    /* py 22 / px 28 at 1440 → py 33 / px 48 at 2160-2400+. */
-    padding: clamp(16px, 1.53vw, 33px) clamp(16px, 2vw, 48px);
-    color: #fff;
-    background: transparent;
-    font-family: var(--font-sans);
-    /* Medium (500) per Figma — applies to everything except the
-       logo main (explicitly Semibold) and logo sub (Italic 400). */
-    font-weight: 500;
-    /* 16 at 1440 → 22 at 1980+. */
-    font-size: clamp(14px, 1.11vw, 22px);
-    line-height: 1;
-    letter-spacing: 0.02em;
-    will-change: transform;
-    /* Theme switch (bg/color/padding) uses CSS transitions; the
-       transform (hide/show on scroll) is driven by GSAP from
-       scripts/nav.ts. GSAP runs through its own ticker, blends
-       in-flight tweens when the direction reverses, and uses
-       a true exponential expo.inOut curve — the same engine and
-       curve as the contact form sheet, so the motion language
-       matches across the page. */
-    transition:
-      background 420ms cubic-bezier(0.65, 0, 0.35, 1),
-      color 420ms cubic-bezier(0.65, 0, 0.35, 1),
-      box-shadow 420ms cubic-bezier(0.65, 0, 0.35, 1),
-      padding 420ms cubic-bezier(0.65, 0, 0.35, 1);
-  }
-
-  /* Scrolled state — bar matches the page background so it reads
-     as part of the page rather than a separate panel. No border,
-     no shadow: the only thing announcing the nav is the text
-     itself, floating against the same warm cream as everything
-     below it. */
-  .nav.is-scrolled {
-    background: var(--bg);
-    color: var(--ink);
-    /* Scrolled state condenses py from 22 → 16 at 1440 (or 33 → 24
-       at 2160+). px stays the same as default. */
-    padding: clamp(12px, 1.11vw, 24px) clamp(16px, 2vw, 48px);
-  }
-
-  .nav-left {
-    display: flex;
-    align-items: center;
-    /* 80 at 1440 → 120 at 2160+. */
-    gap: clamp(40px, 5.55vw, 120px);
-  }
-
-  .nav-logo {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
-    text-decoration: none;
-    color: inherit;
-    line-height: 1;
-  }
-
-  .nav-logo-main {
-    /* 24 at 1440 → 36 at 2160+. */
-    font-size: clamp(20px, 1.67vw, 36px);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    /* Same easing as .nav so the logo and panel transition feel
-       like one motion, not two. */
-    transition: font-size 420ms cubic-bezier(0.65, 0, 0.35, 1);
-  }
-
-  .nav-logo-sub {
-    font-size: clamp(20px, 1.67vw, 36px);
-    font-style: italic;
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    transition: font-size 420ms cubic-bezier(0.65, 0, 0.35, 1);
-  }
-
-  /* Scrolled — logo shrinks slightly (Colette pattern). The hero
-     version reads as a brand mark; the scrolled version reads as
-     a utility label. 4px (at 1440) isn't dramatic but it lands. */
-  .nav.is-scrolled .nav-logo-main,
-  .nav.is-scrolled .nav-logo-sub {
-    /* 20 at 1440 → 30 at 2160+ (≈ 83% of default logo size). */
-    font-size: clamp(18px, 1.39vw, 30px);
-  }
-
-  .nav-clock {
-    font-size: clamp(14px, 1.11vw, 22px);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .nav-langs {
-    display: flex;
-    gap: clamp(10px, 0.83vw, 18px);
-    align-items: center;
-  }
-
-  .nav-lang {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: clamp(40px, 5.55vw, 120px);
-  }
-
-  .nav-links {
-    display: flex;
-    gap: clamp(10px, 0.83vw, 18px);
-    align-items: center;
-  }
-
-  .nav-links a {
-    color: inherit;
-    text-decoration: none;
-    line-height: 1;
-    display: inline-block;
-  }
-
-  /* Text flip hover — visible text slides up out of the mask, an
-     identical copy (::after, content: attr(data-text)) rises into
-     view from below. Pure CSS, no JS required. */
-  .nav-flip {
-    position: relative;
-    display: inline-block;
-    overflow: hidden;
-    line-height: 1.15;
-    vertical-align: top;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .nav-flip span {
-    display: inline-block;
-    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
-  }
-
-  .nav-flip::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
-  }
-
-  .nav-flip:hover span,
-  .nav-flip:hover::after {
-    transform: translateY(-100%);
-  }
-
-  .nav-cta {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: clamp(10px, 0.83vw, 12px);
-    /* Figma spec 211×44 px — clamps cap at those values so the
-       button never grows past spec above 1440. font-size is
-       declared explicitly (overrides .nav inheritance) so it
-       caps at 16 too. */
-    width: clamp(180px, 14.65vw, 211px);
-    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
-    /* Themed button tokens, not fixed #222: in the .is-scrolled state
-       the nav background becomes var(--bg) (= #222 in dark), so a fixed
-       #222 button would disappear into the bar — var(--btn-bg) inverts
-       it to a light fill in dark mode so it stays visible (matches the
-       home content CTAs and the /sluzby sticky nav). */
-    background: var(--btn-bg);
-    color: var(--btn-fg);
-    text-decoration: none;
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: clamp(14px, 1.11vw, 16px);
-    line-height: 1;
-    letter-spacing: 0.02em;
-    overflow: hidden;
-  }
-
-  /* CTA hover — dark curtain slides in from the left, text shifts a
-     touch right, arrow runs ahead a bit further. Three small motions,
-     same easing, one moment. Background stays in the dark family
-     (the bright white invert we tried earlier read as cheap). */
-
-  .nav-cta::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--btn-bg-hover);
-    transform: translateX(-101%);
-    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
-    z-index: 0;
-  }
-
-  .nav-cta:hover::before {
-    transform: translateX(0);
-  }
-
-  .nav-cta > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  .nav-cta-text {
-    display: inline-block;
-    color: var(--btn-fg);
-    line-height: 1;
-    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
-  }
-
-  .nav-cta:hover .nav-cta-text {
-    transform: translateX(3px);
-  }
-
-  .nav-cta-arrow {
-    display: block;
-    flex: 0 0 auto;
-    color: var(--btn-fg);
-    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
-  }
-
-  /* Arrow travels ~2× the text distance — the gap widens slightly
-     as the arrow "leans into" the click. */
-  .nav-cta:hover .nav-cta-arrow {
-    transform: translateX(7px);
-  }
-
-  /* ===== Mobile menu trigger =====
-     Hidden until ≤767px (see the mobile media query below), where it
-     replaces the inline nav and opens the fullscreen side menu.
-     Inherits .nav color so it follows the light → dark theme switch. */
-  .nav-menu {
-    display: none;
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 16px;
-    line-height: 22px;
-    letter-spacing: 0.02em;
-    color: inherit;
-    background: none;
-    border: 0;
-    padding: 4px 0;
-    cursor: pointer;
-  }
-
   /* ===== Title (bottom) =====
      Figma spec: Switzer 64px / 400 / line-height 70px / no tracking.
      font-size uses clamp so the slogan scales down on smaller screens
@@ -717,21 +377,13 @@ const t = home[lang];
     opacity: 0.75;
   }
 
-  /* ===== Initial hidden states (cleared by revealHero) ===== */
-  .nav-animate {
-    opacity: 0;
-    transform: translateY(-12px);
-    will-change: transform, opacity;
-  }
-
   /* ===== Reduced motion ===== */
   @media (prefers-reduced-motion: reduce) {
     .hero-media-img {
       transform: none;
     }
     .hero-media-overlay,
-    .hero-title-word,
-    .nav-animate {
+    .hero-title-word {
       transform: none;
       opacity: 1;
     }
@@ -748,61 +400,8 @@ const t = home[lang];
     }
   }
 
-  /* ===== Tablet (768–1199) — scaled-down desktop =====
-     Per the studiodado-style approach, tablet keeps the desktop nav
-     composition and just lets it shrink. We drop only the clock
-     (the "Bardejov --:--" label) to free up room; the language switch
-     STAYS — on mobile language lives in the side menu, but tablet has
-     no menu, so the nav is the only place it can live. */
-  @media (min-width: 768px) and (max-width: 1199px) {
-    .nav {
-      gap: clamp(20px, 3vw, 48px);
-    }
-    .nav-left,
-    .nav-right {
-      gap: clamp(24px, 3.5vw, 56px);
-    }
-    .nav-clock {
-      display: none;
-    }
-    .nav-cta {
-      width: auto;
-    }
-  }
-
-  /* ===== Mobile (≤767) — Figma mobile nav =====
-     Collapse to the logo lockup + a "Menu" button that opens the
-     fullscreen side navigation. Everything inline is hidden. */
+  /* ===== Mobile (≤767) ===== */
   @media (max-width: 767px) {
-    .nav {
-      gap: 16px;
-      /* Top padding clears the status bar / notch (matches SideNav). */
-      padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
-      align-items: flex-start;
-    }
-    .nav.is-scrolled {
-      padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px;
-    }
-    .nav-clock,
-    .nav-langs,
-    .nav-links,
-    .nav-cta {
-      display: none;
-    }
-    .nav-menu {
-      display: inline-block;
-    }
-    /* Logo lockup — 20px (the clamp floor anyway) and line-height 1
-       to match the desktop/tablet logo exactly. Using 1.3 here added
-       extra leading between "FOTTA//POPADIČ" and "architekt", which
-       read as a jump versus every other breakpoint. */
-    .nav-logo-main,
-    .nav-logo-sub,
-    .nav.is-scrolled .nav-logo-main,
-    .nav.is-scrolled .nav-logo-sub {
-      font-size: 20px;
-      line-height: 1;
-    }
     /* Slogan stays as the mobile hero statement — page-edge gutters
        align with the nav. */
     .hero-title {
