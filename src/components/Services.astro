@@ -41,14 +41,22 @@ interface Service {
   /** Portrait rows are 328×400; landscape are 328×193. Drives
    *  the .service-media aspect-ratio CSS class. */
   aspect: "portrait" | "landscape";
+  /** "Obsahuje" bullet list — only rendered in the `detailed` variant. */
+  includes: string[];
 }
 
 import { home, type Lang } from "../i18n/home";
+import ServiceDetail from "./ServiceDetail.astro";
+import { detailIndices } from "../i18n/service-details";
 
 interface Props {
   lang?: Lang;
+  /** Detailed variant (the /sluzby page): adds the "Obsahuje" list +
+   *  a per-row "Dozvedieť sa viac" link, drops the section label, and
+   *  closes with a divider instead of the centred CTA. Same effects. */
+  detailed?: boolean;
 }
-const { lang = "sk" } = Astro.props;
+const { lang = "sk", detailed = false } = Astro.props;
 const t = home[lang];
 
 // num / image / aspect are language-agnostic and stay here; titles,
@@ -61,11 +69,32 @@ const meta = [
   { num: "04", image: "/images/services/04-stavebne.jpg", aspect: "portrait" as const },
   { num: "05", image: "/images/services/05-realizacna.jpg", aspect: "landscape" as const },
 ];
-const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }));
+
+// "Obsahuje" lists for the detailed /sluzby variant (SK). The homepage
+// summary ignores them. Move into the i18n dictionary if /sluzby ever
+// goes multi-language.
+const includesList: string[][] = [
+  ["Analýza existujúceho územného plánu", "Analýza územia", "Dopravné riešenie", "Riešenie zón", "Podklad pre zmeny a doplnky územného plánu"],
+  ["Koncept, idea návrhu", "Pôdorysy", "Rezy", "Pohľady", "3D vizualizácia"],
+  ["Sprievodná správa", "Situácia osadenia", "Pôdorysy a rezy", "Zákresy do kontextu"],
+  ["Architektúra (mierka 1:50)", "Energetické hodnotenie stavby", "Požiarna bezpečnosť stavby", "Statika", "Zdravotechnika", "Vykurovanie", "Elektroinštalácie", "Vzduchotechnika", "Dopravné riešenie", "Napojenie stavby na inžinierske siete"],
+  ["Architektúra (mierka 1:50 až 1:25)", "Energetické hodnotenie stavby", "Požiarna bezpečnosť stavby", "Statika", "Zdravotechnika", "Vykurovanie", "Elektroinštalácie", "Vzduchotechnika", "Dopravné riešenie", "Napojenie stavby na inžinierske siete", "Autorský dozor"],
+];
+
+const services: Service[] = t.services.items.map((s, i) => ({
+  ...meta[i],
+  ...s,
+  includes: includesList[i],
+}));
 ---
 
-<section class="services" id="sluzby" aria-labelledby="services-heading">
-  <h2 class="services-label" id="services-heading">{t.services.label}</h2>
+<section
+  class={`services${detailed ? " services--detailed" : ""}`}
+  id="sluzby"
+  aria-label={detailed ? "Stupne projektovej dokumentácie" : undefined}
+  aria-labelledby={detailed ? undefined : "services-heading"}
+>
+  {!detailed && <h2 class="services-label" id="services-heading">{t.services.label}</h2>}
 
   <ul class="services-list">
     {services.map((s, i) => (
@@ -75,7 +104,35 @@ const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }
             <span class="service-num" data-reveal>{s.num}</span>
             <h3 class="service-title" data-reveal>{s.title}</h3>
           </div>
-          <p class="service-desc" data-reveal>{s.desc}</p>
+          <div class="service-desc" data-reveal>
+            <p class="service-desc-text">{s.desc}</p>
+            {detailed && s.includes.length > 0 && (
+              <div class="service-includes">
+                <p class="service-includes-label">Obsahuje:</p>
+                <ul class="service-includes-list">
+                  {s.includes.map((it) => <li>{it}</li>)}
+                </ul>
+              </div>
+            )}
+            {/* Per-row link — shown on every stage except Urbanistická
+                štúdia (index 0). It opens the detail panel only where
+                detail copy exists (i18n/service-details — just
+                Architektonická štúdia for now); the rest are present but
+                inert placeholders until their copy is written. */}
+            {detailed && i > 0 && (
+              <button
+                type="button"
+                class="service-more"
+                data-open-detail={detailIndices.has(i) ? "" : undefined}
+                data-detail-index={detailIndices.has(i) ? i : undefined}
+              >
+                <span>{t.services.cta}</span>
+                <svg class="service-more-arrow" width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+                </svg>
+              </button>
+            )}
+          </div>
           <div class={`service-media service-media--${s.aspect}`}>
             <img
               src={s.image}
@@ -89,27 +146,37 @@ const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }
     ))}
   </ul>
 
-  {/* data-open-contact — same wiring as the nav CTA. Opens the
-      contact form panel; no separate "service detail" page exists
-      for V1 launch (parked work memory). */}
-  <a class="services-cta" href="/sluzby">
-    <span class="services-cta-text">{t.services.cta}</span>
-    <svg
-      class="services-cta-arrow"
-      width="16"
-      height="10"
-      viewBox="0 0 16 10"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M0 5 H14 M10 1 L14 5 L10 9" />
-    </svg>
-  </a>
+  {/* Homepage summary — centred CTA to the /sluzby page. The detailed
+      /sluzby variant has no bottom CTA/divider; the per-row links carry
+      the action. */}
+  {!detailed && (
+    <a class="services-cta" href="/sluzby">
+      <span class="services-cta-text">{t.services.cta}</span>
+      <svg
+        class="services-cta-arrow"
+        width="16"
+        height="10"
+        viewBox="0 0 16 10"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+      </svg>
+    </a>
+  )}
+
+  {/* Detailed variant closes with a hairline before the footer — mirrors
+      the homepage Leaders → divider → Footer. */}
+  {detailed && <div class="services-divider" aria-hidden="true"></div>}
 </section>
+
+{/* Detail panel — only the detailed /sluzby variant renders it (so its
+    CSS + JS never ship on the homepage). */}
+{detailed && <ServiceDetail />}
 
 <style>
   /* ===== Section frame =====
@@ -134,6 +201,20 @@ const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }
        28 at 1440 → 48 at 2400+ horizontal. */
     padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px);
     background: var(--bg);
+  }
+
+  /* Detailed variant drops the bottom padding so its closing divider sits
+     flush at the section edge, then the footer follows — same rhythm as
+     the homepage Leaders → divider → Footer. */
+  .services--detailed {
+    padding-bottom: 0;
+  }
+
+  .services-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--line);
+    margin: clamp(40px, 5.55vw, 120px) 0 0;
   }
 
   /* ===== Top label "Služby" =====
@@ -245,10 +326,22 @@ const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }
   }
 
   /* ===== Description column =====
-     Capped at 20px like the rest of the row. line-height 1.4
-     (= 28/20) matches the Figma reading rhythm. */
+     A flex-col container so the detailed /sluzby variant can stack the
+     "Obsahuje" list + "Dozvedieť sa viac" link under the desc. The
+     clip-path reveal (services.ts) targets THIS container, so the whole
+     column unrolls as one. */
   .service-desc {
     flex: 0 0 calc(445 / 1384 * 100%);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(20px, 2.22vw, 32px);
+    min-width: 0;
+    margin: 0;
+    will-change: clip-path;
+  }
+
+  /* Desc text — capped at 20px, line-height 1.4 (= 28/20). */
+  .service-desc-text {
     font-family: var(--font-sans);
     font-weight: 400;
     font-style: normal;
@@ -257,8 +350,94 @@ const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }
     letter-spacing: 0.02em;
     color: var(--ink);
     margin: 0;
-    will-change: clip-path;
   }
+
+  /* ===== Detailed variant — "Obsahuje" list + per-row link ===== */
+  .service-includes {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .service-includes-label {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 20px);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    color: var(--text-mute);
+    margin: 0;
+  }
+
+  /* Bulleted contents — overrides the global `ul { list-style: none }`. */
+  .service-includes-list {
+    list-style: disc;
+    margin: 0;
+    padding-left: 30px;
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 20px);
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
+  .service-includes-list li {
+    margin: 0;
+  }
+
+  /* "Dozvedieť sa viac →" — underlined text link (not the filled CTA);
+     align-self keeps the underline only as wide as the text. The
+     underline is a ::after so it can wipe on hover. */
+  .service-more {
+    position: relative;
+    display: inline-flex;
+    align-self: flex-start;
+    align-items: center;
+    gap: clamp(8px, 0.83vw, 12px);
+    padding-bottom: 4px;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .service-more::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--ink);
+    transform-origin: left;
+  }
+
+  /* Hover — the underline wipes through left-to-right (retracts to the
+     right, redraws from the left); the arrow leans into the click. */
+  .service-more:hover::after {
+    animation: serviceMoreWipe 560ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @keyframes serviceMoreWipe {
+    0% { transform: scaleX(1); transform-origin: right; }
+    45% { transform: scaleX(0); transform-origin: right; }
+    55% { transform: scaleX(0); transform-origin: left; }
+    100% { transform: scaleX(1); transform-origin: left; }
+  }
+
+  .service-more-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 360ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .service-more:hover .service-more-arrow {
+    transform: translateX(4px);
+  }
+
 
   /* ===== Media frame =====
      Two aspect ratios drive the asymmetric rhythm of the section:
@@ -443,10 +622,12 @@ const services: Service[] = t.services.items.map((s, i) => ({ ...meta[i], ...s }
        long descriptions stay comfortable on a narrow column. */
     .service-num,
     .service-title,
-    .service-desc {
+    .service-desc-text,
+    .service-includes-label,
+    .service-includes-list {
       font-size: 18px;
     }
-    .service-desc {
+    .service-desc-text {
       line-height: 1.5;
     }
   }

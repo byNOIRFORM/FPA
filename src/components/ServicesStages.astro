@@ -1,0 +1,108 @@
+---
+/**
+ * Stupne projektovej dokumentácie — a full-bleed image band that breaks
+ * out of the page's max-width (like a mini-hero): the photo runs edge to
+ * edge, the white title sits top-left at the gutter, and a scroll arrow
+ * sits bottom-right.
+ *
+ * Inner parallax (scripts/services-stages.ts): the photo is 122% of the
+ * band with 11% headroom and drifts ±8% inside it on scroll — the same
+ * "image lags the frame" motion as the Works / scope tiles. Driven off
+ * getBoundingClientRect (robust against this page's sticky intro).
+ *
+ * Placeholder photo: public/images/services-stages/stupne.png — swap by
+ * dropping a new file with the same name.
+ */
+const image = "/images/services-stages/stupne.png";
+---
+
+<section class="sstages" aria-labelledby="sstages-title">
+  <img class="sstages-img" src={image} alt="Atelier Fotta // Popadič — pohľad z ulice" decoding="async" loading="lazy" />
+  <div class="sstages-scrim" aria-hidden="true"></div>
+
+  <h2 class="sstages-title" id="sstages-title">Stupne projektovej dokumentácie</h2>
+
+  <div class="sstages-arrow" aria-hidden="true">
+    <svg viewBox="0 0 24 84" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 0 V80 M2 67 L12 80 L22 67" />
+    </svg>
+  </div>
+</section>
+
+<style>
+  /* ===== Full-bleed band — breaks the page max-width edge to edge ===== */
+  .sstages {
+    position: relative;
+    width: 100%;
+    height: clamp(420px, 50vw, 780px); /* 720 @1440 */
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  /* Photo is 122% tall with top:-11% — 11% headroom each side so the ±8%
+     inner parallax drifts inside without revealing the band edge (same
+     maths as the Works tiles). */
+  .sstages-img {
+    position: absolute;
+    top: -11%;
+    left: 0;
+    width: 100%;
+    height: 122%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  /* Subtle top wash so the white title stays legible on any photo. */
+  .sstages-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.34),
+      rgba(0, 0, 0, 0) 42%
+    );
+  }
+
+  /* ===== Title — top-left at the page gutter ===== */
+  .sstages-title {
+    position: absolute;
+    top: clamp(20px, 1.94vw, 28px);
+    left: clamp(16px, 2vw, 48px);
+    z-index: 2;
+    margin: 0;
+    max-width: clamp(320px, 39vw, 564px);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal; /* reset the global h2 italic */
+    font-size: clamp(28px, 3.33vw, 56px); /* 48 @1440 */
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+
+  /* ===== Scroll arrow — bottom-right at the gutter ===== */
+  .sstages-arrow {
+    position: absolute;
+    bottom: clamp(24px, 3vw, 48px);
+    right: clamp(16px, 2vw, 48px);
+    z-index: 2;
+    color: #fff;
+  }
+
+  .sstages-arrow svg {
+    display: block;
+    width: auto;
+    height: clamp(48px, 5.5vw, 96px);
+  }
+
+  /* ===== Reduced motion — inner parallax is skipped in JS; nothing else
+     to disable here. ===== */
+</style>
+
+<script>
+  import { initServicesStages } from "../scripts/services-stages";
+  initServicesStages();
+</script>

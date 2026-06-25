@@ -1,0 +1,88 @@
+---
+/**
+ * Služby manifest — one editorial statement with the per-word colour
+ * scrub (faint → ink, left-to-right on scroll). Same look + mechanism as
+ * the home Leaders manifest ("Dve generácie, tri pohľady…"): left-aligned,
+ * max-width 1384, a 3em first-line indent, Switzer Medium 48px @1440.
+ *
+ * The scrub uses the exact same ScrollTrigger config as the home About /
+ * Leaders manifests (scripts/services-manifest.ts) — stagger 0.4, scrub
+ * 0.6 — so the reveal feels identical everywhere.
+ */
+const text =
+  "Projekt pre nás nekončí odovzdaním výkresov. Sprevádzame vás od prvej skice až po moment, kedy otočíte kľúč v zámku. Strážime každý krok, aby mal hotový dom presne tú atmosféru, ktorú sme spoločne vymysleli.";
+const words = text.split(" ");
+---
+
+<section class="smanifest" aria-label="O službách">
+  <p class="smanifest-text">
+    {
+      words.map((word, i) => (
+        <>
+          <span class="smanifest-word">{word}</span>
+          {i < words.length - 1 ? " " : ""}
+        </>
+      ))
+    }
+  </p>
+</section>
+
+<style>
+  /* ===== Section frame — shared canvas + 80px vertical rhythm ===== */
+  .smanifest {
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px);
+    background: var(--bg);
+  }
+
+  /* ===== Manifest text — mirrors .leaders-manifest exactly =====
+     Left-aligned, capped at 1384, first line indented (the editorial
+     opening for "Zastrešujeme"). 3em ≈ 144px at the 48px baseline. */
+  .smanifest-text {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(28px, 3.33vw, 72px); /* 48 @1440 */
+    line-height: 1.25; /* 60/48 */
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    text-align: left;
+    width: 100%;
+    max-width: 1384px;
+    margin: 0;
+    text-indent: 3em;
+  }
+
+  /* Per-word span — colour mixes from faint to ink as --reveal scrubs
+     0 → 1 (services-manifest.ts). Both ends are theme tokens, so dark
+     mode reveals from faint-dark to off-white with no JS colour change.
+     Identical to the About / Leaders words. */
+  .smanifest-word {
+    color: color-mix(in srgb, var(--ink) calc(var(--reveal, 0) * 100%), var(--ink-faint));
+    will-change: color;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .smanifest-word {
+      --reveal: 1;
+    }
+  }
+
+  /* MOBILE (≤767): drop the first-line indent — it reads as a typo on a
+     narrow column (same call as the Leaders manifest). */
+  @media (max-width: 767px) {
+    .smanifest {
+      padding: 56px 16px;
+    }
+    .smanifest-text {
+      text-indent: 0;
+    }
+  }
+</style>
+
+<script>
+  import { initServicesManifest } from "../scripts/services-manifest";
+  initServicesManifest();
+</script>

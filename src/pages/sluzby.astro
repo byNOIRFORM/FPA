@@ -2,6 +2,11 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ServicesIntro from "../components/ServicesIntro.astro";
 import ServicesScope from "../components/ServicesScope.astro";
+import BuildingTypes from "../components/BuildingTypes.astro";
+import ServicesManifest from "../components/ServicesManifest.astro";
+import ServicesStages from "../components/ServicesStages.astro";
+import Services from "../components/Services.astro";
+import Footer from "../components/Footer.astro";
 ---
 
 {/* Subpage — no intro loader (it only plays on the landing). */}
@@ -14,4 +19,11 @@ import ServicesScope from "../components/ServicesScope.astro";
 >
   <ServicesIntro />
   <ServicesScope />
+  <BuildingTypes />
+  <ServicesManifest />
+  <ServicesStages />
+  {/* Detailed spec-sheet — reuses the homepage Services section + effects. */}
+  <Services lang="sk" detailed />
+  {/* Same footer as the homepage. */}
+  <Footer lang="sk" />
 </BaseLayout>

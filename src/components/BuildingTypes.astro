@@ -1,0 +1,205 @@
+---
+/**
+ * Typy stavieb — a list of building types on the left-hand image.
+ *
+ * Figma (node 3111:379): label "Typy stavieb", then a row — a 445×244
+ * image on the left, a 797-wide list of six types on the right, each row
+ * divided by a 1px hairline. The first type (Rodinné domy) is the active
+ * default (Switzer Medium); the rest are Regular.
+ *
+ * Interaction (pure CSS, no JS — the footer's :has() pattern): hover a
+ * type and its photo crossfades in over the always-on base image, and the
+ * type's label goes Medium. The base image (Rodinné domy) sits underneath
+ * at opacity 1, so the crossfade never dims to the background.
+ *
+ * Placeholder photos live in public/images/building-types/, one per type
+ * and named after it (rodinnedomy.jpg, bytovedomy.jpg …) so they're easy
+ * to replace — just drop a new file in with the same name, no code change.
+ * priemyselnestavby / parkyverejnypriestor are portrait sources centre-
+ * cropped into the landscape frame for now.
+ */
+interface BType {
+  key: string;
+  name: string;
+  image: string;
+  alt: string;
+}
+
+const types: BType[] = [
+  { key: "rodinne",     name: "Rodinné domy",                image: "/images/building-types/rodinnedomy.jpg",         alt: "Moderný rodinný dom vo svahu" },
+  { key: "bytove",      name: "Bytové domy",                 image: "/images/building-types/bytovedomy.jpg",          alt: "Bytový/rezidenčný objekt" },
+  { key: "verejne",     name: "Verejné budovy",              image: "/images/building-types/verejnebudovy.jpg",       alt: "Verejná budova — knižnica" },
+  { key: "priemyselne", name: "Priemyselné stavby",          image: "/images/building-types/priemyselnestavby.jpg",   alt: "Priemyselná / industriálna stavba" },
+  { key: "rekreacne",   name: "Rekreačné a športové stavby", image: "/images/building-types/rekreacnesportove.jpg",   alt: "Rekreačný objekt v prírode" },
+  { key: "parky",       name: "Parky a verejný priestor",    image: "/images/building-types/parkyverejnypriestor.jpg", alt: "Urbanistický model verejného priestoru" },
+];
+---
+
+<section class="btypes" aria-labelledby="btypes-label">
+  <p class="btypes-label" id="btypes-label">Typy stavieb</p>
+
+  <div class="btypes-row">
+    {/* Stacked photos — the first (Rodinné domy) is the always-on base;
+        the rest fade in on top when their list row is hovered. */}
+    <div class="btypes-media" aria-hidden="true">
+      {types.map((t) => (
+        <img class="btypes-img" data-type={t.key} src={t.image} alt="" loading="lazy" decoding="async" />
+      ))}
+    </div>
+
+    <ul class="btypes-list">
+      {types.map((t) => (
+        <li class="btypes-item" data-type={t.key}>
+          <span class="btypes-item-text">{t.name}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* ===== Section frame — shared canvas + 80px vertical rhythm ===== */
+  .btypes {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 2.78vw, 40px); /* label → row, 40 @1440 */
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px);
+    background: var(--bg);
+  }
+
+  /* ===== Label ===== */
+  .btypes-label {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 24px); /* 20 @1440 */
+    line-height: normal;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* ===== Row — image left, list right, 142px auto gap (space-between) ===== */
+  .btypes-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  /* ===== Media — 445×244 frame, stacked crossfading photos ===== */
+  .btypes-media {
+    position: relative;
+    flex: 0 0 calc(445 / 1384 * 100%);
+    aspect-ratio: 445 / 244;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .btypes-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Base (Rodinné domy) — always visible underneath, never animates. */
+  .btypes-img[data-type="rodinne"] {
+    opacity: 1;
+    z-index: 0;
+  }
+
+  /* Every other photo fades in on top of the base on hover. */
+  .btypes-img:not([data-type="rodinne"]) {
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 500ms var(--ease-out);
+  }
+
+  .btypes-row:has(.btypes-item[data-type="bytove"]:hover) .btypes-img[data-type="bytove"],
+  .btypes-row:has(.btypes-item[data-type="verejne"]:hover) .btypes-img[data-type="verejne"],
+  .btypes-row:has(.btypes-item[data-type="priemyselne"]:hover) .btypes-img[data-type="priemyselne"],
+  .btypes-row:has(.btypes-item[data-type="rekreacne"]:hover) .btypes-img[data-type="rekreacne"],
+  .btypes-row:has(.btypes-item[data-type="parky"]:hover) .btypes-img[data-type="parky"] {
+    opacity: 1;
+  }
+
+  /* ===== List ===== */
+  .btypes-list {
+    flex: 0 0 calc(797 / 1384 * 100%);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .btypes-item {
+    display: flex;
+    align-items: center;
+    padding: clamp(14px, 1.39vw, 20px) 0; /* 20 @1440 */
+    border-bottom: 1px solid var(--line);
+  }
+
+  /* First row sits flush with the image top (Figma: no top padding). */
+  .btypes-item:first-child {
+    padding-top: 0;
+  }
+
+  .btypes-item-text {
+    font-family: var(--font-sans);
+    font-weight: 400; /* Regular by default */
+    font-style: normal;
+    font-size: clamp(16px, 1.39vw, 24px); /* 20 @1440 */
+    line-height: normal;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    white-space: nowrap;
+  }
+
+  /* Active → Medium. Default = first row; on hover = the hovered row.
+     (The :not(:has(:hover)) keeps the first row active only while
+     nothing else is hovered, so the weight never doubles up.) */
+  .btypes-list:not(:has(.btypes-item:hover)) .btypes-item:first-child .btypes-item-text,
+  .btypes-item:hover .btypes-item-text {
+    font-weight: 500;
+  }
+
+  /* ===== Reduced motion — the global rule already zeroes the fade. ===== */
+
+  /* =============================================================
+     TABLET (768–1199): no rule — the % widths + aspect-ratio scale the
+     whole row down proportionally (scaled-down desktop, like Works).
+
+     MOBILE (≤767): stack — full-width image on top, list below. Hover
+     swap is pointer-only, so touch simply shows the default photo.
+     ============================================================= */
+  @media (max-width: 767px) {
+    .btypes {
+      gap: 32px;
+      padding: 56px 16px;
+    }
+    .btypes-row {
+      flex-direction: column;
+      gap: 32px;
+    }
+    .btypes-media {
+      flex: none;
+      width: 100%;
+    }
+    .btypes-list {
+      flex: none;
+      width: 100%;
+    }
+    .btypes-item-text {
+      font-size: 18px;
+      white-space: normal; /* allow long names to wrap on a narrow column */
+    }
+  }
+</style>

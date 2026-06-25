@@ -1,0 +1,228 @@
+---
+/**
+ * ServiceDetail — right-side detail panel for a service "stage".
+ *
+ * Opened by the per-row "Dozvedieť sa viac" buttons ([data-open-detail]
+ * carrying data-detail-index). Uses EXACTLY the contact panel's slide-in
+ * mechanism + timings — scripts/service-detail.ts mirrors contact-form.ts:
+ * sheet xPercent 100→0 over 800ms expo.inOut, backdrop 0→1 over 600ms
+ * power2.out; close reverses with the same curve. Body scroll locks via
+ * Lenis.stop() + overflow:clip.
+ *
+ * Layout: big title, grey intro, a hairline rule, then N (heading +
+ * paragraph) blocks. Content lives in i18n/service-details.ts — only
+ * Architektonická štúdia is written so far.
+ *
+ * Only rendered by the detailed Services variant (so its CSS + JS never
+ * ship on the homepage).
+ */
+import { serviceDetails } from "../i18n/service-details";
+---
+
+<aside
+  class="sdetail-panel"
+  id="service-detail"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Detail služby"
+  aria-hidden="true"
+>
+  <div class="sdetail-backdrop" data-detail-close></div>
+
+  <div class="sdetail-sheet" role="document">
+    <button type="button" class="sdetail-close" data-detail-close aria-label="Zavrieť detail">
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <path d="M4 4 L16 16 M16 4 L4 16" />
+      </svg>
+    </button>
+
+    {/* data-lenis-prevent — let the panel's native overflow scroll, not Lenis. */}
+    <div class="sdetail-scroll" data-lenis-prevent>
+      {serviceDetails.map((d, i) => (
+        <article class="sdetail-detail" data-detail={d.index} hidden={i !== 0}>
+          <h2 class="sdetail-title">{d.title}</h2>
+          <p class="sdetail-intro">{d.intro}</p>
+          <div class="sdetail-rule" aria-hidden="true"></div>
+          <div class="sdetail-sections">
+            {d.sections.map((sec) => (
+              <section class="sdetail-section">
+                <h3 class="sdetail-section-heading">{sec.heading}</h3>
+                <p class="sdetail-section-body">{sec.body}</p>
+              </section>
+            ))}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</aside>
+
+<style>
+  /* ===== Mirrors the contact panel (.contact-*) exactly ===== */
+  .sdetail-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .sdetail-panel[aria-hidden="false"] {
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .sdetail-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--backdrop);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    opacity: 0;
+    will-change: opacity;
+  }
+
+  /* No CSS transform here — GSAP owns xPercent (see contact-form note). */
+  .sdetail-sheet {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1040px;
+    max-width: calc(100vw - 40px);
+    background: var(--sheet);
+    will-change: transform;
+    overflow: hidden;
+  }
+
+  .sdetail-close {
+    position: absolute;
+    top: 40px;
+    right: 28px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    border: 0;
+    cursor: pointer;
+    transition: background 280ms ease;
+  }
+  .sdetail-close svg {
+    transition: transform 360ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+  .sdetail-close:hover svg {
+    transform: rotate(90deg);
+  }
+  .sdetail-close:hover {
+    background: var(--btn-bg-hover);
+  }
+
+  .sdetail-scroll {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  /* ===== Detail content ===== */
+  .sdetail-detail {
+    padding: 48px 40px 88px;
+    font-family: var(--font-sans);
+    color: var(--ink);
+  }
+
+  .sdetail-title {
+    font-family: var(--font-sans);
+    font-size: clamp(36px, 5.5vw, 56px);
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    margin: 0;
+    padding-right: 64px; /* clear the absolute close button */
+  }
+
+  /* Grey intro paragraph under the title — 16px. */
+  .sdetail-intro {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-mute);
+    max-width: 760px;
+    margin: 24px 0 0;
+  }
+
+  /* Hairline rule between the intro and the sections. */
+  .sdetail-rule {
+    height: 1px;
+    background: var(--line-faint);
+    margin: 40px 0 56px;
+  }
+
+  /* 32px between (subtitle + text) blocks. */
+  .sdetail-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* 12px between a subtitle and its paragraph. */
+  .sdetail-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Subtitle — 24px. */
+  .sdetail-section-heading {
+    font-family: var(--font-sans);
+    font-size: clamp(20px, 2vw, 24px);
+    font-weight: 500;
+    font-style: normal;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  /* Body copy — 20px. */
+  .sdetail-section-body {
+    font-size: clamp(16px, 1.6vw, 20px);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    margin: 0;
+    max-width: 920px;
+  }
+
+  @media (max-width: 767px) {
+    .sdetail-sheet {
+      width: 100%;
+      max-width: 100%;
+    }
+    .sdetail-detail {
+      padding: 32px 16px 64px;
+    }
+    .sdetail-title {
+      padding-right: 48px;
+    }
+  }
+</style>
+
+<script>
+  import { initServiceDetail } from "../scripts/service-detail";
+  initServiceDetail();
+</script>
