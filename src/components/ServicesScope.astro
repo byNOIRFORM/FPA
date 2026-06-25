@@ -21,6 +21,15 @@
  * Desktop/tablet keep the scatter (scaled-down desktop); mobile (≤767)
  * stacks the tiles in a single column.
  */
+import { servicesPage } from "../i18n/services-page";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = servicesPage[lang];
+
 interface Tile {
   name: string;
   image: string;
@@ -29,20 +38,22 @@ interface Tile {
   speed: number;
 }
 
+// image + speed are language-agnostic; name + alt come from the dict.
 // Order matches the visual stagger (--1 … --4) positioned in CSS.
-const tiles: Tile[] = [
-  { name: "Novostavby",    image: "/images/services-scope/novostavby.png",    alt: "Novostavba rodinného domu vo svahu za súmraku",   speed: 6 },
-  { name: "Rekonštrukcie", image: "/images/services-scope/rekonstrukcie.png", alt: "Drevený model rekonštrukcie nad výkresom",        speed: 10 },
-  { name: "Interiéry",     image: "/images/services-scope/interiery.png",     alt: "Interiér s dreveným obkladom a výhľadom do mesta", speed: 5 },
-  { name: "Urbanizmus",    image: "/images/services-scope/urbanizmus.png",    alt: "Urbanistický model územia na stole pri okne",     speed: 8 },
+const meta = [
+  { image: "/images/services-scope/novostavby.png",    speed: 6 },
+  { image: "/images/services-scope/rekonstrukcie.png", speed: 10 },
+  { image: "/images/services-scope/interiery.png",     speed: 5 },
+  { image: "/images/services-scope/urbanizmus.png",    speed: 8 },
 ];
+const tiles: Tile[] = meta.map((m, i) => ({ ...m, ...t.scope.tiles[i] }));
 ---
 
 <section class="sscope" aria-labelledby="sscope-label">
   <div class="sscope-grid">
     {/* Mobile breaks the label after "projektovú": the tail (display:block
         ≤767) drops "dokumentáciu pre" onto its own second line. */}
-    <p class="sscope-label" id="sscope-label">Vypracujeme kompletnú projektovú <span class="sscope-label-tail">dokumentáciu pre</span></p>
+    <p class="sscope-label" id="sscope-label">{t.scope.labelHead} <span class="sscope-label-tail">{t.scope.labelTail}</span></p>
 
     {tiles.map((t, i) => (
       <div class={`sscope-tile sscope-tile--${i + 1}`} data-speed={t.speed}>

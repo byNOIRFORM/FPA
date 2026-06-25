@@ -18,6 +18,15 @@
  * priemyselnestavby / parkyverejnypriestor are portrait sources centre-
  * cropped into the landscape frame for now.
  */
+import { servicesPage } from "../i18n/services-page";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = servicesPage[lang];
+
 interface BType {
   key: string;
   name: string;
@@ -25,18 +34,21 @@ interface BType {
   alt: string;
 }
 
-const types: BType[] = [
-  { key: "rodinne",     name: "Rodinné domy",                image: "/images/building-types/rodinnedomy.jpg",         alt: "Moderný rodinný dom vo svahu" },
-  { key: "bytove",      name: "Bytové domy",                 image: "/images/building-types/bytovedomy.jpg",          alt: "Bytový/rezidenčný objekt" },
-  { key: "verejne",     name: "Verejné budovy",              image: "/images/building-types/verejnebudovy.jpg",       alt: "Verejná budova — knižnica" },
-  { key: "priemyselne", name: "Priemyselné stavby",          image: "/images/building-types/priemyselnestavby.jpg",   alt: "Priemyselná / industriálna stavba" },
-  { key: "rekreacne",   name: "Rekreačné a športové stavby", image: "/images/building-types/rekreacnesportove.jpg",   alt: "Rekreačný objekt v prírode" },
-  { key: "parky",       name: "Parky a verejný priestor",    image: "/images/building-types/parkyverejnypriestor.jpg", alt: "Urbanistický model verejného priestoru" },
+// key (CSS selectors + filenames) + image are language-agnostic; the
+// visible name (and alt) come from the dict, in the same order.
+const meta = [
+  { key: "rodinne",     image: "/images/building-types/rodinnedomy.jpg" },
+  { key: "bytove",      image: "/images/building-types/bytovedomy.jpg" },
+  { key: "verejne",     image: "/images/building-types/verejnebudovy.jpg" },
+  { key: "priemyselne", image: "/images/building-types/priemyselnestavby.jpg" },
+  { key: "rekreacne",   image: "/images/building-types/rekreacnesportove.jpg" },
+  { key: "parky",       image: "/images/building-types/parkyverejnypriestor.jpg" },
 ];
+const types: BType[] = meta.map((m, i) => ({ ...m, ...t.buildingTypes.types[i] }));
 ---
 
 <section class="btypes" aria-labelledby="btypes-label">
-  <p class="btypes-label" id="btypes-label">Typy stavieb</p>
+  <p class="btypes-label" id="btypes-label">{t.buildingTypes.label}</p>
 
   <div class="btypes-row">
     {/* Stacked photos — the first (Rodinné domy) is the always-on base;

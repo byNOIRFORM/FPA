@@ -1,6 +1,6 @@
 ---
 /**
- * Stupne projektovej dokumentácie — a full-bleed image band that breaks
+ * Fázy projektu a rozsah naších služieb — a full-bleed image band that breaks
  * out of the page's max-width (like a mini-hero): the photo runs edge to
  * edge, the white title sits top-left at the gutter, and a scroll arrow
  * sits bottom-right.
@@ -13,14 +13,22 @@
  * Placeholder photo: public/images/services-stages/stupne.png — swap by
  * dropping a new file with the same name.
  */
+import { servicesPage } from "../i18n/services-page";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = servicesPage[lang];
 const image = "/images/services-stages/stupne.png";
 ---
 
 <section class="sstages" aria-labelledby="sstages-title">
-  <img class="sstages-img" src={image} alt="Atelier Fotta // Popadič — pohľad z ulice" decoding="async" loading="lazy" />
+  <img class="sstages-img" src={image} alt={t.stages.alt} decoding="async" loading="lazy" />
   <div class="sstages-scrim" aria-hidden="true"></div>
 
-  <h2 class="sstages-title" id="sstages-title">Stupne projektovej dokumentácie</h2>
+  <h2 class="sstages-title" id="sstages-title">{t.stages.title}</h2>
 
   <div class="sstages-arrow" aria-hidden="true">
     <svg viewBox="0 0 24 84" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">

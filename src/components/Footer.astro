@@ -27,7 +27,7 @@
 // resolution: each span is inline-block and wraps as a natural
 // word boundary, so line breaks follow the container width
 // exactly as they would for plain text.
-import { home, type Lang } from "../i18n/home";
+import { home, langHref, type Lang } from "../i18n/home";
 
 interface Props {
   lang?: Lang;
@@ -55,7 +55,7 @@ const pitchLine2 = t.footer.pitch2.split(" ");
 
   {/* TOP — brand lockup alone on the left (matches Figma where
       the logo sits at top-7556 with the CTA much lower at 7828). */}
-  <a class="footer-logo" href="/" aria-label="Fotta // Popadič — architekt — domov">
+  <a class="footer-logo" href={langHref[lang]} aria-label="Fotta // Popadič — architekt — domov">
     <span class="footer-logo-main">FOTTA//POPADIČ</span>
     <span class="footer-logo-sub">{t.footer.architekt}</span>
   </a>
@@ -148,7 +148,7 @@ const pitchLine2 = t.footer.pitch2.split(" ");
       <section class="footer-col">
         <h3 class="footer-col-label">{t.footer.labels.navigation}</h3>
         <ul class="footer-links">
-          <li><a href="/" class="nav-flip" data-text={t.footer.nav.home}><span>{t.footer.nav.home}</span></a></li>
+          <li><a href={langHref[lang]} class="nav-flip" data-text={t.footer.nav.home}><span>{t.footer.nav.home}</span></a></li>
           <li><a href="#o-nas" class="nav-flip" data-text={t.footer.nav.about}><span>{t.footer.nav.about}</span></a></li>
           <li><a href="#projekty" class="nav-flip" data-text={t.footer.nav.projects}><span>{t.footer.nav.projects}</span></a></li>
           <li><a href="#sluzby" class="nav-flip" data-text={t.footer.nav.services}><span>{t.footer.nav.services}</span></a></li>

@@ -17,7 +17,7 @@
  * view the nav is transparent (over the hero/photo); once it scrolls
  * past the top the nav becomes the cream panel. Defaults per variant.
  */
-import { home, langHref, langLabel, LANGS, type Lang } from "../i18n/home";
+import { home, langHref, langLabel, LANGS, localizedHrefs, servicesHref, type Lang } from "../i18n/home";
 
 interface Props {
   lang?: Lang;
@@ -35,11 +35,16 @@ const {
 
 const t = home[lang];
 
-// Subpage anchors jump back to the homepage; landing anchors are local.
-const base = variant === "home" ? "" : "/";
-const aboutHref = `${base}#o-nas`;
-const projectsHref = `${base}#projekty`;
-const servicesHref = "/sluzby";
+// SK/CZ/EN switch keeps you on the CURRENT page in the other language
+// (computed from the URL), instead of always bouncing to the homepage.
+const langHrefs = localizedHrefs(Astro.url.pathname);
+
+// Subpage anchors jump back to the current language's homepage; landing
+// anchors are local. Services points at the current language's subpage.
+const homeBase = variant === "home" ? "" : lang === "sk" ? "/" : `/${lang}`;
+const aboutHref = `${homeBase}#o-nas`;
+const projectsHref = `${homeBase}#projekty`;
+const servicesLink = servicesHref[lang];
 
 // Only the landing nav starts hidden for the loader reveal — subpages
 // have no loader, so their nav must paint visible.
@@ -52,7 +57,7 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
 
 <nav class="nav" aria-label="Hlavná navigácia" data-nav-boundary-target={boundary}>
   <div class="nav-left">
-    <a class={`nav-logo${anim}`} href="/" data-grid-trigger>
+    <a class={`nav-logo${anim}`} href={langHref[lang]} data-grid-trigger>
       <span class="nav-logo-main">FOTTA//POPADIČ</span>
       <span class="nav-logo-sub">architekt</span>
     </a>
@@ -63,7 +68,7 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
     {LANGS.map((l) => (
       <li>
         <a
-          href={langHref[l]}
+          href={langHrefs[l]}
           class={`nav-flip nav-lang${l === lang ? " nav-lang--active" : ""}`}
           data-text={langLabel[l]}
           aria-current={l === lang ? "true" : undefined}
@@ -78,7 +83,7 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
     <ul class={`nav-links${anim}`}>
       <li><a class={`nav-flip${activeCls("about")}`} href={aboutHref} data-text={t.nav.links.about} aria-current={ariaCur("about")}><span>{t.nav.links.about}</span></a></li>
       <li><a class={`nav-flip${activeCls("projects")}`} href={projectsHref} data-text={t.nav.links.projects} aria-current={ariaCur("projects")}><span>{t.nav.links.projects}</span></a></li>
-      <li><a class={`nav-flip${activeCls("services")}`} href={servicesHref} data-text={t.nav.links.services} aria-current={ariaCur("services")}><span>{t.nav.links.services}</span></a></li>
+      <li><a class={`nav-flip${activeCls("services")}`} href={servicesLink} data-text={t.nav.links.services} aria-current={ariaCur("services")}><span>{t.nav.links.services}</span></a></li>
     </ul>
     <a class={`nav-cta${anim}`} href="#kontakt" data-open-contact>
       <span class="nav-cta-text">{t.nav.cta}</span>
@@ -202,6 +207,13 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
   .nav-lang {
     color: inherit;
     text-decoration: none;
+  }
+
+  /* Current language — de-emphasised + inert, exactly like the active
+     page link (.nav-link--active). */
+  .nav-lang--active {
+    opacity: 0.55;
+    pointer-events: none;
   }
 
   .nav-right {

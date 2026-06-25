@@ -577,3 +577,25 @@ export const langLabel: Record<Lang, string> = {
   cz: "CZ,",
   en: "EN",
 };
+
+/** Path to the services subpage per language (SK has no prefix). */
+export const servicesHref: Record<Lang, string> = {
+  sk: "/sluzby",
+  cz: "/cz/sluzby",
+  en: "/en/sluzby",
+};
+
+/**
+ * Map the CURRENT pathname to its equivalent in every language, so the
+ * SK/CZ/EN switch keeps you on the same page (homepage ↔ homepage,
+ * /sluzby ↔ /cz/sluzby ↔ /en/sluzby) instead of always bouncing to the
+ * homepage. Used by Nav + SideNav.
+ */
+export function localizedHrefs(pathname: string): Record<Lang, string> {
+  // Strip a leading /cz or /en prefix → the canonical (SK) path.
+  const stripped = pathname.replace(/^\/(cz|en)(?=\/|$)/, "");
+  const base = stripped === "" ? "/" : stripped;
+  const join = (prefix: string) =>
+    base === "/" ? prefix || "/" : `${prefix}${base}`;
+  return { sk: join(""), cz: join("/cz"), en: join("/en") };
+}

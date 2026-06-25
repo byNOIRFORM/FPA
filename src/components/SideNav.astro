@@ -26,7 +26,7 @@
  * use the scaled inline nav instead.
  */
 
-import { home, langHref, type Lang } from "../i18n/home";
+import { home, langHref, localizedHrefs, servicesHref, type Lang } from "../i18n/home";
 
 interface Props {
   lang?: Lang;
@@ -44,20 +44,22 @@ interface MenuLink {
 // Home / section links point at the CURRENT language's homepage so the
 // mobile menu keeps you in-language; Služby stays the (SK-only) subpage.
 const base = langHref[lang];
+// SK/CZ/EN switch keeps you on the CURRENT page in the other language.
+const langHrefs = localizedHrefs(Astro.url.pathname);
 const links: MenuLink[] = [
   { label: t.footer.nav.home, href: base },
   { label: t.footer.nav.about, href: `${base}#o-nas` },
   { label: t.footer.nav.projects, href: `${base}#projekty` },
-  { label: t.footer.nav.services, href: "/sluzby" },
+  { label: t.footer.nav.services, href: servicesHref[lang] },
   { label: t.nav.cta, href: "#kontakt", contact: true },
 ];
 
 // Language names stay in their own tongue (a switcher convention); only
 // the active marker follows the current page language.
 const langs = [
-  { label: "Slovenčina (SK)", code: "sk", href: langHref.sk },
-  { label: "Česky (CZ)", code: "cz", href: langHref.cz },
-  { label: "English (EN)", code: "en", href: langHref.en },
+  { label: "Slovenčina (SK)", code: "sk", href: langHrefs.sk },
+  { label: "Česky (CZ)", code: "cz", href: langHrefs.cz },
+  { label: "English (EN)", code: "en", href: langHrefs.en },
 ] as const;
 ---
 
@@ -73,7 +75,7 @@ const langs = [
     {/* Top bar — mirrors the closed mobile nav so the logo stays in
         place and "Menu" appears to swap to "Close" on open. */}
     <div class="sidenav-bar">
-      <a class="sidenav-logo" href="/" data-sidenav-link aria-label="Fotta // Popadič — domov">
+      <a class="sidenav-logo" href={base} data-sidenav-link aria-label="Fotta // Popadič — domov">
         <span class="sidenav-logo-main">FOTTA//POPADIČ</span>
         <span class="sidenav-logo-sub">architekt</span>
       </a>

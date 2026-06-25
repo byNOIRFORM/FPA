@@ -1,0 +1,32 @@
+---
+/**
+ * ServicesPage — the /sluzby page body (all sections), parameterised by
+ * language. Each /sluzby, /cz/sluzby and /en/sluzby route renders this
+ * inside BaseLayout with the matching `lang`, so there's a single source
+ * of truth for the page composition while the copy comes from the i18n
+ * dictionaries (services-page.ts + home.ts). Mirrors Home.astro.
+ */
+import ServicesIntro from "./ServicesIntro.astro";
+import ServicesScope from "./ServicesScope.astro";
+import BuildingTypes from "./BuildingTypes.astro";
+import ServicesManifest from "./ServicesManifest.astro";
+import ServicesStages from "./ServicesStages.astro";
+import Services from "./Services.astro";
+import Footer from "./Footer.astro";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+---
+
+<ServicesIntro lang={lang} />
+<ServicesScope lang={lang} />
+<BuildingTypes lang={lang} />
+<ServicesManifest lang={lang} />
+<ServicesStages lang={lang} />
+{/* Detailed spec-sheet — reuses the homepage Services section + effects. */}
+<Services lang={lang} detailed />
+{/* Same footer as the homepage. */}
+<Footer lang={lang} />

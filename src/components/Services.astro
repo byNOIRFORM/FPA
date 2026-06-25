@@ -48,6 +48,7 @@ interface Service {
 import { home, type Lang } from "../i18n/home";
 import ServiceDetail from "./ServiceDetail.astro";
 import { detailIndices } from "../i18n/service-details";
+import { servicesPage } from "../i18n/services-page";
 
 interface Props {
   lang?: Lang;
@@ -58,6 +59,7 @@ interface Props {
 }
 const { lang = "sk", detailed = false } = Astro.props;
 const t = home[lang];
+const sp = servicesPage[lang];
 
 // num / image / aspect are language-agnostic and stay here; titles,
 // descriptions and alt come from the i18n dictionary (home.ts →
@@ -70,21 +72,13 @@ const meta = [
   { num: "05", image: "/images/services/05-realizacna.jpg", aspect: "landscape" as const },
 ];
 
-// "Obsahuje" lists for the detailed /sluzby variant (SK). The homepage
-// summary ignores them. Move into the i18n dictionary if /sluzby ever
-// goes multi-language.
-const includesList: string[][] = [
-  ["Analýza existujúceho územného plánu", "Analýza územia", "Dopravné riešenie", "Riešenie zón", "Podklad pre zmeny a doplnky územného plánu"],
-  ["Koncept, idea návrhu", "Pôdorysy", "Rezy", "Pohľady", "3D vizualizácia"],
-  ["Sprievodná správa", "Situácia osadenia", "Pôdorysy a rezy", "Zákresy do kontextu"],
-  ["Architektúra (mierka 1:50)", "Energetické hodnotenie stavby", "Požiarna bezpečnosť stavby", "Statika", "Zdravotechnika", "Vykurovanie", "Elektroinštalácie", "Vzduchotechnika", "Dopravné riešenie", "Napojenie stavby na inžinierske siete"],
-  ["Architektúra (mierka 1:50 až 1:25)", "Energetické hodnotenie stavby", "Požiarna bezpečnosť stavby", "Statika", "Zdravotechnika", "Vykurovanie", "Elektroinštalácie", "Vzduchotechnika", "Dopravné riešenie", "Napojenie stavby na inžinierske siete", "Autorský dozor"],
-];
-
+// "Obsahuje" lists for the detailed /sluzby variant come from the
+// services-page dictionary (per language); the homepage summary ignores
+// them. Row titles/descriptions still come from home.ts (services.items).
 const services: Service[] = t.services.items.map((s, i) => ({
   ...meta[i],
   ...s,
-  includes: includesList[i],
+  includes: sp.spec.includes[i],
 }));
 ---
 
@@ -108,7 +102,7 @@ const services: Service[] = t.services.items.map((s, i) => ({
             <p class="service-desc-text">{s.desc}</p>
             {detailed && s.includes.length > 0 && (
               <div class="service-includes">
-                <p class="service-includes-label">Obsahuje:</p>
+                <p class="service-includes-label">{sp.spec.includesLabel}</p>
                 <ul class="service-includes-list">
                   {s.includes.map((it) => <li>{it}</li>)}
                 </ul>
@@ -176,7 +170,7 @@ const services: Service[] = t.services.items.map((s, i) => ({
 
 {/* Detail panel — only the detailed /sluzby variant renders it (so its
     CSS + JS never ship on the homepage). */}
-{detailed && <ServiceDetail />}
+{detailed && <ServiceDetail lang={lang} />}
 
 <style>
   /* ===== Section frame =====

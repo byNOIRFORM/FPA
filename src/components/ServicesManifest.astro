@@ -9,9 +9,14 @@
  * Leaders manifests (scripts/services-manifest.ts) — stagger 0.4, scrub
  * 0.6 — so the reveal feels identical everywhere.
  */
-const text =
-  "Projekt pre nás nekončí odovzdaním výkresov. Sprevádzame vás od prvej skice až po moment, kedy otočíte kľúč v zámku. Strážime každý krok, aby mal hotový dom presne tú atmosféru, ktorú sme spoločne vymysleli.";
-const words = text.split(" ");
+import { servicesPage } from "../i18n/services-page";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const words = servicesPage[lang].manifest.split(" ");
 ---
 
 <section class="smanifest" aria-label="O službách">

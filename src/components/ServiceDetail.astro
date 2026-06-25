@@ -17,6 +17,13 @@
  * ship on the homepage).
  */
 import { serviceDetails } from "../i18n/service-details";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const details = serviceDetails[lang];
 ---
 
 <aside
@@ -47,7 +54,7 @@ import { serviceDetails } from "../i18n/service-details";
 
     {/* data-lenis-prevent — let the panel's native overflow scroll, not Lenis. */}
     <div class="sdetail-scroll" data-lenis-prevent>
-      {serviceDetails.map((d, i) => (
+      {details.map((d, i) => (
         <article class="sdetail-detail" data-detail={d.index} hidden={i !== 0}>
           <h2 class="sdetail-title">{d.title}</h2>
           <p class="sdetail-intro">{d.intro}</p>

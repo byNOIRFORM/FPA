@@ -11,9 +11,15 @@
  * truth across the whole site. Its theme-switch observes `.sintro`
  * (the boundary default for the sub variant).
  */
-const titleText =
-  "Za každou čiarou vo výkrese vidíme ľudské príbehy. Nestaviame na pominuteľných trendoch, ale na svetle, materiáloch a vašich rituáloch. Vytvárame priestor, ktorý s vami prirodzene splynie.";
-const titleWords = titleText.split(" ");
+import { servicesPage } from "../i18n/services-page";
+import type { Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = servicesPage[lang];
+const titleWords = t.intro.title.split(" ");
 ---
 
 <section class="sintro" aria-label="Služby">
@@ -35,7 +41,7 @@ const titleWords = titleText.split(" ");
       <img
         class="sintro-layer sintro-photo"
         src="/images/services-intro/intro-photo.jpg"
-        alt="Dokončený rodinný dom za súmraku — výsledok projektu ateliéru."
+        alt={t.intro.photoAlt}
         decoding="async"
       />
     </div>
