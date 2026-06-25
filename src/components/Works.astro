@@ -507,6 +507,18 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
       height: auto;
       aspect-ratio: 1 / 1;
     }
+    /* iOS Safari doesn't reliably resolve the percentage `top: -11%`
+       against the aspect-ratio media height, so the image sat flush at the
+       top and the ±8% inner parallax exposed a grey strip on scroll. Give
+       the headroom via margin-top instead — margin percentages resolve
+       against WIDTH (always definite), and the mobile tile is square so
+       -11% width == -11% height. Same parallax (±8), reliable on WebKit.
+       top:0 neutralises the base rule on engines where it does resolve, so
+       the offset is never doubled. */
+    .work-media img {
+      top: 0;
+      margin-top: -11%;
+    }
     .work-info {
       gap: 8px;
     }

@@ -136,6 +136,16 @@ const details = serviceDetails[lang];
     background: var(--btn-bg-hover);
   }
 
+  /* Focused on open for keyboard users; suppress the default ring on
+     mouse/touch, keep it for keyboard nav (same as the contact close). */
+  .sdetail-close:focus {
+    outline: none;
+  }
+  .sdetail-close:focus-visible {
+    outline: 2px solid var(--btn-fg);
+    outline-offset: 2px;
+  }
+
   .sdetail-scroll {
     position: absolute;
     inset: 0;

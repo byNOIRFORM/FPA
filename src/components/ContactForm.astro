@@ -260,6 +260,17 @@ const SERVICES = [...t.services.items.map((s) => s.title), t.contact.serviceOthe
     background: var(--btn-bg-hover);
   }
 
+  /* The panel moves focus here on open for keyboard users — but that also
+     flashed the browser's default ring on mouse/touch. Suppress the plain
+     :focus ring; keep a clear one for actual keyboard nav (:focus-visible). */
+  .contact-close:focus {
+    outline: none;
+  }
+  .contact-close:focus-visible {
+    outline: 2px solid var(--btn-fg);
+    outline-offset: 2px;
+  }
+
   /* Scroll area inside the sheet */
   .contact-scroll {
     position: absolute;
