@@ -133,7 +133,9 @@ const label: Record<Lang, string> = {
      but tuck it a little higher so it clears mobile browser UI. */
   @media (max-width: 767px) {
     .theme-toggle {
-      bottom: 20px;
+      /* Clear the home indicator now that viewport-fit=cover lets content
+         run under it (env is 0 on devices without a safe area). */
+      bottom: calc(20px + env(safe-area-inset-bottom, 0px));
       right: 16px;
       width: 42px;
       height: 42px;
