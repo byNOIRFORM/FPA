@@ -1,0 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import ProjectPage from "../../components/ProjectPage.astro";
+import { projects, projectsBySlug } from "../../i18n/projects";
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const locale = projectsBySlug.get(slug!)!.locales.sk;
+---
+
+{/* Subpage — no intro loader; nav is transparent over the hero photo
+    (boundary = .phero) and turns cream once it scrolls past. */}
+<BaseLayout
+  title={`${locale.title} — Fotta // Popadič`}
+  description={locale.intro}
+  loader={false}
+  navVariant="sub"
+  navActive="projects"
+  navBoundary=".phero"
+  lang="sk"
+>
+  <ProjectPage lang="sk" slug={slug!} />
+</BaseLayout>

@@ -24,6 +24,10 @@ interface Props {
   navVariant?: "home" | "sub";
   /** Marks the current-page primary nav link on subpages. */
   navActive?: "about" | "projects" | "services";
+  /** Selector the nav theme-switch observes (transparent while in view,
+   *  cream once scrolled past). Defaults per variant inside Nav; project
+   *  pages pass ".phero" so the bar reads over the hero photo. */
+  navBoundary?: string;
 }
 
 const {
@@ -33,6 +37,7 @@ const {
   lang = "sk",
   navVariant = "home",
   navActive,
+  navBoundary,
 } = Astro.props;
 ---
 
@@ -126,7 +131,7 @@ const {
         inside a section's stacking context (e.g. the sticky intro on
         /sluzby, where a nested nav rendered under later sections). One
         nav for the whole site. */}
-    <Nav lang={lang} variant={navVariant} active={navActive} />
+    <Nav lang={lang} variant={navVariant} active={navActive} boundary={navBoundary} />
 
     {/* Custom cursor — circle ring + small square in the centre.
         Hidden on touch / small screens via CSS in global.css. */}
@@ -164,6 +169,7 @@ const {
       import { initHero } from "../scripts/hero";
       import { initAbout } from "../scripts/about";
       import { initWorks } from "../scripts/works";
+      import { initProject } from "../scripts/project";
       import { initServices } from "../scripts/services";
       import { initLeaders } from "../scripts/leaders";
       import { initFooter } from "../scripts/footer";
@@ -175,6 +181,7 @@ const {
       initHero();
       initAbout();
       initWorks();
+      initProject();
       initServices();
       initLeaders();
       initFooter();

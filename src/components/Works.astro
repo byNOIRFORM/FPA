@@ -33,6 +33,7 @@ interface Project {
 }
 
 import { home, type Lang } from "../i18n/home";
+import { worksProjectSlugs, availableProjectSlugs, projectHref } from "../i18n/projects";
 
 interface Props {
   lang?: Lang;
@@ -55,6 +56,13 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
   ...p,
   image: images[i],
 }));
+
+// A tile links to its detail page only when one exists (phase 1: only
+// "chata-pod-korunami"). The rest stay non-clickable until their detail
+// page is added, at which point the link turns on automatically.
+const projectHrefs = worksProjectSlugs.map((s) =>
+  availableProjectSlugs.has(s) ? projectHref(lang, s) : null,
+);
 ---
 
 <section class="works" id="projekty" aria-labelledby="works-heading">
@@ -72,6 +80,9 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
           <h3 class="work-title" data-reveal>{projects[0].title}</h3>
           <p class="work-desc" data-reveal>{projects[0].description}</p>
         </div>
+        {projectHrefs[0] && (
+          <a class="work-cover" href={projectHrefs[0]} aria-label={projects[0].title}></a>
+        )}
       </article>
       <article class="work-tile work-tile--r1r">
         <div class="work-media">
@@ -81,6 +92,9 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
           <h3 class="work-title" data-reveal>{projects[1].title}</h3>
           <p class="work-desc" data-reveal>{projects[1].description}</p>
         </div>
+        {projectHrefs[1] && (
+          <a class="work-cover" href={projectHrefs[1]} aria-label={projects[1].title}></a>
+        )}
       </article>
     </div>
 
@@ -97,6 +111,9 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
           <h3 class="work-title" data-reveal>{projects[2].title}</h3>
           <p class="work-desc" data-reveal>{projects[2].description}</p>
         </div>
+        {projectHrefs[2] && (
+          <a class="work-cover" href={projectHrefs[2]} aria-label={projects[2].title}></a>
+        )}
       </article>
       <article class="work-tile work-tile--r2r">
         <div class="work-media">
@@ -106,6 +123,9 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
           <h3 class="work-title" data-reveal>{projects[3].title}</h3>
           <p class="work-desc" data-reveal>{projects[3].description}</p>
         </div>
+        {projectHrefs[3] && (
+          <a class="work-cover" href={projectHrefs[3]} aria-label={projects[3].title}></a>
+        )}
       </article>
     </div>
 
@@ -121,6 +141,9 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
           <h3 class="work-title" data-reveal>{projects[4].title}</h3>
           <p class="work-desc" data-reveal>{projects[4].description}</p>
         </div>
+        {projectHrefs[4] && (
+          <a class="work-cover" href={projectHrefs[4]} aria-label={projects[4].title}></a>
+        )}
       </article>
       <article class="work-tile work-tile--r3r">
         <div class="work-media">
@@ -130,6 +153,9 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
           <h3 class="work-title" data-reveal>{projects[5].title}</h3>
           <p class="work-desc" data-reveal>{projects[5].description}</p>
         </div>
+        {projectHrefs[5] && (
+          <a class="work-cover" href={projectHrefs[5]} aria-label={projects[5].title}></a>
+        )}
       </article>
     </div>
   </div>
@@ -219,9 +245,19 @@ const projects: Project[] = t.works.projects.map((p, i) => ({
      (20px at 1440 → 30 at 2160+) so the caption reads as belonging
      to the photo, not as a separate paragraph below it. */
   .work-tile {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: clamp(16px, 1.39vw, 30px);
+  }
+
+  /* Stretched link — makes the whole tile open its detail page without
+     restructuring the media/info. Sits above both; the tile's mouseenter
+     (cursor "POZRIEŤ" + image zoom, works.ts) still fires underneath. */
+  .work-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
   }
 
   /* Tile widths and margins are expressed as percentages of the

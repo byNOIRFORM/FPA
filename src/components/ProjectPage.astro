@@ -1,0 +1,484 @@
+---
+/**
+ * ProjectPage — a single project detail page, parameterised by language
+ * + slug. Built 1:1 from the Figma "projektDetail" frame (node 3193:414)
+ * at the 1440 canvas (28px gutters → 1384 content); proportions are kept
+ * as % of the content width and font/spacing scale with clamp(vw) exactly
+ * like Works/Nav, so it grows the same way as the rest of the site.
+ *
+ * Sections: hero (title over photo) → word-scrub intro + rule → Informácie
+ * + spec → gallery (full / 2-up, inner parallax) → Ďalšie projekty (hover
+ * swaps the preview) → rule → Footer.
+ *
+ * Motion in scripts/project.ts:
+ *   - Inner parallax on gallery + info photos (fill via inset:0 → no grey strips)
+ *   - Hero: slow Ken Burns yo-yo (scale 1 ↔ 1.06), like the homepage hero
+ *   - Per-word colour-scrub on the intro (same --reveal pattern as About)
+ *   - Related: hover a row → preview image swaps (crossfade) + "POZRIEŤ"
+ *   - Photos otherwise just load — no scroll-reveal animations
+ */
+import Footer from "./Footer.astro";
+import { home, type Lang } from "../i18n/home";
+import {
+  projectsBySlug,
+  projectsUI,
+  relatedCategories,
+  worksProjectSlugs,
+  worksImages,
+  availableProjectSlugs,
+  projectHref,
+} from "../i18n/projects";
+
+interface Props {
+  lang?: Lang;
+  slug: string;
+}
+const { lang = "sk", slug } = Astro.props;
+
+const project = projectsBySlug.get(slug);
+if (!project) throw new Error(`ProjectPage: unknown slug "${slug}"`);
+const locale = project.locales[lang];
+const ui = projectsUI[lang];
+
+const introWords = locale.intro.split(" ");
+
+const homeBase = lang === "sk" ? "/" : `/${lang}`;
+const projectsAnchor = `${homeBase}#projekty`;
+
+// "Ďalšie projekty" — every OTHER project from the Works grid, with its
+// localised title + category + image (for the hover preview swap). Links
+// to a detail page when one exists, else back to the homepage projects.
+const currentIndex = worksProjectSlugs.indexOf(slug);
+const related = home[lang].works.projects
+  .map((p, i) => {
+    const s = worksProjectSlugs[i];
+    return {
+      title: p.title,
+      category: relatedCategories[lang][i],
+      image: worksImages[i],
+      href: availableProjectSlugs.has(s) ? projectHref(lang, s) : projectsAnchor,
+    };
+  })
+  .filter((_, i) => i !== currentIndex);
+
+const previewDefault = related[0]?.image ?? project.heroImage;
+---
+
+<article class="project">
+  {/* ===== HERO — title over the photo, flat 10% scrim ===== */}
+  <header class="phero" aria-label={locale.title}>
+    <div class="pmedia phero-media">
+      <img src={project.heroImage} alt={locale.heroAlt} fetchpriority="high" />
+    </div>
+    <div class="phero-scrim" aria-hidden="true"></div>
+    <div class="pwrap phero-inner">
+      <h1 class="phero-title">{locale.title}</h1>
+    </div>
+  </header>
+
+  {/* ===== INTRO — per-word colour scrub + rule ===== */}
+  <section class="pintro">
+    <div class="pwrap pintro-inner">
+      <p class="pintro-text">
+        {introWords.map((w) => (
+          <>
+            <span class="pword">{w}</span>{" "}
+          </>
+        ))}
+      </p>
+      <div class="pdivider"></div>
+    </div>
+  </section>
+
+  {/* ===== INFORMÁCIE — portrait + body + spec sheet ===== */}
+  <section class="pinfo">
+    <div class="pwrap pinfo-grid">
+      <figure class="pinfo-figure">
+        <div class="pmedia" style="aspect-ratio: 564 / 800">
+          <img src={project.infoImage} alt={locale.infoAlt} loading="lazy" />
+        </div>
+      </figure>
+
+      <div class="pinfo-content">
+        <h2 class="pinfo-label">{ui.infoLabel}</h2>
+
+        <div class="pinfo-text">
+          {locale.body.map((para) => (
+            <p>{para}</p>
+          ))}
+        </div>
+
+        <dl class="pspec">
+          <div class="pspec-row"><dt>{ui.specLabels.rok}</dt><dd>{locale.spec.rok}</dd></div>
+          <div class="pspec-row"><dt>{ui.specLabels.klient}</dt><dd>{locale.spec.klient}</dd></div>
+          <div class="pspec-row"><dt>{ui.specLabels.krajina}</dt><dd>{locale.spec.krajina}</dd></div>
+          <div class="pspec-row"><dt>{ui.specLabels.kategoria}</dt><dd>{locale.spec.kategoria}</dd></div>
+          <div class="pspec-row"><dt>{ui.specLabels.architekt}</dt><dd>{locale.spec.architekt}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  {/* ===== GALLERY — full / 2-up, inner parallax ===== */}
+  <section class="pgallery-section">
+    <div class="pwrap pgallery">
+      {project.gallery.map((g, i) => (
+        <figure class={`pg-item pg-item--${g.span}`}>
+          <div class="pmedia" style={`aspect-ratio: ${g.ratio}`}>
+            <img src={g.image} alt={`${locale.title} — ${i + 1}`} loading="lazy" />
+          </div>
+        </figure>
+      ))}
+    </div>
+  </section>
+
+  {/* ===== ĎALŠIE PROJEKTY — hover swaps the preview ===== */}
+  <section class="prelated">
+    <div class="pwrap prelated-inner">
+      <h2 class="prelated-title">{ui.relatedLabel}</h2>
+      <div class="prelated-grid">
+        <ul class="prelated-list">
+          {related.map((r) => (
+            <li class="prelated-row">
+              <a href={r.href} data-project-img={r.image}>
+                <span class="prelated-name">{r.title}</span>
+                <span class="prelated-cat">{r.category}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="prelated-thumb">
+          <div class="pmedia pmedia--static" style={`aspect-ratio: 328 / 280`}>
+            <img class="prelated-thumb-img" src={previewDefault} alt="" loading="lazy" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="pwrap"><div class="pdivider"></div></div>
+
+  <Footer lang={lang} />
+</article>
+
+<style>
+  .project {
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  /* Content container — mirrors Works: full-bleed up to 2464, 28px (2vw)
+     gutters at 1440. The hero is the only edge-to-edge element. */
+  .pwrap {
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    padding-inline: clamp(16px, 2vw, 48px);
+  }
+
+  /* =============================================================
+     Inner-parallax media. The image FILLS the frame exactly via
+     inset:0 — purely geometric, no % height to resolve, so it can
+     never fall back to a short image and leak a grey strip (which is
+     what a % height against an aspect-ratio frame does in Chrome).
+     The parallax headroom is a base transform: scale(1.3) — ~15%
+     overscan each side — and project.ts drifts it with yPercent
+     +10 → -10 (10% of the frame, ≈ the homepage Works grid), leaving
+     ~5% cover buffer at the extremes. Transforms resolve on every
+     engine incl. iOS Safari → no grey strips, any aspect ratio.
+     ============================================================= */
+  .pmedia {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .pmedia img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.3);
+    will-change: transform;
+  }
+  /* Preview thumb is interactive (hover-swap), not a scroll image — no
+     parallax oversize; it just covers its frame. */
+  .pmedia--static img {
+    transform: none;
+  }
+
+  /* ===== HERO ===== */
+  .phero {
+    position: relative;
+    height: 100vh;
+    min-height: 520px;
+    overflow: hidden;
+  }
+  .phero-media {
+    position: absolute;
+    inset: 0;
+  }
+  /* Hero fills via inset:0 (no overscan zoom here) — project.ts runs the
+     Ken Burns yo-yo (scale 1 ↔ 1.06) instead of the inner parallax. */
+  .phero-media img {
+    transform: none;
+  }
+  .phero-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.1); /* flat 10% — matches Figma */
+  }
+  .phero-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: clamp(32px, 3.89vw, 64px); /* 56 @1440 — title offset from bottom */
+  }
+  .phero-title {
+    font-family: var(--font-sans);
+    font-style: normal; /* override the global serif-italic heading rule */
+    font-weight: 500;
+    color: #fff;
+    font-size: clamp(34px, 4.44vw, 88px); /* 64 @1440 */
+    line-height: 1.094; /* 70/64 */
+    letter-spacing: 0;
+    margin: 0;
+  }
+
+  /* ===== INTRO ===== */
+  .pintro {
+    padding-top: clamp(56px, 6.94vw, 140px); /* 100 @1440 */
+  }
+  .pintro-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .pintro-text {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    max-width: 83%; /* 1150/1384 */
+    text-align: center;
+    font-size: clamp(26px, 3.33vw, 68px); /* 48 @1440 */
+    line-height: 1.25; /* 60/48 */
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+  /* Greyed → full-ink per-word reveal, driven by --reveal (0→1) in
+     project.ts — same effect as the homepage About headline. */
+  .pword {
+    color: color-mix(in srgb, var(--ink) calc(var(--reveal, 0) * 100%), var(--ink-faint));
+  }
+
+  .pdivider {
+    width: 100%;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ===== INFORMÁCIE =====
+     Figma: img 564 · gap 140 · right col 563 (≈8.5% trails right). */
+  .pinfo {
+    padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .pinfo-grid {
+    display: grid;
+    grid-template-columns: 40.75% 40.68%;
+    column-gap: 10.12%;
+    justify-content: start;
+    align-items: start;
+  }
+  .pinfo-figure {
+    margin: 0;
+  }
+  .pinfo-content {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(40px, 8.33vw, 160px); /* 120 @1440 */
+  }
+  .pinfo-label {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 500;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .pinfo-text p {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0 0 1.4em;
+  }
+  .pinfo-text p:last-child {
+    margin-bottom: 0;
+  }
+
+  .pspec {
+    margin: 0;
+  }
+  .pspec-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    padding-block: clamp(14px, 1.39vw, 28px); /* 20 @1440 */
+    border-bottom: 1px solid var(--line);
+  }
+  .pspec-row:first-child {
+    padding-top: 0;
+  }
+  .pspec-row dt {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(16px, 1.39vw, 30px);
+    color: var(--ink);
+    margin: 0;
+  }
+  .pspec-row dd {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 30px);
+    color: var(--ink);
+    margin: 0;
+    text-align: right;
+  }
+
+  /* ===== GALLERY ===== */
+  .pgallery-section {
+    padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .pgallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
+    row-gap: clamp(16px, 1.94vw, 40px); /* 28 @1440 */
+  }
+  .pg-item {
+    margin: 0;
+  }
+  .pg-item--full {
+    grid-column: 1 / -1;
+  }
+
+  /* ===== ĎALŠIE PROJEKTY ===== */
+  .prelated {
+    padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .prelated-inner {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(24px, 2.78vw, 56px); /* 40 @1440 */
+  }
+  .prelated-title {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 500;
+    font-size: clamp(16px, 1.39vw, 30px);
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .prelated-grid {
+    display: grid;
+    grid-template-columns: 66.11% 23.7%;
+    justify-content: space-between;
+    align-items: start;
+  }
+  .prelated-list {
+    margin: 0;
+  }
+  .prelated-row a {
+    display: grid;
+    grid-template-columns: 37.38% 48.74%;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: clamp(16px, 1.94vw, 40px); /* 28 @1440 */
+    text-decoration: none;
+    color: inherit;
+  }
+  .prelated-name {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 30px);
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    transition: opacity 0.3s var(--ease-out);
+  }
+  .prelated-cat {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 30px);
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+  .prelated-row a:hover .prelated-name {
+    opacity: 0.5;
+  }
+  .prelated-thumb {
+    width: 100%;
+  }
+  .prelated-thumb-img {
+    will-change: opacity;
+  }
+
+  /* =============================================================
+     Responsive — tablet (768–1199) keeps the desktop grid scaled by
+     clamp()/%. Mobile (≤767) stacks everything.
+     ============================================================= */
+  @media (max-width: 767px) {
+    .phero {
+      height: 78vh;
+      min-height: 460px;
+    }
+    .phero-title {
+      font-size: clamp(30px, 8.8vw, 52px);
+    }
+    .pintro-text {
+      max-width: 100%;
+      text-align: left;
+      font-size: clamp(22px, 6vw, 30px);
+    }
+    .pinfo-grid {
+      grid-template-columns: 1fr;
+      row-gap: clamp(28px, 7vw, 48px);
+      column-gap: 0;
+    }
+    .pinfo-content {
+      gap: clamp(28px, 8vw, 56px);
+    }
+    .pgallery {
+      grid-template-columns: 1fr;
+      row-gap: clamp(16px, 4vw, 28px);
+    }
+    .pg-item--full,
+    .pg-item--half {
+      grid-column: auto;
+    }
+    .prelated-grid {
+      grid-template-columns: 1fr;
+      gap: clamp(24px, 7vw, 40px);
+    }
+    .prelated-row a {
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+    }
+    .prelated-thumb {
+      max-width: 60%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pword {
+      --reveal: 1;
+    }
+  }
+</style>

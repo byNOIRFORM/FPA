@@ -1,0 +1,24 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProjectPage from "../../../components/ProjectPage.astro";
+import { projects, projectsBySlug } from "../../../i18n/projects";
+
+export function getStaticPaths() {
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const locale = projectsBySlug.get(slug!)!.locales.en;
+---
+
+<BaseLayout
+  title={`${locale.title} — Fotta // Popadič`}
+  description={locale.intro}
+  loader={false}
+  navVariant="sub"
+  navActive="projects"
+  navBoundary=".phero"
+  lang="en"
+>
+  <ProjectPage lang="en" slug={slug!} />
+</BaseLayout>
