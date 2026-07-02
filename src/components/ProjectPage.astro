@@ -1,21 +1,23 @@
 ---
 /**
- * ProjectPage — a single project detail page, parameterised by language
- * + slug. Built 1:1 from the Figma "projektDetail" frame (node 3193:414)
+ * ProjectPage — a single project detail page, parameterised by language +
+ * slug. Built from the Figma "projektDetail_final" frame (node 3227:622)
  * at the 1440 canvas (28px gutters → 1384 content); proportions are kept
  * as % of the content width and font/spacing scale with clamp(vw) exactly
  * like Works/Nav, so it grows the same way as the rest of the site.
  *
- * Sections: hero (title over photo) → word-scrub intro + rule → Informácie
- * + spec → gallery (full / 2-up, inner parallax) → Ďalšie projekty (hover
- * swaps the preview) → rule → Footer.
+ * Spine (fixed): hero → word-scrub intro → context + meta → [content
+ * blocks] → drag gallery → Ďalšie projekty → footer. The middle is an
+ * ORDERED ARRAY of typed blocks (photo / text / duo / spec) from the CMS
+ * model in i18n/projects.ts — order + kind drive the layout.
  *
  * Motion in scripts/project.ts:
- *   - Inner parallax on gallery + info photos (fill via inset:0 → no grey strips)
  *   - Hero: slow Ken Burns yo-yo (scale 1 ↔ 1.06), like the homepage hero
+ *   - Inner parallax on every .pmedia photo (block/duo/context) — fill via
+ *     inset:0, scale 1.3 overscan, yPercent drift → no grey strips
  *   - Per-word colour-scrub on the intro (same --reveal pattern as About)
+ *   - Drag gallery: GSAP Draggable + InertiaPlugin, custom "Ťahajte" cursor
  *   - Related: hover a row → preview image swaps (crossfade) + "POZRIEŤ"
- *   - Photos otherwise just load — no scroll-reveal animations
  */
 import Footer from "./Footer.astro";
 import { home, type Lang } from "../i18n/home";
@@ -41,13 +43,14 @@ const locale = project.locales[lang];
 const ui = projectsUI[lang];
 
 const introWords = locale.intro.split(" ");
+// Optional meta rows — a row with an empty value is dropped (CMS behaviour).
+const metaRows = locale.meta.filter((r) => r.value.trim() !== "");
 
 const homeBase = lang === "sk" ? "/" : `/${lang}`;
 const projectsAnchor = `${homeBase}#projekty`;
 
 // "Ďalšie projekty" — every OTHER project from the Works grid, with its
-// localised title + category + image (for the hover preview swap). Links
-// to a detail page when one exists, else back to the homepage projects.
+// localised title + category + image (for the hover preview swap).
 const currentIndex = worksProjectSlugs.indexOf(slug);
 const related = home[lang].works.projects
   .map((p, i) => {
@@ -62,10 +65,13 @@ const related = home[lang].works.projects
   .filter((_, i) => i !== currentIndex);
 
 const previewDefault = related[0]?.image ?? project.heroImage;
+
+const gallery = project.gallery;
+const singleGallery = gallery.length <= 1;
 ---
 
 <article class="project">
-  {/* ===== HERO — title over the photo, flat 10% scrim ===== */}
+  {/* ===== HERO — title over the photo, legibility gradient ===== */}
   <header class="phero" aria-label={locale.title}>
     <div class="pmedia phero-media">
       <img src={project.heroImage} alt={locale.heroAlt} fetchpriority="high" />
@@ -90,47 +96,146 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     </div>
   </section>
 
-  {/* ===== INFORMÁCIE — portrait + body + spec sheet ===== */}
-  <section class="pinfo">
-    <div class="pwrap pinfo-grid">
-      <figure class="pinfo-figure">
-        <div class="pmedia" style="aspect-ratio: 564 / 800">
-          <img src={project.infoImage} alt={locale.infoAlt} loading="lazy" />
+  {/* ===== KONTEXT A OSADENIE — portrait + body + meta table ===== */}
+  <section class="pcontext">
+    <div class="pwrap pcontext-grid">
+      <figure class="pcontext-figure">
+        <div class="pmedia" style="aspect-ratio: 564 / 730">
+          <img src={project.contextImage} alt={locale.contextAlt} loading="lazy" />
         </div>
       </figure>
 
-      <div class="pinfo-content">
-        <h2 class="pinfo-label">{ui.infoLabel}</h2>
+      <div class="pcontext-content">
+        <h2 class="plabel">{ui.contextLabel}</h2>
 
-        <div class="pinfo-text">
-          {locale.body.map((para) => (
+        <div class="pbody">
+          {locale.contextBody.map((para) => (
             <p>{para}</p>
           ))}
         </div>
 
-        <dl class="pspec">
-          <div class="pspec-row"><dt>{ui.specLabels.rok}</dt><dd>{locale.spec.rok}</dd></div>
-          <div class="pspec-row"><dt>{ui.specLabels.klient}</dt><dd>{locale.spec.klient}</dd></div>
-          <div class="pspec-row"><dt>{ui.specLabels.krajina}</dt><dd>{locale.spec.krajina}</dd></div>
-          <div class="pspec-row"><dt>{ui.specLabels.kategoria}</dt><dd>{locale.spec.kategoria}</dd></div>
-          <div class="pspec-row"><dt>{ui.specLabels.architekt}</dt><dd>{locale.spec.architekt}</dd></div>
-        </dl>
+        {metaRows.length > 0 && (
+          <dl class="pspec">
+            {metaRows.map((row) => (
+              <div class="pspec-row">
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
       </div>
     </div>
   </section>
 
-  {/* ===== GALLERY — full / 2-up, inner parallax ===== */}
-  <section class="pgallery-section">
-    <div class="pwrap pgallery">
-      {project.gallery.map((g, i) => (
-        <figure class={`pg-item pg-item--${g.span}`}>
-          <div class="pmedia" style={`aspect-ratio: ${g.ratio}`}>
-            <img src={g.image} alt={`${locale.title} — ${i + 1}`} loading="lazy" />
+  {/* ===== CONTENT BLOCKS — photo / text / duo / spec, in order ===== */}
+  {project.blocks.map((block) => (
+    <>
+      {block.kind === "photo" && (
+        <section class="pblock pblock--photo">
+          <div class="pwrap">
+            <figure class="pmedia" style={`aspect-ratio: ${block.media.ratio}`}>
+              <img src={block.media.image} alt={block.media.alt ?? ""} loading="lazy" />
+            </figure>
           </div>
+        </section>
+      )}
+
+      {block.kind === "text" && (
+        <section class="pblock">
+          <div class="pwrap pblock-text-grid">
+            <h2 class="pblock-title">{block.title[lang]}</h2>
+            <div class="pbody">
+              {block.body[lang].map((para) => (
+                <p>{para}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {block.kind === "duo" && (
+        <section class="pblock">
+          <div class="pwrap pblock-duo-grid">
+            <figure class="pblock-duo-left">
+              <div class="pmedia" style={`aspect-ratio: ${block.left.ratio}`}>
+                <img src={block.left.image} alt={block.left.alt ?? ""} loading="lazy" />
+              </div>
+            </figure>
+            <figure class="pblock-duo-right">
+              <div class="pmedia" style={`aspect-ratio: ${block.right.ratio}`}>
+                <img src={block.right.image} alt={block.right.alt ?? ""} loading="lazy" />
+              </div>
+            </figure>
+          </div>
+        </section>
+      )}
+
+      {block.kind === "spec" && (
+        <section class="pblock">
+          <div class="pwrap pblock-spec-grid">
+            <h2 class="pblock-title">{block.title[lang]}</h2>
+            <dl class="pspec">
+              {block.rows[lang]
+                .filter((row) => row.value.trim() !== "")
+                .map((row) => (
+                  <div class="pspec-row">
+                    <dt>{row.label}</dt>
+                    <dd>{row.value}</dd>
+                  </div>
+                ))}
+            </dl>
+          </div>
+        </section>
+      )}
+    </>
+  ))}
+
+  {/* ===== DRAG GALLERY — 1 photo = static full-width; 2+ = draggable ===== */}
+  {singleGallery ? (
+    <section class="pblock pblock--photo">
+      <div class="pwrap">
+        <figure class="pmedia" style={`aspect-ratio: ${gallery[0]?.ratio ?? "1384 / 1024"}`}>
+          <img src={gallery[0]?.image ?? project.heroImage} alt="" loading="lazy" />
         </figure>
-      ))}
-    </div>
-  </section>
+      </div>
+    </section>
+  ) : (
+    <section class="pgal" data-gallery aria-label={locale.title}>
+      <div class="pgal-viewport">
+        <div class="pgal-track" data-gallery-track>
+          {gallery.map((g, i) => (
+            <figure class="pgal-item">
+              <div class="pmedia pmedia--static" style={`aspect-ratio: ${g.ratio}`}>
+                <img
+                  src={g.image}
+                  alt={g.alt ?? `${locale.title} — ${i + 1}`}
+                  draggable="false"
+                  loading="lazy"
+                />
+              </div>
+            </figure>
+          ))}
+        </div>
+      </div>
+      {/* Custom drag cursor (thisisstudiox style) — a "Ťahajte" ring flanked
+          by a chevron inside its own smaller ring on each side; the whole
+          cluster follows the mouse (see project.ts). Pointer devices only. */}
+      <div class="pgal-cursor" data-gallery-cursor aria-hidden="true">
+        <span class="pgal-cursor-arrow pgal-cursor-arrow--prev">
+          <svg class="pgal-cursor-chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 1 L3 7 L9 13" />
+          </svg>
+        </span>
+        <span class="pgal-cursor-ring">{ui.dragLabel}</span>
+        <span class="pgal-cursor-arrow pgal-cursor-arrow--next">
+          <svg class="pgal-cursor-chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 1 L11 7 L5 13" />
+          </svg>
+        </span>
+      </div>
+    </section>
+  )}
 
   {/* ===== ĎALŠIE PROJEKTY — hover swaps the preview ===== */}
   <section class="prelated">
@@ -141,8 +246,15 @@ const previewDefault = related[0]?.image ?? project.heroImage;
           {related.map((r) => (
             <li class="prelated-row">
               <a href={r.href} data-project-img={r.image}>
-                <span class="prelated-name">{r.title}</span>
-                <span class="prelated-cat">{r.category}</span>
+                <span class="prelated-head">
+                  <span class="prelated-name">{r.title}</span>
+                  <span class="prelated-cat">{r.category}</span>
+                </span>
+                {/* Per-project photo — hidden on desktop (the hover preview
+                    handles imagery there); shown inline on touch/mobile. */}
+                <span class="prelated-photo" aria-hidden="true">
+                  <img src={r.image} alt="" loading="lazy" />
+                </span>
               </a>
             </li>
           ))}
@@ -153,6 +265,26 @@ const previewDefault = related[0]?.image ?? project.heroImage;
           </div>
         </div>
       </div>
+
+      {/* CTA — centered below the list. Same 211×44 spec + curtain hover
+          as every other primary CTA on the site. */}
+      <a class="prelated-cta" href={projectsAnchor}>
+        <span class="prelated-cta-text">{ui.relatedCta}</span>
+        <svg
+          class="prelated-cta-arrow"
+          width="16"
+          height="10"
+          viewBox="0 0 16 10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+        </svg>
+      </a>
     </div>
   </section>
 
@@ -168,7 +300,8 @@ const previewDefault = related[0]?.image ?? project.heroImage;
   }
 
   /* Content container — mirrors Works: full-bleed up to 2464, 28px (2vw)
-     gutters at 1440. The hero is the only edge-to-edge element. */
+     gutters at 1440. The hero + drag gallery are the only edge-to-edge
+     elements. */
   .pwrap {
     width: 100%;
     max-width: 2464px;
@@ -179,12 +312,9 @@ const previewDefault = related[0]?.image ?? project.heroImage;
   /* =============================================================
      Inner-parallax media. The image FILLS the frame exactly via
      inset:0 — purely geometric, no % height to resolve, so it can
-     never fall back to a short image and leak a grey strip (which is
-     what a % height against an aspect-ratio frame does in Chrome).
-     The parallax headroom is a base transform: scale(1.3) — ~15%
-     overscan each side — and project.ts drifts it with yPercent
-     +10 → -10 (10% of the frame, ≈ the homepage Works grid), leaving
-     ~5% cover buffer at the extremes. Transforms resolve on every
+     never fall back to a short image and leak a grey strip. The
+     parallax headroom is a base transform: scale(1.3); project.ts
+     drifts it with yPercent +10 → -10. Transforms resolve on every
      engine incl. iOS Safari → no grey strips, any aspect ratio.
      ============================================================= */
   .pmedia {
@@ -203,10 +333,11 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     transform: scale(1.3);
     will-change: transform;
   }
-  /* Preview thumb is interactive (hover-swap), not a scroll image — no
-     parallax oversize; it just covers its frame. */
+  /* Static media (gallery items, preview thumb) — no parallax oversize;
+     just cover the frame. */
   .pmedia--static img {
     transform: none;
+    will-change: auto;
   }
 
   /* ===== HERO ===== */
@@ -225,11 +356,20 @@ const previewDefault = related[0]?.image ?? project.heroImage;
   .phero-media img {
     transform: none;
   }
+  /* Legibility gradient — subtle wash anchored to the bottom so the title
+     stays readable over any photo, while the top of the image stays clean
+     (same "background aby bol názov čitateľný" idea as the rest of the site). */
   .phero-scrim {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.1); /* flat 10% — matches Figma */
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.28) 22%,
+      rgba(0, 0, 0, 0.04) 48%,
+      rgba(0, 0, 0, 0) 66%
+    );
   }
   .phero-inner {
     position: absolute;
@@ -237,7 +377,7 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    padding-bottom: clamp(32px, 3.89vw, 64px); /* 56 @1440 — title offset from bottom */
+    padding-bottom: clamp(32px, 3.89vw, 64px); /* 56 @1440 */
   }
   .phero-title {
     font-family: var(--font-sans);
@@ -282,27 +422,8 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     background: var(--line);
   }
 
-  /* ===== INFORMÁCIE =====
-     Figma: img 564 · gap 140 · right col 563 (≈8.5% trails right). */
-  .pinfo {
-    padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
-  }
-  .pinfo-grid {
-    display: grid;
-    grid-template-columns: 40.75% 40.68%;
-    column-gap: 10.12%;
-    justify-content: start;
-    align-items: start;
-  }
-  .pinfo-figure {
-    margin: 0;
-  }
-  .pinfo-content {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(40px, 8.33vw, 160px); /* 120 @1440 */
-  }
-  .pinfo-label {
+  /* ===== Shared type ===== */
+  .plabel {
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 500;
@@ -311,7 +432,7 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     color: var(--ink);
     margin: 0;
   }
-  .pinfo-text p {
+  .pbody p {
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
@@ -319,12 +440,35 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     color: var(--ink);
     margin: 0 0 1.4em;
   }
-  .pinfo-text p:last-child {
+  .pbody p:last-child {
     margin-bottom: 0;
   }
 
+  /* ===== KONTEXT A OSADENIE =====
+     Figma: img 564 · gap 140 · right col 563 (≈8.5% trails right). */
+  .pcontext {
+    padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .pcontext-grid {
+    display: grid;
+    grid-template-columns: 40.75% 40.68%;
+    column-gap: 10.12%;
+    justify-content: start;
+    align-items: start;
+  }
+  .pcontext-figure {
+    margin: 0;
+  }
+  .pcontext-content {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(40px, 8.33vw, 160px); /* 120 @1440 */
+  }
+
+  /* ===== Spec / meta table (context meta + Technické špecifikácie) ===== */
   .pspec {
     margin: 0;
+    width: 100%;
   }
   .pspec-row {
     display: flex;
@@ -335,6 +479,10 @@ const previewDefault = related[0]?.image ?? project.heroImage;
   }
   .pspec-row:first-child {
     padding-top: 0;
+  }
+  .pspec-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
   }
   .pspec-row dt {
     font-family: var(--font-sans);
@@ -352,21 +500,179 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     text-align: right;
   }
 
-  /* ===== GALLERY ===== */
-  .pgallery-section {
+  /* ===== CONTENT BLOCKS ===== */
+  .pblock {
     padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
   }
-  .pgallery {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
-    row-gap: clamp(16px, 1.94vw, 40px); /* 28 @1440 */
+
+  /* Full-width photos are 16:9 (data ratio) so they read as widescreen and
+     stay fully visible while scrolling. Height is capped like the /sluzby
+     stages band so they never grow unwieldy on wide screens — width stays
+     100% and the image covers (crops) past the cap. */
+  .pblock--photo .pmedia {
+    max-height: 780px;
   }
-  .pg-item {
+
+  /* Text block — 48px title (left column) · body (right column, aligned
+     under the context section's right column so everything stacks). */
+  .pblock-text-grid {
+    display: grid;
+    grid-template-columns: 40.75% 40.68%;
+    column-gap: 10.12%;
+    justify-content: start;
+    align-items: start;
+  }
+  .pblock-title {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 500;
+    font-size: clamp(28px, 3.33vw, 68px); /* 48 @1440 */
+    line-height: 1.25; /* 60/48 */
+    letter-spacing: 0;
+    color: var(--ink);
+    margin: 0;
+    max-width: 445px; /* Figma title measure */
+  }
+
+  /* Duo block — small landscape (left) + tall portrait (right). Left image
+     sits at the TOP of the row (Figma: 445×478 inside an 800-tall column). */
+  .pblock-duo-grid {
+    display: grid;
+    grid-template-columns: 32.15% 49.13%; /* 445 · 680 of 1384 */
+    column-gap: 10.26%; /* 142 of 1384 */
+    justify-content: start;
+    align-items: start;
+  }
+  .pblock-duo-left,
+  .pblock-duo-right {
     margin: 0;
   }
-  .pg-item--full {
-    grid-column: 1 / -1;
+
+  /* Spec block — 48px title (left) · wide key/value table (right, flush to
+     the content edge). Figma: title 445 @x28 · table 914 @x498. */
+  .pblock-spec-grid {
+    display: grid;
+    grid-template-columns: 33.96% 66.04%; /* 470 · 914 of 1384 */
+    justify-content: start;
+    align-items: start;
+  }
+
+  /* =============================================================
+     DRAG GALLERY (2+ photos)
+     Full-bleed track: images start at the left content gutter and flow
+     off the right screen edge, so the next photo peeks past the visible
+     ~11 columns as a drag affordance. project.ts drives the horizontal
+     motion (GSAP Draggable + InertiaPlugin) on pointer devices; touch
+     devices fall back to native horizontal scroll (below).
+     Uniform item height, width derived from each photo's aspect ratio.
+     ============================================================= */
+  .pgal {
+    position: relative;
+    padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+    /* Same 780px frame height as the full-width photos (Figma carousel is
+       780 tall). A landscape (1267/780) item at this height ≈ 11 columns
+       wide, so the next photo peeks past the right edge as a drag affordance. */
+    --pgal-h: clamp(300px, 54vw, 780px);
+  }
+  .pgal-viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  .pgal-track {
+    display: flex;
+    gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
+    padding-inline: clamp(16px, 2vw, 48px); /* align first photo to the gutter */
+    width: max-content;
+    will-change: transform;
+    cursor: grab;
+  }
+  .pgal-track.is-dragging {
+    cursor: grabbing;
+  }
+  .pgal-item {
+    flex: 0 0 auto;
+    height: var(--pgal-h);
+    margin: 0;
+  }
+  .pgal-item .pmedia {
+    height: 100%;
+  }
+
+  /* Custom drag cursor (thisisstudiox style) — a horizontal cluster of
+     chevron · "Ťahajte" ring · chevron. The whole cluster follows the mouse
+     (project.ts positions it via GSAP quickTo, centred with xPercent/yPercent
+     -50, and shrinks it while dragging). mix-blend-mode keeps it legible
+     over any photo. */
+  .pgal-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1vw, 18px);
+    pointer-events: none;
+    mix-blend-mode: difference;
+    color: rgba(255, 255, 255, 0.95);
+    opacity: 0;
+    visibility: hidden;
+  }
+  .pgal-cursor-ring {
+    width: clamp(76px, 6.6vw, 104px);
+    height: clamp(76px, 6.6vw, 104px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* Flanking arrows — each chevron sits inside its own ring, a touch smaller
+     than the main "Ťahajte" ring (per the brief), matching its border style. */
+  .pgal-cursor-arrow {
+    width: clamp(48px, 4.4vw, 64px);
+    height: clamp(48px, 4.4vw, 64px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+  }
+  .pgal-cursor-chev {
+    width: clamp(11px, 1vw, 15px);
+    height: auto;
+  }
+  /* project.ts hides the direction you can no longer drag (at the start the
+     prev arrow, at the end the next arrow) so the cursor only ever offers a
+     move that's actually possible. */
+  .pgal-cursor-arrow.is-off {
+    display: none;
+  }
+  /* Touch devices — no custom cursor, native horizontal scroll instead. */
+  @media (hover: none) {
+    .pgal-cursor {
+      display: none;
+    }
+    .pgal-viewport {
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .pgal-viewport::-webkit-scrollbar {
+      display: none;
+    }
+    .pgal-track {
+      cursor: auto;
+    }
+    .pgal-item {
+      scroll-snap-align: start;
+    }
   }
 
   /* ===== ĎALŠIE PROJEKTY ===== */
@@ -397,22 +703,24 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     margin: 0;
   }
   .prelated-row a {
+    display: block;
+    padding-bottom: clamp(16px, 1.94vw, 40px); /* 28 @1440 */
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.3s var(--ease-out);
+  }
+  /* Name + category share one row; the per-project photo is desktop-hidden
+     (the single hover preview on the right handles imagery there). */
+  .prelated-head {
     display: grid;
     grid-template-columns: 37.38% 48.74%;
     justify-content: space-between;
     align-items: baseline;
-    padding-bottom: clamp(16px, 1.94vw, 40px); /* 28 @1440 */
-    text-decoration: none;
-    color: inherit;
   }
-  .prelated-name {
-    font-family: var(--font-sans);
-    font-weight: 400;
-    font-size: clamp(16px, 1.39vw, 30px);
-    letter-spacing: 0.02em;
-    color: var(--ink);
-    transition: opacity 0.3s var(--ease-out);
+  .prelated-photo {
+    display: none;
   }
+  .prelated-name,
   .prelated-cat {
     font-family: var(--font-sans);
     font-weight: 400;
@@ -420,14 +728,80 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     letter-spacing: 0.02em;
     color: var(--ink);
   }
-  .prelated-row a:hover .prelated-name {
-    opacity: 0.5;
+  /* Hover behaviour (pointer devices only): hovering a row keeps THAT row
+     (name + category together) at full ink while the others dim — the
+     hovered project stays active, the rest read as disabled. Gated on
+     hover so a touch tap never sticks the dim state. */
+  @media (hover: hover) {
+    .prelated-list:hover .prelated-row a {
+      opacity: 0.35;
+    }
+    .prelated-list:hover .prelated-row a:hover {
+      opacity: 1;
+    }
   }
   .prelated-thumb {
     width: 100%;
   }
   .prelated-thumb-img {
     will-change: opacity;
+  }
+
+  /* CTA — identical 211×44 spec + curtain hover to every primary CTA
+     (nav / footer). Centered below the list. */
+  .prelated-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(10px, 0.83vw, 12px);
+    width: clamp(180px, 14.65vw, 211px);
+    align-self: center;
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    will-change: transform;
+  }
+  .prelated-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--btn-bg-hover);
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+  .prelated-cta:hover::before {
+    transform: translateX(0);
+  }
+  .prelated-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+  .prelated-cta-text {
+    display: inline-block;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+  .prelated-cta:hover .prelated-cta-text {
+    transform: translateX(3px);
+  }
+  .prelated-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+  }
+  .prelated-cta:hover .prelated-cta-arrow {
+    transform: translateX(7px);
   }
 
   /* =============================================================
@@ -442,37 +816,115 @@ const previewDefault = related[0]?.image ?? project.heroImage;
     .phero-title {
       font-size: clamp(30px, 8.8vw, 52px);
     }
+
+    /* Intro — centred, same size as the homepage About headline. */
     .pintro-text {
       max-width: 100%;
-      text-align: left;
-      font-size: clamp(22px, 6vw, 30px);
+      text-align: center;
+      font-size: clamp(28px, 8vw, 32px);
+      line-height: 1.25;
     }
-    .pinfo-grid {
+
+    /* Section rhythm — tight, CONSISTENT gaps. 28px block padding → ~56px
+       between adjacent blocks (the same 28px the homepage / služby rows
+       use), instead of the 112px that 56px-per-block produced. */
+    .pcontext,
+    .pblock,
+    .prelated {
+      padding-block: 28px;
+    }
+
+    .pcontext-grid {
       grid-template-columns: 1fr;
       row-gap: clamp(28px, 7vw, 48px);
       column-gap: 0;
     }
-    .pinfo-content {
+    .pcontext-content {
       gap: clamp(28px, 8vw, 56px);
     }
-    .pgallery {
+
+    /* Text / spec blocks stack: title over the body/table, full width. */
+    .pblock-text-grid,
+    .pblock-spec-grid {
+      grid-template-columns: 1fr;
+      row-gap: clamp(20px, 6vw, 40px);
+      column-gap: 0;
+    }
+    .pblock-title {
+      max-width: none;
+      font-size: clamp(26px, 7.5vw, 40px);
+    }
+
+    /* Duo block stacks into one column. */
+    .pblock-duo-grid {
       grid-template-columns: 1fr;
       row-gap: clamp(16px, 4vw, 28px);
+      column-gap: 0;
     }
-    .pg-item--full,
-    .pg-item--half {
-      grid-column: auto;
+
+    /* Gallery — 28px block padding; item height so a landscape photo fills
+       ~the screen width; native swipe (no custom cursor on touch). */
+    .pgal {
+      padding-block: 28px;
+      --pgal-h: clamp(200px, 56vw, 360px);
     }
+
+    /* Ďalšie projekty — SAME responsive pattern as the homepage Služby rows:
+       each project shows its [name | category] header, then its photo full
+       width, then a hairline divider to the next. No hover on touch, so the
+       per-row photo replaces the desktop hover preview. */
     .prelated-grid {
       grid-template-columns: 1fr;
-      gap: clamp(24px, 7vw, 40px);
-    }
-    .prelated-row a {
-      grid-template-columns: 1fr auto;
-      gap: 16px;
+      gap: 0;
     }
     .prelated-thumb {
-      max-width: 60%;
+      display: none;
+    }
+    .prelated-row {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .prelated-row:first-child {
+      padding-top: 0;
+    }
+    .prelated-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    /* Row = a caption (name over category) then the photo. Name matches the
+       "Ďalšie projekty" label size (16px) in default ink; category sits 8px
+       below in the weak/muted tone; 20px down to the photo. */
+    .prelated-row a {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding-bottom: 0;
+    }
+    .prelated-head {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .prelated-name,
+    .prelated-cat {
+      font-size: 16px;
+      text-align: left;
+    }
+    .prelated-cat {
+      color: var(--text-mute);
+    }
+    .prelated-photo {
+      display: block;
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    .prelated-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
   }
 
