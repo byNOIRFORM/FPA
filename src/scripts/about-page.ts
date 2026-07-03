@@ -71,17 +71,9 @@ export function initAboutPage(): void {
     }
   }
 
-  // ===== 3. ORIGINS — Works row-1 reveal on scroll-in =====
-  const origins = root.querySelector<HTMLElement>(".aorigins");
-  if (!origins) return;
-
-  const label = origins.querySelector<HTMLElement>(".aorigins-label[data-reveal]");
-  const cols = Array.from(origins.querySelectorAll<HTMLElement>(".aorigins-col[data-reveal]"));
-  const media = origins.querySelector<HTMLElement>(".amedia[data-reveal]");
-  const caption = origins.querySelector<HTMLElement>(".aorigins-caption[data-reveal]");
-
+  // ===== 3. SCROLL REVEALS — origins text + every photo on the page =====
   if (reduced) {
-    origins.querySelectorAll("[data-reveal]").forEach((el) => el.removeAttribute("data-reveal"));
+    root.querySelectorAll("[data-reveal]").forEach((el) => el.removeAttribute("data-reveal"));
     return;
   }
 
@@ -91,23 +83,33 @@ export function initAboutPage(): void {
   // below, nothing extra. fromTo + immediateRender:false pins start values;
   // [data-reveal] CSS stays active until onComplete (the services.ts lesson
   // — stripping early made late-starting targets flash fully visible).
-  const textEls = [label, ...cols].filter((el): el is HTMLElement => el !== null);
-  if (textEls.length) {
-    const from = { clipPath: "inset(100% 0 0 0)" };
-    const to = { clipPath: "inset(0% 0 0 0)", duration: 0.9, ease: "expo.out", immediateRender: false };
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: origins,
-        start: "top 80%",
-        toggleActions: "play none none none",
-      },
-      onComplete: () => textEls.forEach((el) => el.removeAttribute("data-reveal")),
-    });
-    textEls.forEach((el, i) => tl.fromTo(el, from, to, [0, 0.06, 0.18][i] ?? 0.18));
+  const origins = root.querySelector<HTMLElement>(".aorigins");
+  if (origins) {
+    const label = origins.querySelector<HTMLElement>(".aorigins-label[data-reveal]");
+    const cols = Array.from(origins.querySelectorAll<HTMLElement>(".aorigins-col[data-reveal]"));
+    const textEls = [label, ...cols].filter((el): el is HTMLElement => el !== null);
+    if (textEls.length) {
+      const from = { clipPath: "inset(100% 0 0 0)" };
+      const to = { clipPath: "inset(0% 0 0 0)", duration: 0.9, ease: "expo.out", immediateRender: false };
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: origins,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+        onComplete: () => textEls.forEach((el) => el.removeAttribute("data-reveal")),
+      });
+      textEls.forEach((el, i) => tl.fromTo(el, from, to, [0, 0.06, 0.18][i] ?? 0.18));
+    }
   }
 
-  // Photo curtains up on its own trigger; the caption rises just behind it.
-  if (media) {
+  // Every photo (origins + story blocks) curtains up on its own trigger —
+  // one motion, repeated: clip-path 1.0s power3.out with the figure's
+  // caption rising just behind it (0.2 offset). Photos that share a row
+  // start together because their triggers sit at the same scroll position.
+  root.querySelectorAll<HTMLElement>(".amedia[data-reveal]").forEach((media) => {
+    const caption =
+      media.closest("figure")?.querySelector<HTMLElement>("figcaption[data-reveal]") ?? null;
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: media,
@@ -128,5 +130,26 @@ export function initAboutPage(): void {
     if (caption) {
       tl.to(caption, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.2);
     }
-  }
+  });
+
+  // Inner parallax — each photo drifts yPercent +8 → -8 within its 11%
+  // headroom as it scrolls through the viewport (same calibration as the
+  // homepage Works grid). Skipped entirely under reduced motion (early
+  // return above).
+  root.querySelectorAll<HTMLElement>(".amedia img").forEach((img) => {
+    gsap.fromTo(
+      img,
+      { yPercent: 8 },
+      {
+        yPercent: -8,
+        ease: "none",
+        scrollTrigger: {
+          trigger: img.closest(".amedia"),
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      },
+    );
+  });
 }

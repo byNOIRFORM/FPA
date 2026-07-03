@@ -17,6 +17,10 @@ export interface AboutPageCopy {
     col2: string[]; // second text column, paragraphs
     caption: string; // photo caption
   };
+  /** Photo-story blocks after "Počiatky" — pair row (tall 445 + mid 680)
+   *  then the wide 1147 photo; order matches the Figma left→right, top→down.
+   *  Images are lang-agnostic and live in AboutPage.astro. */
+  story: { alt: string; caption: string }[];
 }
 
 export const aboutPage: Record<Lang, AboutPageCopy> = {
@@ -37,6 +41,23 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
       ],
       caption: "Pavol Fotta, Dominik Fotta a Tomáš Popadič pri návrhu konceptu.",
     },
+    story: [
+      {
+        alt: "Kontrola realizačnej dokumentácie v ateliéri",
+        caption:
+          "Koncept preklápame do prísnych čísiel. Každý detail kontrolujeme, pretože vieme, že dobrá stavba stojí na bezchybnej realizačnej dokumentácii.",
+      },
+      {
+        alt: "Tím ateliéru pri diskusii nad prvými skicami",
+        caption:
+          "Architektúra pre nás nie je prácou jednotlivca. Každý projekt prechádza otvorenou diskusiou celého tímu. Pri veľkom stole konfrontujeme prvé skice s čistou logikou priestoru a hľadáme ideálny prienik medzi odvahou konceptu a realitou statiky.",
+      },
+      {
+        alt: "Autorský dozor priamo na stavbe",
+        caption:
+          "Papier znesie všetko, no realita surového betónu neodpúšťa chyby. Príbeh projektu preto nekončí odovzdaním výkresov. Sme s vami priamo na stavbe, kde formou autorského dozoru garantujeme, že to, čo sme nakreslili, bude v reálnom svete bezchybne fungovať.",
+      },
+    ],
   },
   cz: {
     metaTitle: "O nás — Fotta // Popadič",
@@ -55,6 +76,23 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
       ],
       caption: "Pavol Fotta, Dominik Fotta a Tomáš Popadič při návrhu konceptu.",
     },
+    story: [
+      {
+        alt: "Kontrola realizační dokumentace v ateliéru",
+        caption:
+          "Koncept překlápíme do přísných čísel. Každý detail kontrolujeme, protože víme, že dobrá stavba stojí na bezchybné realizační dokumentaci.",
+      },
+      {
+        alt: "Tým ateliéru při diskusi nad prvními skicami",
+        caption:
+          "Architektura pro nás není prací jednotlivce. Každý projekt prochází otevřenou diskusí celého týmu. U velkého stolu konfrontujeme první skici s čistou logikou prostoru a hledáme ideální průnik mezi odvahou konceptu a realitou statiky.",
+      },
+      {
+        alt: "Autorský dozor přímo na stavbě",
+        caption:
+          "Papír snese všechno, ale realita surového betonu chyby neodpouští. Příběh projektu proto nekončí odevzdáním výkresů. Jsme s vámi přímo na stavbě, kde formou autorského dozoru garantujeme, že to, co jsme nakreslili, bude v reálném světě bezchybně fungovat.",
+      },
+    ],
   },
   en: {
     metaTitle: "About us — Fotta // Popadič",
@@ -73,5 +111,22 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
       ],
       caption: "Pavol Fotta, Dominik Fotta and Tomáš Popadič working on a concept.",
     },
+    story: [
+      {
+        alt: "Reviewing construction documentation in the studio",
+        caption:
+          "We translate the concept into strict numbers. We check every detail, because we know that a good building stands on flawless construction documentation.",
+      },
+      {
+        alt: "The studio team discussing first sketches",
+        caption:
+          "For us, architecture is never the work of an individual. Every project passes through an open discussion of the whole team. At the big table we confront the first sketches with the pure logic of space, looking for the ideal balance between a bold concept and the reality of structural engineering.",
+      },
+      {
+        alt: "Author's supervision directly on site",
+        caption:
+          "Paper can bear anything, but the reality of raw concrete forgives no mistakes. That is why a project's story does not end with the handover of drawings. We stand with you directly on site, where our author's supervision guarantees that what we drew will work flawlessly in the real world.",
+      },
+    ],
   },
 };

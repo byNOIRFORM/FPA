@@ -80,6 +80,34 @@ const introWords = t.intro.split(" ");
         </figure>
       </div>
     </div>
+  </section>
+
+  {/* ===== PRÍBEH V OBRAZOCH — pair row (tall 445 + mid 680) then the wide
+      1147 photo aligned right; every photo reveals with the same curtain +
+      caption rise as the "Počiatky" photo above. Divider closes here. ===== */}
+  <section class="astory">
+    <div class="awrap astory-row">
+      <figure class="astory-fig astory-fig--tall">
+        <div class="amedia" data-reveal style="aspect-ratio: 445 / 620">
+          <img src="/images/about/kontrola.jpg" alt={t.story[0].alt} loading="lazy" />
+        </div>
+        <figcaption class="astory-caption" data-reveal>{t.story[0].caption}</figcaption>
+      </figure>
+      <figure class="astory-fig astory-fig--mid">
+        <div class="amedia" data-reveal style="aspect-ratio: 680 / 482">
+          <img src="/images/about/diskusia.jpg" alt={t.story[1].alt} loading="lazy" />
+        </div>
+        <figcaption class="astory-caption" data-reveal>{t.story[1].caption}</figcaption>
+      </figure>
+    </div>
+    <div class="awrap astory-widerow">
+      <figure class="astory-fig astory-fig--wide">
+        <div class="amedia" data-reveal style="aspect-ratio: 1147 / 584">
+          <img src="/images/about/stavba.jpg" alt={t.story[2].alt} loading="lazy" />
+        </div>
+        <figcaption class="astory-caption" data-reveal>{t.story[2].caption}</figcaption>
+      </figure>
+    </div>
     <div class="awrap"><div class="adivider"></div></div>
   </section>
 
@@ -224,7 +252,7 @@ const introWords = t.intro.split(" ");
     display: flex;
     flex-direction: column;
     gap: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
-    padding-bottom: clamp(48px, 5.55vw, 80px); /* 80 @1440 → closing divider */
+    padding-bottom: clamp(48px, 5.55vw, 80px); /* 80 @1440 → photo story below */
   }
   .aorigins-cols {
     display: grid;
@@ -257,11 +285,14 @@ const introWords = t.intro.split(" ");
     overflow: hidden;
     background: var(--surface);
   }
+  /* Oversized for the inner parallax (about-page.ts drifts yPercent ±8
+     within the 11% headroom) — same calibration as the Works grid. */
   .amedia img {
     position: absolute;
-    inset: 0;
+    top: -11%;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: 122%;
     object-fit: cover;
     display: block;
   }
@@ -274,6 +305,49 @@ const introWords = t.intro.split(" ");
     color: var(--text-mute);
   }
 
+  /* ===== PRÍBEH V OBRAZOCH — Figma: 445 + 680 pair (mid photo offset
+     117/1384 from the right edge), then 1147 aligned right. Captions here
+     are body-size ink text (20px), not the muted photo-credit style. ===== */
+  .astory-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    /* 80/80 @1440 — with the neighbours' own 80s this makes 160 of air
+       between a caption and the next photo (Figma update: bolo tesné). */
+    padding-top: clamp(48px, 5.55vw, 80px);
+    padding-bottom: clamp(48px, 5.55vw, 80px);
+  }
+  .astory-fig {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 1.39vw, 28px); /* 20 @1440 */
+  }
+  .astory-fig--tall {
+    width: 32.15%; /* 445/1384 */
+  }
+  .astory-fig--mid {
+    width: 49.13%; /* 680/1384 */
+    margin-right: 8.45%; /* 117/1384 */
+  }
+  .astory-widerow {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: clamp(48px, 5.55vw, 80px); /* 80 @1440 */
+    padding-bottom: clamp(48px, 5.55vw, 80px); /* 80 @1440 → closing divider */
+  }
+  .astory-fig--wide {
+    width: 82.87%; /* 1147/1384 */
+  }
+  .astory-caption {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+  }
+
   /* ===== Reveal initial states — hidden from first paint; about-page.ts
      animates and strips the attributes. Label + columns use the SAME
      clip-path curtain as the Services rows (one motion family with the
@@ -283,7 +357,8 @@ const introWords = t.intro.split(" ");
   .aorigins-col[data-reveal] {
     clip-path: inset(100% 0 0 0);
   }
-  .aorigins-caption[data-reveal] {
+  .aorigins-caption[data-reveal],
+  .astory-caption[data-reveal] {
     opacity: 0;
     transform: translateY(16px);
   }
@@ -325,6 +400,27 @@ const introWords = t.intro.split(" ");
       font-size: 18px;
       line-height: 1.5;
     }
+    .astory-row {
+      flex-direction: column;
+      /* 56 = the block-to-block rhythm (28 pb + 28 pt of the neighbours)
+         so every caption→photo distance on mobile reads the same. */
+      gap: 56px;
+      padding-top: 28px;
+      padding-bottom: 28px;
+    }
+    .astory-fig--tall,
+    .astory-fig--mid,
+    .astory-fig--wide {
+      width: 100%;
+      margin-right: 0;
+    }
+    .astory-widerow {
+      padding-top: 28px;
+      padding-bottom: 28px;
+    }
+    .astory-caption {
+      font-size: 18px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -339,7 +435,8 @@ const introWords = t.intro.split(" ");
     .aorigins-col[data-reveal] {
       clip-path: none;
     }
-    .aorigins-caption[data-reveal] {
+    .aorigins-caption[data-reveal],
+    .astory-caption[data-reveal] {
       opacity: 1;
       transform: none;
     }
