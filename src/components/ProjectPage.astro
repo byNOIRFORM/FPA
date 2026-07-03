@@ -29,6 +29,7 @@ import {
   worksImages,
   availableProjectSlugs,
   projectHref,
+  projectsListHref,
 } from "../i18n/projects";
 
 interface Props {
@@ -46,8 +47,7 @@ const introWords = locale.intro.split(" ");
 // Optional meta rows — a row with an empty value is dropped (CMS behaviour).
 const metaRows = locale.meta.filter((r) => r.value.trim() !== "");
 
-const homeBase = lang === "sk" ? "/" : `/${lang}`;
-const projectsAnchor = `${homeBase}#projekty`;
+const projectsAnchor = projectsListHref(lang);
 
 // "Ďalšie projekty" — every OTHER project from the Works grid, with its
 // localised title + category + image (for the hover preview swap).
@@ -78,7 +78,12 @@ const singleGallery = gallery.length <= 1;
     </div>
     <div class="phero-scrim" aria-hidden="true"></div>
     <div class="pwrap phero-inner">
-      <h1 class="phero-title">{locale.title}</h1>
+      {/* Word-by-word mask reveal on load — same as the homepage hero. */}
+      <h1 class="phero-title">
+        {locale.title.split(" ").map((w) => (
+          <span class="phero-title-mask"><span class="phero-title-word">{w}</span></span>
+        ))}
+      </h1>
     </div>
   </header>
 
@@ -351,10 +356,11 @@ const singleGallery = gallery.length <= 1;
     position: absolute;
     inset: 0;
   }
-  /* Hero fills via inset:0 (no overscan zoom here) — project.ts runs the
-     Ken Burns yo-yo (scale 1 ↔ 1.06) instead of the inner parallax. */
+  /* Hero fills via inset:0, starting at scale 1.1 — project.ts settles it to
+     1 (intro, same as the homepage hero) then runs the Ken Burns yo-yo.
+     Excluded from the inner parallax. */
   .phero-media img {
-    transform: none;
+    transform: scale(1.1);
   }
   /* Legibility gradient — subtle wash anchored to the bottom so the title
      stays readable over any photo, while the top of the image stays clean
@@ -380,14 +386,30 @@ const singleGallery = gallery.length <= 1;
     padding-bottom: clamp(32px, 3.89vw, 64px); /* 56 @1440 */
   }
   .phero-title {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.28em; /* inter-word spacing (mask spans are inline-block) */
     font-family: var(--font-sans);
     font-style: normal; /* override the global serif-italic heading rule */
-    font-weight: 500;
+    font-weight: 400; /* Regular — matches the homepage hero title exactly */
     color: #fff;
     font-size: clamp(34px, 4.44vw, 88px); /* 64 @1440 */
     line-height: 1.094; /* 70/64 */
     letter-spacing: 0;
     margin: 0;
+  }
+  /* Each word rides up out of an overflow-clip mask; project.ts seeds the
+     yPercent (CSS only sets opacity:0 to dodge the matrix-decomposition trap
+     that breaks yPercent tweens). */
+  .phero-title-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: inherit;
+  }
+  .phero-title-word {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
   }
 
   /* ===== INTRO ===== */
@@ -931,6 +953,9 @@ const singleGallery = gallery.length <= 1;
   @media (prefers-reduced-motion: reduce) {
     .pword {
       --reveal: 1;
+    }
+    .phero-title-word {
+      opacity: 1;
     }
   }
 </style>

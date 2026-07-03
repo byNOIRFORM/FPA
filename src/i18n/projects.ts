@@ -134,6 +134,98 @@ export const relatedCategories: Record<Lang, string[]> = {
 };
 
 /* ============================================================
+   /projekty listing page copy + data.
+   ============================================================ */
+
+/** /projekty page copy — big typographic title + <meta description>. */
+export const projectsPageUI: Record<Lang, { title: string; intro: string }> = {
+  sk: {
+    title: "Projekty",
+    intro:
+      "Nekreslíme veci preto, aby boli pekné na papieri. Zaujíma nás len to, ako dom reálne stojí vo svahu, ako doň padá svetlo a či materiály vydržia. Každá čiara v našich projektoch má svoj skutočný dôvod.",
+  },
+  cz: {
+    title: "Projekty",
+    intro:
+      "Nekreslíme věci proto, aby byly pěkné na papíře. Zajímá nás jen to, jak dům reálně stojí ve svahu, jak do něj padá světlo a zda materiály vydrží. Každá čára v našich projektech má svůj skutečný důvod.",
+  },
+  en: {
+    title: "Projects",
+    intro:
+      "We don't draw things to look good on paper. All we care about is how a house actually stands on its slope, how the light falls into it and whether the materials will last. Every line in our projects has a genuine reason.",
+  },
+};
+
+/** A listing-only project card (no detail page yet). CMS: these live in the
+ *  same project collection as the Works ones — an editor adds a card,
+ *  uploads a photo, writes the copy. */
+export interface ListingProject {
+  title: Localized<string>;
+  description: Localized<string>;
+  image: string;
+}
+
+/** The extra 6 projects shown on /projekty after the 6 Works projects, so the
+ *  grid demonstrates a full 12 (Figma "Projekty_V2"). Photos + copy 1:1 from
+ *  the Figma; categories spread across all six building types. */
+export const extraProjects: ListingProject[] = [
+  {
+    image: "/images/projects/listing/dom-pri-jazere.jpg",
+    title: { sk: "Dom pri jazere", cz: "Dům u jezera", en: "House by the Lake" },
+    description: {
+      sk: "Prízemná stavba osadená priamo na brehu vodnej plochy. Veľkoformátové presklenie otvára výhľad na hladinu, zatiaľ čo vertikálny drevený obklad zjemňuje prísnu geometriu plochej strechy.",
+      cz: "Přízemní stavba osazená přímo na břehu vodní plochy. Velkoformátové prosklení otevírá výhled na hladinu, zatímco vertikální dřevěný obklad zjemňuje přísnou geometrii ploché střechy.",
+      en: "A single-storey building set right on the water's edge. Large-format glazing opens the view onto the surface, while vertical timber cladding softens the strict geometry of the flat roof.",
+    },
+  },
+  {
+    image: "/images/projects/listing/vila-na-svahu.jpg",
+    title: { sk: "Vila na svahu", cz: "Vila na svahu", en: "Villa on the Slope" },
+    description: {
+      sk: "Minimalistická biela hmota na betónovom sokli, ktorá kopíruje sklon terénu. Posuvné drevené paravány slúžia ako tieniaci prvok a dynamicky menia charakter fasády.",
+      cz: "Minimalistická bílá hmota na betonovém soklu, která kopíruje sklon terénu. Posuvné dřevěné paravány slouží jako stínicí prvek a dynamicky mění charakter fasády.",
+      en: "A minimalist white volume on a concrete plinth that follows the slope of the terrain. Sliding timber screens act as shading and dynamically change the character of the façade.",
+    },
+  },
+  {
+    image: "/images/projects/listing/rezidencia-s-terasou.jpg",
+    title: { sk: "Rezidencia s terasou", cz: "Rezidence s terasou", en: "Residence with a Terrace" },
+    description: {
+      sk: "Veľkorysá rodinná vila s čistými líniami. Architektúra pracuje s masívnym vykonzolovaním poschodia, ktoré prirodzene kryje drevenú pobytovú palubu nadväzujúcu na záhradu.",
+      cz: "Velkorysá rodinná vila s čistými liniemi. Architektura pracuje s masivním vykonzolováním patra, které přirozeně kryje dřevěnou pobytovou palubu navazující na zahradu.",
+      en: "A generous family villa with clean lines. The architecture works with a massive cantilevered upper floor that naturally shelters the timber living deck opening onto the garden.",
+    },
+  },
+  {
+    image: "/images/projects/listing/knihkupectvo-kaviaren.jpg",
+    title: { sk: "Knihkupectvo a kaviareň", cz: "Knihkupectví a kavárna", en: "Bookshop & Café" },
+    description: {
+      sk: "Interiér zameraný na akustickú a vizuálnu pohodu. Dominantná celostenná knižnica z tmavého dreva kontrastuje s voľným, svetlým usporiadaním sedenia pre hostí.",
+      cz: "Interiér zaměřený na akustickou a vizuální pohodu. Dominantní celostěnná knihovna z tmavého dřeva kontrastuje s volným, světlým uspořádáním sezení pro hosty.",
+      en: "An interior focused on acoustic and visual comfort. A dominant full-wall bookcase in dark timber contrasts with the open, light-filled arrangement of seating for guests.",
+    },
+  },
+  {
+    image: "/images/projects/listing/tvorivy-priestor.jpg",
+    title: { sk: "Tvorivý priestor", cz: "Tvůrčí prostor", en: "Creative Space" },
+    description: {
+      sk: "Svetlý, otvorený ateliér s vysokým stropom a veľkými oknami do dvora. Priznané materiály, nekonečné pracovné stoly a steny prispôsobené na prezentáciu skíc a vzoriek.",
+      cz: "Světlý, otevřený ateliér s vysokým stropem a velkými okny do dvora. Přiznané materiály, nekonečné pracovní stoly a stěny přizpůsobené na prezentaci skic a vzorků.",
+      en: "A bright, open studio with a high ceiling and large windows onto the courtyard. Exposed materials, endless worktables and walls adapted for pinning up sketches and samples.",
+    },
+  },
+  {
+    image: "/images/projects/listing/pavilon-v-luke.jpg",
+    title: { sk: "Pavilón v lúke", cz: "Pavilon v louce", en: "Pavilion in the Meadow" },
+    description: {
+      sk: "Nízky prízemný dom takmer úplne zapustený do divokej zelene. Presah strechy po celom obvode prirodzene chráni interiér pred prehrievaním a vytvára krytý vonkajší chodník.",
+      cz: "Nízký přízemní dům téměř úplně zapuštěný do divoké zeleně. Přesah střechy po celém obvodu přirozeně chrání interiér před přehříváním a vytváří krytý venkovní chodník.",
+      en: "A low single-storey house almost entirely embedded in wild greenery. A roof overhang around the whole perimeter naturally shields the interior from overheating and forms a covered outdoor walkway.",
+    },
+  },
+];
+
+/* ============================================================
    The projects. Phase 1 = one fully built sample.
    ============================================================ */
 
@@ -342,4 +434,9 @@ export const availableProjectSlugs = new Set(projects.map((p) => p.slug));
 export function projectHref(lang: Lang, slug: string): string {
   const prefix = lang === "sk" ? "" : `/${lang}`;
   return `${prefix}/projekty/${slug}`;
+}
+
+/** Language-aware path to the /projekty listing page. */
+export function projectsListHref(lang: Lang): string {
+  return lang === "sk" ? "/projekty" : `/${lang}/projekty`;
 }

@@ -12,13 +12,15 @@ const locale = projectsBySlug.get(slug!)!.locales.sk;
 ---
 
 {/* Subpage — no intro loader; nav is transparent over the hero photo
-    (boundary = .phero) and turns cream once it scrolls past. */}
+    (boundary = .phero) and turns cream once it scrolls past. "Projekty" is
+    deliberately NOT navActive here: the detail is its own page, and the link
+    must stay clickable so the user can get back to /projekty (active links
+    are inert). */}
 <BaseLayout
   title={`${locale.title} — Fotta // Popadič`}
   description={locale.intro}
   loader={false}
   navVariant="sub"
-  navActive="projects"
   navBoundary=".phero"
   lang="sk"
 >

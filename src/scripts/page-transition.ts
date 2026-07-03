@@ -35,10 +35,34 @@ export const isTransitionArrival =
   typeof document !== "undefined" &&
   document.documentElement.hasAttribute("data-pt");
 
+/**
+ * Post-curtain hook. On a transition arrival the enter curtain covers the
+ * page for ~1s — a load reveal that starts at init would play (and finish)
+ * unseen underneath it. Subpage load-reveals register through this instead:
+ * the callback runs immediately on a normal visit, or exactly when the
+ * curtain has fully lifted on a transition arrival.
+ */
+let settled = !isTransitionArrival;
+const settledCbs: Array<() => void> = [];
+
+function settle(): void {
+  if (settled) return;
+  settled = true;
+  for (const cb of settledCbs.splice(0)) cb();
+}
+
+export function onTransitionSettled(cb: () => void): void {
+  if (settled) cb();
+  else settledCbs.push(cb);
+}
+
 export function initPageTransition(): void {
   if (typeof window === "undefined") return;
   const curtain = document.getElementById("page-transition");
-  if (!curtain) return;
+  if (!curtain) {
+    settle(); // no curtain to wait for — release any registered reveals
+    return;
+  }
 
   const html = document.documentElement;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -61,6 +85,7 @@ export function initPageTransition(): void {
     if (reduced) {
       gsap.set(curtain, { autoAlpha: 0 });
       clearBoot();
+      settle();
     } else {
       gsap.set(curtain, { autoAlpha: 1, yPercent: 0 });
       document.body.style.visibility = "visible"; // overrides the boot hide
@@ -72,9 +97,14 @@ export function initPageTransition(): void {
         onComplete: () => {
           clearBoot();
           gsap.set(curtain, { autoAlpha: 0, yPercent: 0 });
+          settle(); // release the load reveals waiting on the curtain
         },
       });
+      // Failsafe — never leave reveals stuck if the tween is interrupted.
+      window.setTimeout(settle, 1600);
     }
+  } else {
+    settle(); // stale arrival flag with no boot cover — nothing to wait for
   }
 
   // ---- EXIT — intercept internal cross-page navigations ----
@@ -129,5 +159,6 @@ export function initPageTransition(): void {
     leaving = false;
     clearBoot();
     gsap.set(curtain, { autoAlpha: 0, yPercent: 0 });
+    settle();
   });
 }

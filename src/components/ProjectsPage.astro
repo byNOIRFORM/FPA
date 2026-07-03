@@ -1,0 +1,351 @@
+---
+/**
+ * ProjectsPage — the /projekty listing (Figma "Projekty_Final", 3249:2363).
+ *
+ * Deliberately simple: just the project grid (no hero, no intro, no filter),
+ * then the footer. The grid is the EXACT homepage Works asymmetric grid
+ * (same tile shapes / offsets / type scale), rendered for all projects with
+ * the shapes cycling every 6 — so it reads as one continuous sequence and
+ * repeats the layout after each 6. Static images (fill the frame, no
+ * parallax) → nothing ever re-lays out, so it's rock-solid.
+ *
+ * CMS-ready: `projects` is the 6 Works entries + 6 listing-only extras
+ * (i18n/projects.ts). An editor adds a project → the grid absorbs it.
+ */
+import Footer from "./Footer.astro";
+import { home, type Lang } from "../i18n/home";
+import {
+  worksProjectSlugs,
+  availableProjectSlugs,
+  projectHref,
+  worksImages,
+  extraProjects,
+  projectsPageUI,
+} from "../i18n/projects";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = home[lang];
+const ui = projectsPageUI[lang];
+
+// 6 Works projects + 6 listing-only projects = the full grid (12).
+const worksList = t.works.projects.map((p, i) => ({
+  title: p.title,
+  description: p.description,
+  alt: p.alt,
+  image: worksImages[i],
+  href: availableProjectSlugs.has(worksProjectSlugs[i])
+    ? projectHref(lang, worksProjectSlugs[i])
+    : null,
+}));
+const extraList = extraProjects.map((p) => ({
+  title: p.title[lang],
+  description: p.description[lang],
+  alt: p.title[lang],
+  image: p.image,
+  href: null as string | null,
+}));
+const projects = [...worksList, ...extraList];
+
+// Group into rows, cycling the three homepage row types (r1/r2/r3) every 6
+// cards — the "repeat after 6" layout.
+const rows: { type: number; left: (typeof projects)[number]; right: (typeof projects)[number] | null }[] = [];
+for (let i = 0; i < projects.length; i += 2) {
+  const type = ((i / 2) % 3) + 1; // 1, 2, 3, 1, 2, 3 …
+  rows.push({ type, left: projects[i], right: projects[i + 1] ?? null });
+}
+---
+
+<article class="pprojects">
+  <section class="pgrid-section" aria-label="Projekty">
+    <div class="pwrap">
+      {/* Big typographic page title — reveals word-by-word from a mask on
+          load, exactly like the hero titles (see projects-page.ts). */}
+      <h1 class="ptitle">
+        {ui.title.split(" ").map((w) => (
+          <span class="ptitle-mask"><span class="ptitle-word">{w}</span></span>
+        ))}
+      </h1>
+
+      <div class="pgrid" data-grid>
+        {rows.map((row, ri) => {
+          // First row (first two projects) reveals on load — same look as the
+          // homepage Works row-1 reveal. `rv` = "" adds the attribute, undefined
+          // omits it (projects-page.ts animates + strips [data-reveal]).
+          const rv = ri === 0 ? "" : undefined;
+          return (
+            <div class={`works-row works-row--${row.type}`}>
+              <article class={`pcard work-tile work-tile--r${row.type}l`}>
+                <div class="work-media" data-reveal={rv}><img src={row.left.image} alt={row.left.alt} loading="lazy" /></div>
+                <div class="work-info">
+                  <h3 class="work-title" data-reveal={rv}>{row.left.title}</h3>
+                  <p class="work-desc" data-reveal={rv}>{row.left.description}</p>
+                </div>
+                {row.left.href && <a class="work-cover" href={row.left.href} aria-label={row.left.title}></a>}
+              </article>
+              {row.right && (
+                <article class={`pcard work-tile work-tile--r${row.type}r`}>
+                  <div class="work-media" data-reveal={rv}><img src={row.right.image} alt={row.right.alt} loading="lazy" /></div>
+                  <div class="work-info">
+                    <h3 class="work-title" data-reveal={rv}>{row.right.title}</h3>
+                    <p class="work-desc" data-reveal={rv}>{row.right.description}</p>
+                  </div>
+                  {row.right.href && <a class="work-cover" href={row.right.href} aria-label={row.right.title}></a>}
+                </article>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+
+  <div class="pwrap"><div class="pdivider"></div></div>
+
+  <Footer lang={lang} />
+</article>
+
+<style>
+  .pprojects {
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .pwrap {
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    padding-inline: clamp(16px, 2vw, 48px);
+  }
+
+  .pdivider {
+    width: 100%;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* Grid section — top padding drops the first row so that, at 100vh, the
+     first tile (Chata, r1l) shows ~70% (grid top ≈ 100vh − 23vw, the tile
+     being ~33vw tall). The title + its 40px gap (~10.27vw + 2.78vw) now sit
+     inside that space, so the padding subtracts them and the GRID stays on
+     the same peek position as before. Floored at 160px to always clear the
+     fixed nav on short viewports. */
+  .pgrid-section {
+    padding-top: max(160px, calc(100vh - 36.05vw));
+    padding-bottom: clamp(48px, 5.55vw, 80px);
+  }
+
+  /* Big typographic page title — Figma: Switzer Medium 112 @1440, ink,
+     40px gap down to the grid. Same mask/word structure as the hero titles
+     so the reveal is identical (projects-page.ts). */
+  .ptitle {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.28em;
+    font-family: var(--font-sans);
+    font-style: normal; /* override the global serif-italic heading rule */
+    font-weight: 500;
+    color: var(--ink);
+    font-size: clamp(56px, 7.78vw, 168px); /* 112 @1440 */
+    line-height: 1.32; /* Figma 148/112 — keeps j/y descenders inside the mask */
+    letter-spacing: 0;
+    margin: 0 0 clamp(24px, 2.78vw, 56px); /* 40 @1440 → grid */
+  }
+  .ptitle-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: inherit;
+  }
+  /* CSS only hides via opacity — projects-page.ts seeds yPercent (the
+     matrix-decomposition trap; same note as the hero titles). */
+  .ptitle-word {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* =============================================================
+     GRID — a faithful copy of the homepage Works asymmetric grid.
+     Tile shapes cycle every 6 cards.
+     ============================================================= */
+  .pgrid {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(56px, 5.55vw, 120px); /* 80 @1440 */
+    width: 100%;
+  }
+  .works-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .work-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(16px, 1.39vw, 30px);
+  }
+  .work-cover {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+  }
+
+  .work-tile--r1l {
+    flex: 0 0 calc(445 / 1384 * 100%);
+    min-width: 0;
+  }
+  .work-tile--r1l .work-media { aspect-ratio: 445 / 478; }
+
+  .work-tile--r1r {
+    flex: 0 0 calc(680 / 1384 * 100%);
+    min-width: 0;
+    margin-right: calc(117 / 1384 * 100%);
+  }
+  .work-tile--r1r .work-media { aspect-ratio: 680 / 698; }
+
+  .work-tile--r2l {
+    flex: 0 0 calc(563 / 1384 * 100%);
+    min-width: 0;
+    margin-left: calc(117 / 1384 * 100%);
+  }
+  .work-tile--r2l .work-media { aspect-ratio: 563 / 730; }
+
+  .work-tile--r2r {
+    flex: 0 0 calc(563 / 1384 * 100%);
+    min-width: 0;
+  }
+  .work-tile--r2r .work-media { aspect-ratio: 563 / 402; }
+
+  .work-tile--r3l {
+    flex: 0 0 calc(445 / 1384 * 100%);
+    min-width: 0;
+  }
+  .work-tile--r3l .work-media { aspect-ratio: 445 / 540; }
+
+  .work-tile--r3r {
+    flex: 0 0 calc(800 / 1384 * 100%);
+    min-width: 0;
+  }
+  .work-tile--r3r .work-media { aspect-ratio: 800 / 400; }
+
+  .work-media {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  /* 122% of the frame, top:-11% → 11% headroom each side for the ±8
+     inner-parallax drift (projects-page.ts), same as the homepage Works.
+     Safe now that the grid never re-lays out (no filter). */
+  .work-media img {
+    position: relative;
+    top: -11%;
+    width: 100%;
+    height: 122%;
+    object-fit: cover;
+    display: block;
+    will-change: transform;
+  }
+
+  .work-info {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(6px, 0.56vw, 12px);
+    width: 100%;
+  }
+  .work-title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-style: normal;
+    font-size: clamp(18px, 1.39vw, 30px);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 0;
+    will-change: transform;
+  }
+  .work-desc {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(14px, 1.11vw, 22px);
+    line-height: 1.375;
+    letter-spacing: 0.02em;
+    color: var(--text-mute);
+    margin: 0;
+  }
+
+  /* First-row reveal — initial hidden state, declared in CSS so the tiles are
+     hidden from first paint. The media curtains up from below; the text rises
+     in. projects-page.ts plays it on load and strips [data-reveal]. */
+  .work-media[data-reveal] {
+    clip-path: inset(100% 0 0 0);
+  }
+  .work-title[data-reveal],
+  .work-desc[data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  /* =============================================================
+     Responsive — tablet scales down; mobile stacks (same as Works).
+     ============================================================= */
+  @media (max-width: 767px) {
+    .pgrid-section {
+      padding-top: clamp(96px, 26vw, 140px);
+      padding-bottom: 56px;
+    }
+    .ptitle {
+      font-size: clamp(40px, 12vw, 56px);
+      margin-bottom: 32px;
+    }
+    .pgrid { gap: 48px; }
+    .works-row {
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: flex-start;
+      gap: 48px;
+    }
+    .work-tile--r1l,
+    .work-tile--r1r,
+    .work-tile--r2l,
+    .work-tile--r2r,
+    .work-tile--r3l,
+    .work-tile--r3r {
+      flex: none;
+      width: 100%;
+      height: auto;
+      margin: 0;
+    }
+    .work-tile { gap: 20px; }
+    .work-tile--r1l .work-media,
+    .work-tile--r1r .work-media,
+    .work-tile--r2l .work-media,
+    .work-tile--r2r .work-media,
+    .work-tile--r3l .work-media,
+    .work-tile--r3r .work-media {
+      flex: none;
+      height: auto;
+      aspect-ratio: 1 / 1;
+    }
+    /* iOS Safari doesn't resolve `top: -11%` against the aspect-ratio height;
+       give the parallax headroom via margin-top (resolves against width, and
+       the mobile tile is square so -11% width == -11% height). */
+    .work-media img {
+      top: 0;
+      margin-top: -11%;
+    }
+    .work-info { gap: 8px; }
+    .work-title { font-size: 20px; line-height: 1.1; }
+    .work-desc { font-size: 16px; line-height: 1.375; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ptitle-word {
+      opacity: 1;
+    }
+  }
+</style>

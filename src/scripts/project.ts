@@ -70,19 +70,33 @@ export function initProject(): void {
     });
   }
 
-  // ===== 1b. HERO — slow Ken Burns "yo-yo" (same as the homepage hero) =====
+  // ===== 1b. HERO — intro reveal, 1:1 with the homepage hero (hero.ts →
+  // revealHero): the image settles scale 1.1 → 1 (1.6s expo.out) while the
+  // title reveals word-by-word from its masks at the SAME 0.85s beat
+  // (1.0s expo.out, 0.05 stagger); the slow Ken Burns yo-yo starts only once
+  // the reveal timeline completes. There's no loader on this subpage, so the
+  // timeline plays on init — the exact same choreography, just no curtain.
   const heroImg = root.querySelector<HTMLImageElement>(".phero-media img");
-  if (heroImg) {
-    if (reduced) {
-      gsap.set(heroImg, { scale: 1 });
-    } else {
-      gsap.to(heroImg, {
-        scale: 1.06,
-        duration: 22,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
+  const titleWords = root.querySelectorAll<HTMLElement>(".phero-title-word");
+
+  const startKenBurns = () => {
+    if (heroImg) {
+      gsap.to(heroImg, { scale: 1.06, duration: 22, ease: "sine.inOut", repeat: -1, yoyo: true });
+    }
+  };
+
+  if (reduced) {
+    if (heroImg) gsap.set(heroImg, { scale: 1 });
+    if (titleWords.length) gsap.set(titleWords, { yPercent: 0, opacity: 1 });
+  } else {
+    if (heroImg) gsap.set(heroImg, { scale: 1.1 });
+    // Seed the masked-word start on the GSAP side (CSS only sets opacity:0).
+    if (titleWords.length) gsap.set(titleWords, { yPercent: 110, opacity: 0 });
+
+    const tl = gsap.timeline({ onComplete: startKenBurns });
+    if (heroImg) tl.to(heroImg, { scale: 1, duration: 1.6, ease: "expo.out" }, 0);
+    if (titleWords.length) {
+      tl.to(titleWords, { yPercent: 0, opacity: 1, duration: 1.0, ease: "expo.out", stagger: 0.05 }, 0.85);
     }
   }
 

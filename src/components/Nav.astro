@@ -18,6 +18,7 @@
  * past the top the nav becomes the cream panel. Defaults per variant.
  */
 import { home, langHref, langLabel, LANGS, localizedHrefs, servicesHref, type Lang } from "../i18n/home";
+import { projectsListHref } from "../i18n/projects";
 
 interface Props {
   lang?: Lang;
@@ -43,7 +44,7 @@ const langHrefs = localizedHrefs(Astro.url.pathname);
 // anchors are local. Services points at the current language's subpage.
 const homeBase = variant === "home" ? "" : lang === "sk" ? "/" : `/${lang}`;
 const aboutHref = `${homeBase}#o-nas`;
-const projectsHref = `${homeBase}#projekty`;
+const projectsHref = projectsListHref(lang);
 const servicesLink = servicesHref[lang];
 
 // Only the landing nav starts hidden for the loader reveal — subpages
@@ -246,10 +247,26 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
 
   /* Text flip hover — visible text slides up, a duplicate (::after,
      content: attr(data-text)) rises from below. Pure CSS. */
+  /* Flip mask. ORIGINAL metrics (line-height 1.15, vertical-align top) so
+     the bar's alignment is byte-identical to the long-approved layout —
+     do NOT change these, they set every .nav-flip box height.
+
+     The clipping is clip-path (not overflow:hidden), for two reasons:
+       1. Switzer's glyphs overrun the tight 1.15 line box (descenders of
+          j/y/ž below, cap diacritics above) — overflow:hidden cut them.
+          The negative ±0.18em inset lets the full glyphs show at rest.
+       2. WebKit doesn't reliably clip composited children with
+          overflow:hidden alone — that's what leaked fragments mid-flip.
+          clip-path clips them dependably (and there's no permanent
+          will-change to force compositing at rest).
+
+     The duplicate (::after) shares the exact box (inset: 0) and both
+     texts travel ±140% — beyond the widened clip window — so neither
+     text's overhanging glyphs ever peek at rest or post-flip. */
   .nav-flip {
     position: relative;
     display: inline-block;
-    overflow: hidden;
+    clip-path: inset(-0.18em 0);
     line-height: 1.15;
     vertical-align: top;
     color: inherit;
@@ -259,21 +276,21 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
   .nav-flip span {
     display: inline-block;
     transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
   }
 
   .nav-flip::after {
     content: attr(data-text);
     position: absolute;
-    left: 0;
-    top: 100%;
+    inset: 0;
+    transform: translateY(140%);
     transition: transform 480ms cubic-bezier(0.65, 0, 0.35, 1);
-    will-change: transform;
   }
 
-  .nav-flip:hover span,
+  .nav-flip:hover span {
+    transform: translateY(-140%);
+  }
   .nav-flip:hover::after {
-    transform: translateY(-100%);
+    transform: translateY(0);
   }
 
   .nav-cta {

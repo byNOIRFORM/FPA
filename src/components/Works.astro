@@ -33,7 +33,7 @@ interface Project {
 }
 
 import { home, type Lang } from "../i18n/home";
-import { worksProjectSlugs, availableProjectSlugs, projectHref } from "../i18n/projects";
+import { worksProjectSlugs, availableProjectSlugs, projectHref, projectsListHref } from "../i18n/projects";
 
 interface Props {
   lang?: Lang;
@@ -160,7 +160,7 @@ const projectHrefs = worksProjectSlugs.map((s) =>
     </div>
   </div>
 
-  <a class="works-cta" href="#projekty">
+  <a class="works-cta" href={projectsListHref(lang)}>
     <span class="works-cta-text">{t.works.cta}</span>
     <svg
       class="works-cta-arrow"

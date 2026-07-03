@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ProjectsPage from "../../../components/ProjectsPage.astro";
+import { projectsPageUI } from "../../../i18n/projects";
+---
+
+<BaseLayout
+  title="Projekty — Fotta // Popadič"
+  description={projectsPageUI.cz.intro}
+  loader={false}
+  navVariant="sub"
+  navActive="projects"
+  lang="cz"
+>
+  <ProjectsPage lang="cz" />
+</BaseLayout>
