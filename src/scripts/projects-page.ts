@@ -86,6 +86,12 @@ export function initProjectsPage(): void {
         const desc = tile.querySelector<HTMLElement>(".work-desc[data-reveal]");
         if (!title || !desc) return;
 
+        // fromTo + immediateRender:false + strip at onComplete — the desc
+        // tween starts 0.08 after the timeline; stripping the attribute in
+        // onStart dropped its hidden CSS state before its start values were
+        // captured and it popped in unanimated (the services.ts lesson).
+        const from = { y: 16, opacity: 0 };
+        const to = { y: 0, opacity: 1, duration: 0.7, ease: "power3.out", immediateRender: false };
         gsap
           .timeline({
             scrollTrigger: {
@@ -93,13 +99,13 @@ export function initProjectsPage(): void {
               start: "top 75%",
               toggleActions: "play none none none",
             },
-            onStart: () => {
+            onComplete: () => {
               title.removeAttribute("data-reveal");
               desc.removeAttribute("data-reveal");
             },
           })
-          .to(title, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" })
-          .to(desc, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.08);
+          .fromTo(title, from, to, 0)
+          .fromTo(desc, from, to, 0.08);
       });
     });
   }

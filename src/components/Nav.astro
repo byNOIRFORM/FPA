@@ -17,7 +17,7 @@
  * view the nav is transparent (over the hero/photo); once it scrolls
  * past the top the nav becomes the cream panel. Defaults per variant.
  */
-import { home, langHref, langLabel, LANGS, localizedHrefs, servicesHref, type Lang } from "../i18n/home";
+import { home, langHref, langLabel, LANGS, localizedHrefs, servicesHref, aboutHref as aboutHrefMap, type Lang } from "../i18n/home";
 import { projectsListHref } from "../i18n/projects";
 
 interface Props {
@@ -40,10 +40,9 @@ const t = home[lang];
 // (computed from the URL), instead of always bouncing to the homepage.
 const langHrefs = localizedHrefs(Astro.url.pathname);
 
-// Subpage anchors jump back to the current language's homepage; landing
-// anchors are local. Services points at the current language's subpage.
-const homeBase = variant === "home" ? "" : lang === "sk" ? "/" : `/${lang}`;
-const aboutHref = `${homeBase}#o-nas`;
+// All three nav links point at their own language-aware pages now
+// (no homepage anchors left).
+const aboutHref = aboutHrefMap[lang];
 const projectsHref = projectsListHref(lang);
 const servicesLink = servicesHref[lang];
 

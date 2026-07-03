@@ -585,6 +585,13 @@ export const servicesHref: Record<Lang, string> = {
   en: "/en/sluzby",
 };
 
+/** Language-aware path to the /o-nas (About) page. */
+export const aboutHref: Record<Lang, string> = {
+  sk: "/o-nas",
+  cz: "/cz/o-nas",
+  en: "/en/o-nas",
+};
+
 /**
  * Map the CURRENT pathname to its equivalent in every language, so the
  * SK/CZ/EN switch keeps you on the same page (homepage ↔ homepage,

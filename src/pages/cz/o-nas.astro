@@ -1,0 +1,17 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AboutPage from "../../components/AboutPage.astro";
+import { aboutPage } from "../../i18n/about-page";
+---
+
+<BaseLayout
+  title={aboutPage.cz.metaTitle}
+  description={aboutPage.cz.intro}
+  loader={false}
+  navVariant="sub"
+  navActive="about"
+  navBoundary=".ahero"
+  lang="cz"
+>
+  <AboutPage lang="cz" />
+</BaseLayout>

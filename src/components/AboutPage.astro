@@ -1,0 +1,347 @@
+---
+/**
+ * AboutPage — the /o-nas page (Figma "oNás", node 3227:348). Built section
+ * by section as the design lands; current spine:
+ *
+ *   hero (photo + word-mask title) → word-scrub intro → "Počiatky
+ *   spoločnosti" (label · two text columns · photo + caption) → footer
+ *
+ * Motion in scripts/about-page.ts — everything reuses the site's motion
+ * language 1:1:
+ *   - Hero: homepage hero choreography (image settle 1.1→1, words at 0.85s,
+ *     Ken Burns yo-yo after)
+ *   - Intro: per-word colour scrub (--reveal)
+ *   - Origins: text rises + photo curtain on scroll-in (Works row-1 pattern)
+ */
+import Footer from "./Footer.astro";
+import { type Lang } from "../i18n/home";
+import { aboutPage } from "../i18n/about-page";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+const t = aboutPage[lang];
+
+const introWords = t.intro.split(" ");
+---
+
+<article class="apage">
+  {/* ===== HERO — photo + word-mask title (homepage choreography) ===== */}
+  <header class="ahero" aria-label={t.heroTitle}>
+    <div class="ahero-media">
+      <img src="/images/about/hero.jpg" alt="" fetchpriority="high" />
+    </div>
+    <div class="ahero-scrim" aria-hidden="true"></div>
+    <div class="awrap ahero-inner">
+      <h1 class="ahero-title">
+        {t.heroTitle.split(" ").map((w) => (
+          <span class="ahero-title-mask"><span class="ahero-title-word">{w}</span></span>
+        ))}
+      </h1>
+    </div>
+  </header>
+
+  {/* ===== INTRO — per-word colour scrub + rule ===== */}
+  <section class="aintro">
+    <div class="awrap aintro-inner">
+      <p class="aintro-text">
+        {introWords.map((w) => (
+          <>
+            <span class="aword">{w}</span>{" "}
+          </>
+        ))}
+      </p>
+      <div class="adivider"></div>
+    </div>
+  </section>
+
+  {/* ===== POČIATKY SPOLOČNOSTI — label · two columns · photo ===== */}
+  <section class="aorigins">
+    <div class="awrap aorigins-grid">
+      <h2 class="aorigins-label" data-reveal>{t.origins.label}</h2>
+
+      <div class="aorigins-content">
+        <div class="aorigins-cols">
+          <div class="aorigins-col" data-reveal>
+            {t.origins.col1.map((p) => <p>{p}</p>)}
+          </div>
+          <div class="aorigins-col" data-reveal>
+            {t.origins.col2.map((p) => <p>{p}</p>)}
+          </div>
+        </div>
+
+        <figure class="aorigins-figure">
+          {/* Curtain reveal on scroll-in — homepage Works row-1 pattern. */}
+          <div class="amedia" data-reveal style="aspect-ratio: 915 / 456">
+            <img src="/images/about/pociatky.jpg" alt={t.origins.caption} loading="lazy" />
+          </div>
+          <figcaption class="aorigins-caption" data-reveal>{t.origins.caption}</figcaption>
+        </figure>
+      </div>
+    </div>
+    <div class="awrap"><div class="adivider"></div></div>
+  </section>
+
+  <Footer lang={lang} />
+</article>
+
+<style>
+  .apage {
+    background: var(--bg);
+    color: var(--ink);
+  }
+
+  .awrap {
+    width: 100%;
+    max-width: 2464px;
+    margin: 0 auto;
+    padding-inline: clamp(16px, 2vw, 48px);
+  }
+
+  .adivider {
+    width: 100%;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* ===== HERO — same treatment as the project-detail hero ===== */
+  .ahero {
+    position: relative;
+    height: 100vh;
+    min-height: 520px;
+    overflow: hidden;
+  }
+  .ahero-media {
+    position: absolute;
+    inset: 0;
+  }
+  /* Starts at scale 1.1 — about-page.ts settles it to 1 (intro), then runs
+     the Ken Burns yo-yo. */
+  .ahero-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transform: scale(1.1);
+    will-change: transform;
+  }
+  /* Legibility gradient — same as the detail hero. */
+  .ahero-scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.55) 0%,
+      rgba(0, 0, 0, 0.28) 22%,
+      rgba(0, 0, 0, 0.04) 48%,
+      rgba(0, 0, 0, 0) 66%
+    );
+  }
+  .ahero-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: clamp(32px, 3.89vw, 64px); /* 56 @1440 */
+  }
+  .ahero-title {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 0.28em;
+    max-width: 66.11%; /* 915/1384 — wraps to two lines like the Figma */
+    font-family: var(--font-sans);
+    font-style: normal; /* override the global serif-italic heading rule */
+    font-weight: 400; /* Regular — matches the homepage hero title */
+    color: #fff;
+    font-size: clamp(34px, 4.44vw, 88px); /* 64 @1440 */
+    line-height: 1.094; /* 70/64 */
+    letter-spacing: 0;
+    margin: 0;
+  }
+  .ahero-title-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: inherit;
+  }
+  /* CSS only hides via opacity — about-page.ts seeds yPercent (the
+     matrix-decomposition trap; same note as every hero title). */
+  .ahero-title-word {
+    display: inline-block;
+    opacity: 0;
+    will-change: transform, opacity;
+  }
+
+  /* ===== INTRO (word-scrub) — same scale as the other page intros ===== */
+  .aintro {
+    padding-top: clamp(56px, 6.94vw, 140px); /* 100 @1440 */
+  }
+  .aintro-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .aintro-text {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    max-width: 83%; /* 1150/1384 */
+    text-align: center;
+    font-size: clamp(26px, 3.33vw, 68px); /* 48 @1440 */
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+  .aword {
+    color: color-mix(in srgb, var(--ink) calc(var(--reveal, 0) * 100%), var(--ink-faint));
+  }
+
+  /* ===== POČIATKY — label left, content right (Figma: label @0,
+     content 915 @469 → 33.89% offset of the 1384 grid) ===== */
+  .aorigins {
+    padding-top: clamp(48px, 5.55vw, 80px); /* 80 @1440 */
+  }
+  .aorigins-grid {
+    display: grid;
+    grid-template-columns: auto 66.11%; /* content = 915/1384 */
+    justify-content: space-between;
+    align-items: start;
+  }
+  .aorigins-label {
+    font-family: var(--font-sans);
+    font-style: normal;
+    font-weight: 500;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 0;
+  }
+  .aorigins-content {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+    padding-bottom: clamp(48px, 5.55vw, 80px); /* 80 @1440 → closing divider */
+  }
+  .aorigins-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 446 · 445 of 915 */
+    column-gap: clamp(16px, 1.67vw, 32px); /* 24 @1440 */
+    align-items: start;
+  }
+  .aorigins-col p {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: var(--ink);
+    margin: 0 0 1.4em;
+  }
+  .aorigins-col p:last-child {
+    margin-bottom: 0;
+  }
+
+  .aorigins-figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 1.39vw, 28px); /* 20 @1440 */
+  }
+  .amedia {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .amedia img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .aorigins-caption {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(14px, 1.11vw, 22px); /* 16 @1440 */
+    line-height: 1.375;
+    letter-spacing: 0.02em;
+    color: var(--text-mute);
+  }
+
+  /* ===== Reveal initial states — hidden from first paint; about-page.ts
+     animates and strips the attributes. Label + columns use the SAME
+     clip-path curtain as the Services rows (one motion family with the
+     photo); only the caption keeps the small fade-up. ===== */
+  .amedia[data-reveal],
+  .aorigins-label[data-reveal],
+  .aorigins-col[data-reveal] {
+    clip-path: inset(100% 0 0 0);
+  }
+  .aorigins-caption[data-reveal] {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  /* =============================================================
+     Responsive — tablet scales via clamp/%; mobile (≤767) stacks.
+     ============================================================= */
+  @media (max-width: 767px) {
+    .ahero {
+      height: 78vh;
+      min-height: 460px;
+    }
+    .ahero-title {
+      max-width: 100%;
+      font-size: clamp(30px, 8.8vw, 52px);
+    }
+    .aintro-text {
+      max-width: 100%;
+      text-align: center;
+      font-size: clamp(28px, 8vw, 32px);
+      line-height: 1.25;
+    }
+    .aorigins {
+      padding-top: 28px;
+    }
+    .aorigins-grid {
+      grid-template-columns: 1fr;
+      row-gap: clamp(20px, 6vw, 40px);
+    }
+    .aorigins-content {
+      gap: clamp(28px, 8vw, 56px);
+      padding-bottom: 28px;
+    }
+    .aorigins-cols {
+      grid-template-columns: 1fr;
+      row-gap: clamp(20px, 6vw, 32px);
+    }
+    .aorigins-col p {
+      font-size: 18px;
+      line-height: 1.5;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aword {
+      --reveal: 1;
+    }
+    .ahero-title-word {
+      opacity: 1;
+    }
+    .amedia[data-reveal],
+    .aorigins-label[data-reveal],
+    .aorigins-col[data-reveal] {
+      clip-path: none;
+    }
+    .aorigins-caption[data-reveal] {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

@@ -26,7 +26,7 @@
  * use the scaled inline nav instead.
  */
 
-import { home, langHref, localizedHrefs, servicesHref, type Lang } from "../i18n/home";
+import { home, langHref, localizedHrefs, servicesHref, aboutHref, type Lang } from "../i18n/home";
 import { projectsListHref } from "../i18n/projects";
 
 interface Props {
@@ -49,7 +49,7 @@ const base = langHref[lang];
 const langHrefs = localizedHrefs(Astro.url.pathname);
 const links: MenuLink[] = [
   { label: t.footer.nav.home, href: base },
-  { label: t.footer.nav.about, href: `${base}#o-nas` },
+  { label: t.footer.nav.about, href: aboutHref[lang] },
   { label: t.footer.nav.projects, href: projectsListHref(lang) },
   { label: t.footer.nav.services, href: servicesHref[lang] },
   { label: t.nav.cta, href: "#kontakt", contact: true },
