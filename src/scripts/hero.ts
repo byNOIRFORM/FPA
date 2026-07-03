@@ -63,6 +63,21 @@ function initHeroImageSwap(): void {
   );
   if (!words.length || !images.length) return;
 
+  // The swap images ship with data-src only (see Hero.astro) so the multi-MB
+  // photos don't compete with the LCP hero image. Hydrate them once the page
+  // has fully loaded — long before any hover could need them.
+  const hydrate = () => {
+    images.forEach((img) => {
+      const src = img.dataset.src;
+      if (src) {
+        img.src = src;
+        img.removeAttribute("data-src");
+      }
+    });
+  };
+  if (document.readyState === "complete") hydrate();
+  else window.addEventListener("load", hydrate, { once: true });
+
   const findImage = (key: string) =>
     images.find((img) => img.dataset.imageKey === key) ?? null;
 

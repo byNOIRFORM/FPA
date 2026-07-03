@@ -40,17 +40,20 @@ const t = home[lang];
       alt=""
       decoding="async"
     />
+    {/* Hover-swap images carry data-src only — they're invisible until the
+        user hovers a slogan trigger, so hero.ts hydrates them AFTER window
+        load. Keeps them from competing with the LCP hero image. */}
     <img
       class="hero-media-img"
       data-image-key="hlucna"
-      src="/images/hero-hlucna.jpg"
+      data-src="/images/hero-hlucna.jpg"
       alt=""
       decoding="async"
     />
     <img
       class="hero-media-img"
       data-image-key="priestor"
-      src="/images/hero-priestor.jpg"
+      data-src="/images/hero-priestor.jpg"
       alt=""
       decoding="async"
     />

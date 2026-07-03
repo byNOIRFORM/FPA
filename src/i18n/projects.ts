@@ -82,19 +82,19 @@ export const projectsUI: Record<
   { contextLabel: string; relatedLabel: string; relatedCta: string; dragLabel: string }
 > = {
   sk: {
-    contextLabel: "Kontext a osadenie",
+    contextLabel: "Informácie o projekte",
     relatedLabel: "Ďalšie projekty",
     relatedCta: "Všetky projekty",
     dragLabel: "Ťahajte",
   },
   cz: {
-    contextLabel: "Kontext a osazení",
+    contextLabel: "Informace o projektu",
     relatedLabel: "Další projekty",
     relatedCta: "Všechny projekty",
     dragLabel: "Táhněte",
   },
   en: {
-    contextLabel: "Context & setting",
+    contextLabel: "Project information",
     relatedLabel: "More projects",
     relatedCta: "All projects",
     dragLabel: "Drag",

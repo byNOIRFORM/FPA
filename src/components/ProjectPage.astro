@@ -105,7 +105,8 @@ const singleGallery = gallery.length <= 1;
   <section class="pcontext">
     <div class="pwrap pcontext-grid">
       <figure class="pcontext-figure">
-        <div class="pmedia" style="aspect-ratio: 564 / 730">
+        {/* Curtain reveal on scroll-in — same as the homepage Works row 1. */}
+        <div class="pmedia" data-reveal style="aspect-ratio: 564 / 730">
           <img src={project.contextImage} alt={locale.contextAlt} loading="lazy" />
         </div>
       </figure>
@@ -161,14 +162,16 @@ const singleGallery = gallery.length <= 1;
 
       {block.kind === "duo" && (
         <section class="pblock">
-          <div class="pwrap pblock-duo-grid">
+          {/* Paired curtain reveal on scroll-in — the two photos rise with
+              the same 0.15s stagger as the homepage Works row 1. */}
+          <div class="pwrap pblock-duo-grid" data-duo>
             <figure class="pblock-duo-left">
-              <div class="pmedia" style={`aspect-ratio: ${block.left.ratio}`}>
+              <div class="pmedia" data-reveal style={`aspect-ratio: ${block.left.ratio}`}>
                 <img src={block.left.image} alt={block.left.alt ?? ""} loading="lazy" />
               </div>
             </figure>
             <figure class="pblock-duo-right">
-              <div class="pmedia" style={`aspect-ratio: ${block.right.ratio}`}>
+              <div class="pmedia" data-reveal style={`aspect-ratio: ${block.right.ratio}`}>
                 <img src={block.right.image} alt={block.right.alt ?? ""} loading="lazy" />
               </div>
             </figure>
@@ -343,6 +346,14 @@ const singleGallery = gallery.length <= 1;
   .pmedia--static img {
     transform: none;
     will-change: auto;
+  }
+
+  /* Curtain-reveal initial state (context photo + duo pair) — hidden from
+     first paint; project.ts plays the homepage Works reveal and strips the
+     attribute. Clip sits on the FRAME, so the inner parallax transform on
+     the img is untouched. */
+  .pmedia[data-reveal] {
+    clip-path: inset(100% 0 0 0);
   }
 
   /* ===== HERO ===== */
@@ -956,6 +967,9 @@ const singleGallery = gallery.length <= 1;
     }
     .phero-title-word {
       opacity: 1;
+    }
+    .pmedia[data-reveal] {
+      clip-path: none;
     }
   }
 </style>

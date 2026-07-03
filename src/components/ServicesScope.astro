@@ -41,10 +41,10 @@ interface Tile {
 // image + speed are language-agnostic; name + alt come from the dict.
 // Order matches the visual stagger (--1 … --4) positioned in CSS.
 const meta = [
-  { image: "/images/services-scope/novostavby.png",    speed: 6 },
-  { image: "/images/services-scope/rekonstrukcie.png", speed: 10 },
-  { image: "/images/services-scope/interiery.png",     speed: 5 },
-  { image: "/images/services-scope/urbanizmus.png",    speed: 8 },
+  { image: "/images/services-scope/novostavby.jpg",    speed: 6 },
+  { image: "/images/services-scope/rekonstrukcie.jpg", speed: 10 },
+  { image: "/images/services-scope/interiery.jpg",     speed: 5 },
+  { image: "/images/services-scope/urbanizmus.jpg",    speed: 8 },
 ];
 const tiles: Tile[] = meta.map((m, i) => ({ ...m, ...t.scope.tiles[i] }));
 ---

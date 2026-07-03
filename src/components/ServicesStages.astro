@@ -10,7 +10,7 @@
  * "image lags the frame" motion as the Works / scope tiles. Driven off
  * getBoundingClientRect (robust against this page's sticky intro).
  *
- * Placeholder photo: public/images/services-stages/stupne.png — swap by
+ * Placeholder photo: public/images/services-stages/stupne.jpg — swap by
  * dropping a new file with the same name.
  */
 import { servicesPage } from "../i18n/services-page";
@@ -21,7 +21,7 @@ interface Props {
 }
 const { lang = "sk" } = Astro.props;
 const t = servicesPage[lang];
-const image = "/images/services-stages/stupne.png";
+const image = "/images/services-stages/stupne.jpg";
 ---
 
 <section class="sstages" aria-labelledby="sstages-title">

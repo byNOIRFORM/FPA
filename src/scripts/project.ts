@@ -121,6 +121,45 @@ export function initProject(): void {
     }
   }
 
+  // ===== 2b. PHOTO CURTAIN REVEALS — 1:1 with the homepage Works row-1
+  // (works.ts): clip-path inset(100%) → 0, 1.0s power3.out, trigger top 80%,
+  // play once. The context portrait reveals alone; the duo pair reveals
+  // together with the same 0.15s stagger as the homepage pair. Initial
+  // hidden state lives in CSS via .pmedia[data-reveal]. =====
+  const revealMedias = (medias: HTMLElement[], trigger: HTMLElement) => {
+    gsap.fromTo(
+      medias,
+      { clipPath: "inset(100% 0 0 0)" },
+      {
+        clipPath: "inset(0% 0 0 0)",
+        duration: 1.0,
+        ease: "power3.out",
+        stagger: 0.15,
+        scrollTrigger: {
+          trigger,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+        onComplete: () => medias.forEach((m) => m.removeAttribute("data-reveal")),
+      },
+    );
+  };
+
+  const revealFrames = Array.from(root.querySelectorAll<HTMLElement>(".pmedia[data-reveal]"));
+  if (reduced) {
+    revealFrames.forEach((m) => m.removeAttribute("data-reveal"));
+  } else {
+    const duo = root.querySelector<HTMLElement>("[data-duo]");
+    const duoMedias = duo
+      ? Array.from(duo.querySelectorAll<HTMLElement>(".pmedia[data-reveal]"))
+      : [];
+    if (duo && duoMedias.length) revealMedias(duoMedias, duo);
+    // Everything else (the context portrait) reveals on its own trigger.
+    revealFrames
+      .filter((m) => !duoMedias.includes(m))
+      .forEach((m) => revealMedias([m], m));
+  }
+
   // ===== 3. DRAG GALLERY =====
   initGallery(root, reduced);
 
