@@ -31,6 +31,30 @@ export function initNav(): void {
   const nav = document.querySelector<HTMLElement>(".nav");
   if (!nav) return;
 
+  // ===== 0. iOS STATUS-BAR TINT =====
+  // In portrait Safari the page can NOT paint behind the notch — the
+  // status-bar strip is browser chrome, and Safari fills it from
+  // <meta name="theme-color"> (falling back to the page background,
+  // which is what showed as the cream band above the photo heroes).
+  // So instead of fighting the layout, we drive that meta in sync with
+  // the nav state: transparent-over-photo → misty photo tone (the strip
+  // reads as the image continuing under the notch); cream panel → the
+  // live --bg token (theme-aware). Safari animates the change smoothly.
+  const barMeta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+  const HERO_TONE = "#a9adb2"; // misty-sky neutral shared by the hero photos
+  let overPhoto = false;
+  const tintBar = () => {
+    if (!barMeta) return;
+    barMeta.content = overPhoto
+      ? HERO_TONE
+      : getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#FAF9F6";
+  };
+  // Re-tint when the light/dark theme flips (visible in the panel state).
+  new MutationObserver(tintBar).observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-theme"],
+  });
+
   // ===== 1. THEME SWITCH =====
   const boundarySel = nav.dataset.navBoundaryTarget || ".hero";
   const boundary = document.querySelector<HTMLElement>(boundarySel);
@@ -38,10 +62,13 @@ export function initNav(): void {
   if (!boundary || typeof IntersectionObserver === "undefined") {
     // No boundary to watch (or no IO support) → just show the panel.
     nav.classList.add("is-scrolled");
+    tintBar();
   } else {
     const observer = new IntersectionObserver(
       ([entry]) => {
         nav.classList.toggle("is-scrolled", !entry.isIntersecting);
+        overPhoto = entry.isIntersecting;
+        tintBar();
       },
       {
         rootMargin: "-60px 0px 0px 0px",

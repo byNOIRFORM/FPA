@@ -53,6 +53,14 @@ const {
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
 
+    {/* iOS/Android browser-chrome tint. In portrait Safari the status-bar
+        strip is CHROME, not page — content can never paint behind the
+        notch, and without this meta Safari fills the strip with the page
+        background (the cream band bug over photo heroes). nav.ts keeps the
+        value in sync at runtime: photo tone while the nav is transparent
+        over a hero, live --bg once scrolled to the cream panel. */}
+    <meta name="theme-color" content="#FAF9F6" />
+
     {/* THEME — resolve light/dark BEFORE first paint to avoid a flash.
         Order of truth: explicit stored choice → OS preference → light.
         Sets data-theme on <html> synchronously; theme-toggle.ts keeps
@@ -66,6 +74,10 @@ const {
             ? "dark"
             : "light");
         document.documentElement.setAttribute("data-theme", theme);
+        if (theme === "dark") {
+          var tc = document.querySelector('meta[name="theme-color"]');
+          if (tc) tc.setAttribute("content", "#222222");
+        }
       } catch (e) {}
     </script>
 
