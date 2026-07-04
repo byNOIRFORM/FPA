@@ -103,33 +103,62 @@ export function initAboutPage(): void {
     }
   }
 
-  // Every photo (origins + story blocks) curtains up on its own trigger —
-  // one motion, repeated: clip-path 1.0s power3.out with the figure's
-  // caption rising just behind it (0.2 offset). Photos that share a row
-  // start together because their triggers sit at the same scroll position.
-  root.querySelectorAll<HTMLElement>(".amedia[data-reveal]").forEach((media) => {
+  // Every photo (origins + story blocks) curtains up 1.0s power3.out with
+  // its caption rising 0.2 behind — one motion, repeated. Adds one figure
+  // (media + caption) to a timeline at the given offset and returns the
+  // elements so the caller can strip [data-reveal] onComplete.
+  const addFigure = (tl: gsap.core.Timeline, media: HTMLElement, at: number): HTMLElement[] => {
     const caption =
       media.closest("figure")?.querySelector<HTMLElement>("figcaption[data-reveal]") ?? null;
+    tl.fromTo(
+      media,
+      { clipPath: "inset(100% 0 0 0)" },
+      { clipPath: "inset(0% 0 0 0)", duration: 1.0, ease: "power3.out", immediateRender: false },
+      at,
+    );
+    if (caption) {
+      tl.to(caption, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, at + 0.2);
+    }
+    return caption ? [media, caption] : [media];
+  };
+
+  // Side-by-side pairs unroll in READING ORDER — the row is the trigger and
+  // the right photo starts 0.15 after the left (the Works/duo stagger).
+  // Desktop only: on mobile the rows stack, so a shared trigger would play
+  // the lower photo off-screen; each keeps its own trigger there instead.
+  const grouped = new Set<HTMLElement>();
+  if (window.matchMedia("(min-width: 768px)").matches) {
+    root.querySelectorAll<HTMLElement>(".astory-row").forEach((row) => {
+      const medias = Array.from(row.querySelectorAll<HTMLElement>(".amedia[data-reveal]"));
+      if (!medias.length) return;
+      medias.forEach((m) => grouped.add(m));
+      const els: HTMLElement[] = [];
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: row,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+        onComplete: () => els.forEach((el) => el.removeAttribute("data-reveal")),
+      });
+      medias.forEach((media, i) => els.push(...addFigure(tl, media, i * 0.15)));
+    });
+  }
+
+  // Remaining photos (origins, the wide one — and all of them on mobile)
+  // reveal on their own trigger as they scroll in.
+  root.querySelectorAll<HTMLElement>(".amedia[data-reveal]").forEach((media) => {
+    if (grouped.has(media)) return;
+    const els: HTMLElement[] = [];
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: media,
         start: "top 80%",
         toggleActions: "play none none none",
       },
-      onComplete: () => {
-        media.removeAttribute("data-reveal");
-        caption?.removeAttribute("data-reveal");
-      },
+      onComplete: () => els.forEach((el) => el.removeAttribute("data-reveal")),
     });
-    tl.fromTo(
-      media,
-      { clipPath: "inset(100% 0 0 0)" },
-      { clipPath: "inset(0% 0 0 0)", duration: 1.0, ease: "power3.out" },
-      0,
-    );
-    if (caption) {
-      tl.to(caption, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.2);
-    }
+    els.push(...addFigure(tl, media, 0));
   });
 
   // Inner parallax — each photo drifts yPercent +8 → -8 within its 11%

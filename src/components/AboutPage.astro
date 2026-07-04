@@ -100,12 +100,28 @@ const introWords = t.intro.split(" ");
         <figcaption class="astory-caption" data-reveal>{t.story[1].caption}</figcaption>
       </figure>
     </div>
+    {/* Second pair — mirrored composition: portrait 563 offset 117 from the
+        left edge, landscape 563 flush right (Figma frame "2"). */}
+    <div class="awrap astory-row">
+      <figure class="astory-fig astory-fig--offset">
+        <div class="amedia" data-reveal style="aspect-ratio: 563 / 730">
+          <img src="/images/about/model.jpg" alt={t.story[2].alt} loading="lazy" />
+        </div>
+        <figcaption class="astory-caption" data-reveal>{t.story[2].caption}</figcaption>
+      </figure>
+      <figure class="astory-fig astory-fig--flush">
+        <div class="amedia" data-reveal style="aspect-ratio: 563 / 402">
+          <img src="/images/about/vzorky.jpg" alt={t.story[3].alt} loading="lazy" />
+        </div>
+        <figcaption class="astory-caption" data-reveal>{t.story[3].caption}</figcaption>
+      </figure>
+    </div>
     <div class="awrap astory-widerow">
       <figure class="astory-fig astory-fig--wide">
         <div class="amedia" data-reveal style="aspect-ratio: 1147 / 584">
-          <img src="/images/about/stavba.jpg" alt={t.story[2].alt} loading="lazy" />
+          <img src="/images/about/stavba.jpg" alt={t.story[4].alt} loading="lazy" />
         </div>
-        <figcaption class="astory-caption" data-reveal>{t.story[2].caption}</figcaption>
+        <figcaption class="astory-caption" data-reveal>{t.story[4].caption}</figcaption>
       </figure>
     </div>
     <div class="awrap"><div class="adivider"></div></div>
@@ -330,6 +346,14 @@ const introWords = t.intro.split(" ");
     width: 49.13%; /* 680/1384 */
     margin-right: 8.45%; /* 117/1384 */
   }
+  /* Second pair — mirror of the first: same 117 offset, from the LEFT. */
+  .astory-fig--offset {
+    width: 40.68%; /* 563/1384 */
+    margin-left: 8.45%; /* 117/1384 */
+  }
+  .astory-fig--flush {
+    width: 40.68%; /* 563/1384 */
+  }
   .astory-widerow {
     display: flex;
     justify-content: flex-end;
@@ -410,9 +434,12 @@ const introWords = t.intro.split(" ");
     }
     .astory-fig--tall,
     .astory-fig--mid,
+    .astory-fig--offset,
+    .astory-fig--flush,
     .astory-fig--wide {
       width: 100%;
       margin-right: 0;
+      margin-left: 0;
     }
     .astory-widerow {
       padding-top: 28px;

@@ -53,6 +53,16 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
           "Architektúra pre nás nie je prácou jednotlivca. Každý projekt prechádza otvorenou diskusiou celého tímu. Pri veľkom stole konfrontujeme prvé skice s čistou logikou priestoru a hľadáme ideálny prienik medzi odvahou konceptu a realitou statiky.",
       },
       {
+        alt: "3D tlačený model domu v rukách klienta",
+        caption:
+          "Priestor sa nedá úplne navnímať na plochom monitore. Pre zložitejšie projekty preto vytvárame verné 3D tlačené modely celých domov, aby klient držal zmenšenú realitu vo svojich rukách.",
+      },
+      {
+        alt: "Vzorky materiálov v ateliéri — betón, drevo a oceľ",
+        caption:
+          "Architektúru netvoríme len pre oči, musíte ju ucítiť na dotyk. V ateliéri fyzicky ladíme vzorky surového betónu, dreva a ocele – hľadáme kombinácie, ktoré budú prirodzene a dôstojne starnúť.",
+      },
+      {
         alt: "Autorský dozor priamo na stavbe",
         caption:
           "Papier znesie všetko, no realita surového betónu neodpúšťa chyby. Príbeh projektu preto nekončí odovzdaním výkresov. Sme s vami priamo na stavbe, kde formou autorského dozoru garantujeme, že to, čo sme nakreslili, bude v reálnom svete bezchybne fungovať.",
@@ -88,6 +98,16 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
           "Architektura pro nás není prací jednotlivce. Každý projekt prochází otevřenou diskusí celého týmu. U velkého stolu konfrontujeme první skici s čistou logikou prostoru a hledáme ideální průnik mezi odvahou konceptu a realitou statiky.",
       },
       {
+        alt: "3D tištěný model domu v rukou klienta",
+        caption:
+          "Prostor se nedá úplně vnímat na plochém monitoru. Pro složitější projekty proto vytváříme věrné 3D tištěné modely celých domů, aby klient držel zmenšenou realitu ve svých rukou.",
+      },
+      {
+        alt: "Vzorky materiálů v ateliéru — beton, dřevo a ocel",
+        caption:
+          "Architekturu netvoříme jen pro oči, musíte ji ucítit na dotek. V ateliéru fyzicky ladíme vzorky surového betonu, dřeva a oceli – hledáme kombinace, které budou přirozeně a důstojně stárnout.",
+      },
+      {
         alt: "Autorský dozor přímo na stavbě",
         caption:
           "Papír snese všechno, ale realita surového betonu chyby neodpouští. Příběh projektu proto nekončí odevzdáním výkresů. Jsme s vámi přímo na stavbě, kde formou autorského dozoru garantujeme, že to, co jsme nakreslili, bude v reálném světě bezchybně fungovat.",
@@ -121,6 +141,16 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         alt: "The studio team discussing first sketches",
         caption:
           "For us, architecture is never the work of an individual. Every project passes through an open discussion of the whole team. At the big table we confront the first sketches with the pure logic of space, looking for the ideal balance between a bold concept and the reality of structural engineering.",
+      },
+      {
+        alt: "A 3D-printed model of a house in the client's hands",
+        caption:
+          "Space can never be fully grasped on a flat screen. For more complex projects we therefore create faithful 3D-printed models of entire houses, so the client can hold a scaled-down reality in their own hands.",
+      },
+      {
+        alt: "Material samples in the studio — concrete, wood and steel",
+        caption:
+          "We do not create architecture for the eyes alone — you have to feel it. In the studio we physically tune samples of raw concrete, wood and steel, looking for combinations that will age naturally and with dignity.",
       },
       {
         alt: "Author's supervision directly on site",
