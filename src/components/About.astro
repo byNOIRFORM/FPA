@@ -17,7 +17,7 @@
  *   - CTA + divider: one-shot reveals after section enters viewport.
  */
 
-import { home, type Lang } from "../i18n/home";
+import { home, aboutHref, type Lang } from "../i18n/home";
 
 interface Props {
   lang?: Lang;
@@ -53,7 +53,7 @@ const words = t.about.headline.split(" ");
       }
     </h2>
 
-    <a class="about-cta" href="#about">
+    <a class="about-cta" href={aboutHref[lang]}>
       <span class="about-cta-text">{t.about.cta}</span>
       <svg
         class="about-cta-arrow"

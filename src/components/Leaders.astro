@@ -33,7 +33,7 @@ interface Leader {
   alt: string;
 }
 
-import { home, type Lang } from "../i18n/home";
+import { home, aboutHref, type Lang } from "../i18n/home";
 
 interface Props {
   lang?: Lang;
@@ -104,7 +104,7 @@ const manifestWords = t.leaders.manifest.split(" ");
     </div>
   </div>
 
-  <a class="leaders-cta" href="#kontakt" data-open-contact>
+  <a class="leaders-cta" href={aboutHref[lang]}>
     <span class="leaders-cta-text">{t.leaders.cta}</span>
     <svg
       class="leaders-cta-arrow"
