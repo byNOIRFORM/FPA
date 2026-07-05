@@ -2,6 +2,7 @@ import { gsap } from "gsap";
 // ScrollTrigger is registered globally in gsap-setup.ts — referencing
 // `scrollTrigger` in a tween config picks it up.
 import { onTransitionSettled } from "./page-transition";
+import { getLenis } from "./lenis";
 
 /**
  * /projekty listing — a static project grid (no hero / intro / filter, so
@@ -9,8 +10,94 @@ import { onTransitionSettled } from "./page-transition";
  *  - inner parallax (±8 yPercent) on each tile's image as it scrolls past
  *  - hover zoom (scale 1.04) + the shared "POZRIEŤ" cursor
  *
+ * Return memory: clicking a card records the grid scroll position in
+ * sessionStorage; coming BACK from a detail page (nav-bar "Projekty" or
+ * browser back) restores it instantly under the enter curtain, so the user
+ * picks up exactly where they left the listing. Fresh arrivals (homepage
+ * nav, direct URL) are untouched and start from the top.
+ *
  * Reduced motion: parallax is skipped (hover still works).
  */
+
+const RETURN_KEY = "fpa:plist-return";
+
+// Astro's trailingSlash "ignore" serves /projekty and /projekty/ as the
+// same page — normalise before storing or comparing listing paths.
+const normPath = (p: string) => p.replace(/\/+$/, "");
+
+/**
+ * Restore the saved listing position when this pageview is a RETURN from
+ * one of this listing's own detail pages. Returns true when it restored
+ * (the load reveals are then skipped — the user has already seen them).
+ *
+ * The flag is consumed on EVERY listing arrival, restored or not, so a
+ * stale save can never fire later (e.g. listing → detail → homepage →
+ * "Projekty" arrives fresh and clears it).
+ */
+function restoreReturnPosition(grid: HTMLElement): boolean {
+  let raw: string | null = null;
+  try {
+    raw = sessionStorage.getItem(RETURN_KEY);
+    if (raw) sessionStorage.removeItem(RETURN_KEY);
+  } catch {
+    return false; // storage unavailable (private mode) — normal top load
+  }
+  if (!raw) return false;
+
+  let saved: { path?: string; href?: string; y?: number };
+  try {
+    saved = JSON.parse(raw);
+  } catch {
+    return false;
+  }
+  // Per-listing: a position saved on /projekty must not restore /en/projekty.
+  const here = normPath(location.pathname);
+  if (saved.path !== here || typeof saved.y !== "number") return false;
+
+  // A return is a history back/forward arrival, or a link arrival whose
+  // referrer is a detail under this listing (…/projekty/<slug>). Anything
+  // else — homepage nav, footer, direct URL — is a fresh visit.
+  const navEntry = performance.getEntriesByType("navigation")[0] as
+    | PerformanceNavigationTiming
+    | undefined;
+  let isReturn = navEntry?.type === "back_forward";
+  if (!isReturn && document.referrer) {
+    try {
+      const ref = new URL(document.referrer);
+      isReturn =
+        ref.origin === location.origin && ref.pathname.startsWith(`${here}/`);
+    } catch {
+      /* unparsable referrer — treat as a fresh arrival */
+    }
+  }
+  if (!isReturn) return false;
+
+  const clamp = (y: number) =>
+    Math.max(0, Math.min(y, document.documentElement.scrollHeight - window.innerHeight));
+  const jumpTo = (y: number) => {
+    // Through Lenis when it's running so its internal target stays in sync
+    // (a bare window.scrollTo can be yanked back on the next wheel tick).
+    const lenis = getLenis();
+    if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+    else window.scrollTo(0, y);
+  };
+
+  jumpTo(clamp(saved.y));
+
+  // Sanity anchor: if the layout changed between save and return (device
+  // rotation swaps the grid for the stacked mobile layout), the raw scrollY
+  // points somewhere unrelated — re-center on the clicked card instead.
+  const cover = Array.from(grid.querySelectorAll<HTMLAnchorElement>(".work-cover")).find(
+    (a) => a.getAttribute("href") === saved.href,
+  );
+  if (cover) {
+    const r = cover.getBoundingClientRect();
+    if (r.bottom < 0 || r.top > window.innerHeight) {
+      jumpTo(clamp(window.scrollY + r.top - (window.innerHeight - r.height) / 2));
+    }
+  }
+  return true;
+}
 export function initProjectsPage(): void {
   if (typeof window === "undefined") return;
 
@@ -19,13 +106,21 @@ export function initProjectsPage(): void {
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  // Returning from a project detail? Jump back to where the user left the
+  // grid — while the enter curtain still covers the viewport, so the lift
+  // reveals the listing exactly as they left it. Must run BEFORE the reveal
+  // setup (a return skips the load reveals — replaying them reads as
+  // "starting over") and before the parallax triggers, so the scrubs
+  // initialise from the restored offset.
+  const restored = restoreReturnPosition(grid);
+
   // Page title — word-by-word mask reveal, IDENTICAL to the hero titles
   // (homepage slogan / detail hero): yPercent 110 → 0, opacity 0 → 1,
   // 1.0s expo.out, 0.05 stagger. Gated behind the enter curtain like the
   // rest of this page's load reveals.
   const titleWords = document.querySelectorAll<HTMLElement>(".pprojects .ptitle-word");
   if (titleWords.length) {
-    if (reduced) {
+    if (reduced || restored) {
       gsap.set(titleWords, { yPercent: 0, opacity: 1 });
     } else {
       gsap.set(titleWords, { yPercent: 110, opacity: 0 });
@@ -57,7 +152,7 @@ export function initProjectsPage(): void {
   // lifted, then the ScrollTriggers are created and fire — the reveal plays
   // right after the curtain, in sync. Normal visits run immediately.
   const firstRow = grid.querySelector<HTMLElement>(".works-row");
-  if (!firstRow || reduced) {
+  if (!firstRow || reduced || restored) {
     firstRow
       ?.querySelectorAll("[data-reveal]")
       .forEach((el) => el.removeAttribute("data-reveal"));
@@ -127,6 +222,29 @@ export function initProjectsPage(): void {
       );
     });
   }
+
+  // Leaving for a detail — remember where on the grid the user was, so the
+  // return trip can pick up here (see restoreReturnPosition). Modified
+  // clicks (new tab, download, …) don't navigate THIS tab, so skip them —
+  // same guards as the page-transition interceptor.
+  grid.querySelectorAll<HTMLAnchorElement>(".work-cover").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      if (e.defaultPrevented || e.button !== 0) return;
+      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      try {
+        sessionStorage.setItem(
+          RETURN_KEY,
+          JSON.stringify({
+            path: normPath(location.pathname),
+            href: link.getAttribute("href"),
+            y: Math.round(window.scrollY),
+          }),
+        );
+      } catch {
+        /* private mode — the return simply lands at the top, as before */
+      }
+    });
+  });
 
   // Hover zoom + cursor "POZRIEŤ" (pointer devices only).
   if (window.matchMedia("(hover: hover)").matches) {
