@@ -155,7 +155,9 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
     align-items: center;
     justify-content: space-between;
     gap: clamp(24px, 3.33vw, 72px);
-    padding: clamp(16px, 1.53vw, 33px) clamp(16px, 2vw, 48px);
+    /* Hero state — generous vertical padding so the enlarged logo sits in
+       an airy bar; is-scrolled compacts both padding and logo. */
+    padding: clamp(18px, 1.7vw, 36px) clamp(16px, 2vw, 48px);
     color: #fff;
     background: transparent;
     font-family: var(--font-sans);
@@ -193,12 +195,13 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
     line-height: 1;
   }
 
-  /* The official mark (inline SVG, currentColor → follows the nav ink
-     in every state/theme). Heights mirror the old two-line text lockup:
-     2 × clamp(20px,1.67vw,36px) + 2px gap, and its is-scrolled shrink. */
+  /* The official mark (inline SVG, currentColor → follows the nav ink in
+     every state/theme). Enlarged in the hero so the stacked 3-line mark
+     (incl. the small "architekt" line) reads clearly; it shrinks to a
+     compact size once is-scrolled, on the shared 420ms curve. */
   .nav-logo-mark {
     display: block;
-    height: clamp(42px, 3.47vw, 74px);
+    height: clamp(50px, 4.15vw, 88px);
     width: auto;
     aspect-ratio: 166.6 / 125.7;
     transition: height 420ms cubic-bezier(0.65, 0, 0.35, 1);
