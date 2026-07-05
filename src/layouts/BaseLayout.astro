@@ -87,11 +87,29 @@ const {
         <style> element (NOT the bundled stylesheet): the dev server
         loads CSS through JS after first paint, which is what caused
         the white flash between pages. page-transition.ts cleans all
-        of this up once its curtain holds the screen. */}
+        of this up once its curtain holds the screen.
+
+        Covered arrivals are (a) link navigations that played the exit
+        sweep (sessionStorage flag), and (b) back/forward FULL RELOADS —
+        without the cover those flash the raw page (no exit sweep ever
+        covered the screen). bfcache restores never run this script, so
+        native instant back-swipes stay untouched. */}
     <script is:inline>
       try {
-        if (sessionStorage.getItem("fpa:pt")) {
-          sessionStorage.removeItem("fpa:pt");
+        var pt = sessionStorage.getItem("fpa:pt");
+        if (pt) sessionStorage.removeItem("fpa:pt");
+        var bf = false;
+        try {
+          var nav = performance.getEntriesByType("navigation")[0];
+          // WebKit doesn't expose the navigation entry until the load
+          // event, so in <head> the array is empty — fall back to the
+          // legacy (deprecated but synchronous) API there. type 2 =
+          // TYPE_BACK_FORWARD.
+          bf = nav
+            ? nav.type === "back_forward"
+            : !!(performance.navigation && performance.navigation.type === 2);
+        } catch (e2) {}
+        if (pt || bf) {
           var d = document.documentElement;
           d.setAttribute("data-pt", "");
           d.style.background = "#222";

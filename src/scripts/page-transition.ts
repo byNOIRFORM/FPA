@@ -12,7 +12,12 @@ import { gsap } from "gsap";
  *  sessionStorage flag synchronously and sets html[data-pt], so the
  *  new document's first paint is already covered. This module then
  *  lifts the curtain up and away. To the user the two halves read as
- *  one continuous upward wipe.
+ *  one continuous upward wipe. The same covered arrival also applies
+ *  to back/forward FULL RELOADS (the head script checks the
+ *  navigation type) — no exit sweep preceded those, but an uncovered
+ *  arrival would flash. bfcache restores skip scripts entirely and
+ *  stay native-instant (the pageshow handler below only clears a
+ *  stuck curtain).
  *
  *  The intro house-loader is skipped on transition arrivals
  *  (loader.ts checks html[data-pt]) — the full intro only plays on a

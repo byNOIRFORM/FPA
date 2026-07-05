@@ -60,7 +60,12 @@ function restoreReturnPosition(grid: HTMLElement): boolean {
   const navEntry = performance.getEntriesByType("navigation")[0] as
     | PerformanceNavigationTiming
     | undefined;
-  let isReturn = navEntry?.type === "back_forward";
+  // WebKit doesn't expose the navigation entry until the load event —
+  // this module runs before it, so fall back to the legacy synchronous
+  // API there (deprecated; type 2 = TYPE_BACK_FORWARD).
+  let isReturn = navEntry
+    ? navEntry.type === "back_forward"
+    : performance.navigation?.type === 2;
   if (!isReturn && document.referrer) {
     try {
       const ref = new URL(document.referrer);
