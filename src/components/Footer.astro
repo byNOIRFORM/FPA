@@ -296,12 +296,13 @@ const mapsKosice =
     margin: 0;
   }
 
-  /* The official mark — same footprint as the old two-line text lockup
-     (2 lines x clamp(18px,1.67vw,26px) x 1.08). currentColor follows
-     --footer-fg, so theming AND the location-hover fade both apply. */
+  /* The official mark, sized to MATCH the hero nav logo (its largest
+     state) so the brand reads at the same scale top and bottom of the
+     page. currentColor follows --footer-fg, so theming AND the
+     location-hover fade both apply. */
   .footer-logo-mark {
     display: block;
-    height: clamp(39px, 3.6vw, 56px);
+    height: clamp(50px, 4.15vw, 88px);
     width: auto;
     aspect-ratio: 166.6 / 125.7;
   }
@@ -398,8 +399,10 @@ const mapsKosice =
     width: 100%;
     /* Left-aligned to the inner section edge — no margin-left
        trickery. Lines up with the logo above and the rest of
-       the page's left content edge. */
-    margin: clamp(40px, 4.44vw, 96px) 0 0;
+       the page's left content edge. 40px gap logo → pitch, per
+       Figma (node 3290:253) — flat, not fluid (the old 4.44vw
+       clamp drifted to ~64px at 1440). */
+    margin: 40px 0 0;
     text-wrap: pretty;
   }
 
