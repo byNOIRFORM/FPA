@@ -21,6 +21,11 @@ import { setupGsap } from "./gsap-setup";
 // Inner-image drift, ±% of the image's own height. Matches works.ts (8):
 // 8% of the 122% image = 9.76% of the frame, inside the 11% headroom.
 const INNER = 8;
+// Centering baseline: -11% of the frame = -9.0164% of the 122%-tall
+// image — carried inside the transform because CSS percentage offsets
+// don't survive (WebKit won't resolve `top:%` against aspect-ratio
+// heights; the Safari grey-band bug — see Works.astro).
+const BASELINE = -9.0164;
 
 export function initServicesScope(): void {
   if (typeof window === "undefined") return;
@@ -54,7 +59,7 @@ export function initServicesScope(): void {
     // 0 as the section enters from the bottom → 1 as it leaves past the top.
     const raw = (vh - rect.top) / (vh + rect.height);
     const p = Math.max(0, Math.min(1, raw));
-    const inner = INNER - 2 * INNER * p; // +8 → −8, % of image height
+    const inner = BASELINE + INNER - 2 * INNER * p; // ±8 around the baseline
 
     tiles.forEach((tile, i) => {
       const d = cardSpeeds[i];

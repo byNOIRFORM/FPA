@@ -461,18 +461,25 @@ const services: Service[] = t.services.items.map((s, i) => ({
   }
 
   /* Image overflow trick for the parallax — identical maths to
-     Works: image is 122% of frame height with top:-11%, giving
-     11% headroom on each side for the ±8 yPercent scrub to drift
-     inside without ever revealing the frame's edge. will-change
-     promotes the layer to the GPU so the scrub stays buttery. */
+     Works: image is 122% of frame height, NO static CSS offset; the
+     scrub in services.ts carries the -11%-of-frame centering baseline
+     itself (yPercent ±8 around -9.0164) — see Works.astro for the
+     full Safari grey-band story. will-change promotes the layer to
+     the GPU so the scrub stays buttery. */
   .service-media img {
     position: relative;
-    top: -11%;
     width: 100%;
     height: 122%;
     object-fit: cover;
     display: block;
     will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* No parallax → no headroom needed; a plain centered cover crop. */
+    .service-media img {
+      height: 100%;
+    }
   }
 
   /* ===== Initial reveal state (CSS-owned, pre-paint) =====

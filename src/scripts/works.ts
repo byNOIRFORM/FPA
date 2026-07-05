@@ -50,10 +50,13 @@ export function initWorks(): void {
   // ===== 1. INNER PARALLAX (every tile) =====
   // ±8% drift — clearly visible ambient motion, but still
   // "image breathes within the frame", not "image is animated".
-  // The image's 122% height + top:-11% (set in Works.astro CSS)
-  // gives 11% headroom each side; ±8 yPercent = 8% of image height
-  // = 9.76% of container, staying safely inside with a ~1.24%
-  // edge-bleed buffer at each extreme.
+  // The image is 122% tall (Works.astro CSS) = 11% headroom each
+  // side; the -9.0164 baseline (= -11% of the frame) centers it and
+  // is carried BY THE SCRUB — CSS percentage offsets don't survive
+  // (WebKit won't resolve `top:%` against aspect-ratio heights and
+  // GSAP wipes the CSS `translate` property; the Safari grey-band
+  // bug). ±8 yPercent = 9.76% of container, safely inside with a
+  // ~1.24% edge-bleed buffer at each extreme.
   if (!reduced) {
     tiles.forEach((tile) => {
       const img = tile.querySelector<HTMLImageElement>(".work-media img");
@@ -61,9 +64,9 @@ export function initWorks(): void {
 
       gsap.fromTo(
         img,
-        { yPercent: 8 },
+        { yPercent: 8 - 9.0164 },
         {
-          yPercent: -8,
+          yPercent: -8 - 9.0164,
           ease: "none",
           scrollTrigger: {
             trigger: tile,

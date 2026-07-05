@@ -119,18 +119,26 @@ const tiles: Tile[] = meta.map((m, i) => ({ ...m, ...t.scope.tiles[i] }));
     will-change: transform;
   }
 
-  /* Image is 122% of the frame with top:-11% — 11% headroom each side so
-     the ±8% inner parallax drifts inside without ever revealing the frame
-     edge. Identical maths to the Works tiles. */
+  /* Image is 122% of the frame — headroom for the inner parallax.
+     NO static CSS offset: services-scope.ts carries the -11%-of-frame
+     centering baseline inside its transform (±8 around -9.0164) — see
+     Works.astro for the full Safari grey-band story. */
   .sscope-tile img {
     position: absolute;
-    top: -11%;
+    top: 0;
     left: 0;
     width: 100%;
     height: 122%;
     object-fit: cover;
     display: block;
     will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* No parallax → no headroom needed; a plain centered cover crop. */
+    .sscope-tile img {
+      height: 100%;
+    }
   }
 
   /* 40% dark wash so the white label stays legible on any photo. */

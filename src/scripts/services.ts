@@ -33,6 +33,9 @@ export function initServices(): void {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ===== 1. INNER PARALLAX (every row) =====
+  // ±8 around the -9.0164 centering baseline (-11% of the frame) — the
+  // scrub carries the baseline itself; see works.ts / Works.astro for
+  // the Safari grey-band story.
   if (!reduced) {
     rows.forEach((row) => {
       const img = row.querySelector<HTMLImageElement>(".service-media img");
@@ -40,9 +43,9 @@ export function initServices(): void {
 
       gsap.fromTo(
         img,
-        { yPercent: 8 },
+        { yPercent: 8 - 9.0164 },
         {
-          yPercent: -8,
+          yPercent: -8 - 9.0164,
           ease: "none",
           scrollTrigger: {
             trigger: row,

@@ -301,11 +301,13 @@ const introWords = t.intro.split(" ");
     overflow: hidden;
     background: var(--surface);
   }
-  /* Oversized for the inner parallax (about-page.ts drifts yPercent ±8
-     within the 11% headroom) — same calibration as the Works grid. */
+  /* Oversized for the inner parallax — same calibration as the Works
+     grid. NO static CSS offset: the scrub in about-page.ts carries the
+     -11%-of-frame centering baseline itself (yPercent ±8 around
+     -9.0164) — see Works.astro for the full Safari grey-band story. */
   .amedia img {
     position: absolute;
-    top: -11%;
+    top: 0;
     left: 0;
     width: 100%;
     height: 122%;
@@ -456,6 +458,10 @@ const introWords = t.intro.split(" ");
     }
     .ahero-title-word {
       opacity: 1;
+    }
+    /* No parallax → no headroom needed; a plain centered cover crop. */
+    .amedia img {
+      height: 100%;
     }
     .amedia[data-reveal],
     .aorigins-label[data-reveal],

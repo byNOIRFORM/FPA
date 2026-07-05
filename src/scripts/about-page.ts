@@ -161,16 +161,17 @@ export function initAboutPage(): void {
     els.push(...addFigure(tl, media, 0));
   });
 
-  // Inner parallax — each photo drifts yPercent +8 → -8 within its 11%
-  // headroom as it scrolls through the viewport (same calibration as the
-  // homepage Works grid). Skipped entirely under reduced motion (early
-  // return above).
+  // Inner parallax — each photo drifts ±8 around the -9.0164 centering
+  // baseline (-11% of the frame, carried by the scrub itself; see
+  // works.ts / Works.astro for the Safari grey-band story). Same
+  // calibration as the homepage Works grid. Skipped entirely under
+  // reduced motion (early return above).
   root.querySelectorAll<HTMLElement>(".amedia img").forEach((img) => {
     gsap.fromTo(
       img,
-      { yPercent: 8 },
+      { yPercent: 8 - 9.0164 },
       {
-        yPercent: -8,
+        yPercent: -8 - 9.0164,
         ease: "none",
         scrollTrigger: {
           trigger: img.closest(".amedia"),

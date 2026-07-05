@@ -358,20 +358,31 @@ const projectHrefs = worksProjectSlugs.map((s) =>
     background: var(--surface); /* faint placeholder before image paints */
   }
 
-  /* Image is 122% of frame height with top:-11% — extra 22% of
-     vertical headroom (11% on each side) is the room the parallax
-     has to drift. yPercent ±8 = 8% of image height = 9.76% of
-     frame, well inside the 11% headroom (~1.24% safety buffer at
-     each extreme). will-change promotes the layer to the GPU so
-     the scrub stays buttery. */
+  /* Image is 122% of frame height — 22% of vertical headroom for the
+     parallax drift. Deliberately NO static CSS offset centers it:
+     release WebKit doesn't resolve percentage `top` against
+     aspect-ratio-derived heights (the Safari grey-band bug), and GSAP
+     wipes the CSS `translate` property when it takes over transform.
+     The scrub in works.ts therefore carries the -11%-of-frame
+     centering baseline itself (yPercent ±8 around -9.0164, % of this
+     122%-tall image). Reduced motion / no JS: the reduced-motion rule
+     below sizes the image back to 100% for a clean centered cover
+     crop. will-change promotes the layer to the GPU so the scrub
+     stays buttery. */
   .work-media img {
     position: relative;
-    top: -11%;
     width: 100%;
     height: 122%;
     object-fit: cover;
     display: block;
     will-change: transform;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* No parallax → no headroom needed; a plain centered cover crop. */
+    .work-media img {
+      height: 100%;
+    }
   }
 
   /* ===== Text block ===== */
@@ -542,18 +553,6 @@ const projectHrefs = worksProjectSlugs.map((s) =>
       flex: none;
       height: auto;
       aspect-ratio: 1 / 1;
-    }
-    /* iOS Safari doesn't reliably resolve the percentage `top: -11%`
-       against the aspect-ratio media height, so the image sat flush at the
-       top and the ±8% inner parallax exposed a grey strip on scroll. Give
-       the headroom via margin-top instead — margin percentages resolve
-       against WIDTH (always definite), and the mobile tile is square so
-       -11% width == -11% height. Same parallax (±8), reliable on WebKit.
-       top:0 neutralises the base rule on engines where it does resolve, so
-       the offset is never doubled. */
-    .work-media img {
-      top: 0;
-      margin-top: -11%;
     }
     .work-info {
       gap: 8px;

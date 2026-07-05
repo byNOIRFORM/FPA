@@ -210,17 +210,20 @@ export function initProjectsPage(): void {
     });
   }
 
-  // Inner parallax — image drifts yPercent +8 → -8 within its 11% headroom
-  // as the tile scrolls through the viewport (same calibration as Works).
+  // Inner parallax — image drifts ±8 around the -9.0164 centering baseline
+  // (-11% of the frame, carried by the scrub itself because CSS percentage
+  // offsets don't survive: WebKit won't resolve `top:%` against aspect-ratio
+  // heights and GSAP wipes the CSS `translate` property — the Safari
+  // grey-band bug; see Works.astro). Same calibration as Works.
   if (!reduced) {
     cards.forEach((card) => {
       const img = card.querySelector<HTMLImageElement>(".work-media img");
       if (!img) return;
       gsap.fromTo(
         img,
-        { yPercent: 8 },
+        { yPercent: 8 - 9.0164 },
         {
-          yPercent: -8,
+          yPercent: -8 - 9.0164,
           ease: "none",
           scrollTrigger: { trigger: card, start: "top bottom", end: "bottom top", scrub: true },
         },

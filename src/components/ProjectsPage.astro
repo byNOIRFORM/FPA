@@ -238,12 +238,13 @@ for (let i = 0; i < projects.length; i += 2) {
     overflow: hidden;
     background: var(--surface);
   }
-  /* 122% of the frame, top:-11% → 11% headroom each side for the ±8
-     inner-parallax drift (projects-page.ts), same as the homepage Works.
+  /* 122% of the frame = headroom for the inner-parallax drift. NO
+     static CSS offset — the scrub in projects-page.ts carries the
+     -11%-of-frame centering baseline itself (yPercent ±8 around
+     -9.0164); see Works.astro for the full Safari grey-band story.
      Safe now that the grid never re-lays out (no filter). */
   .work-media img {
     position: relative;
-    top: -11%;
     width: 100%;
     height: 122%;
     object-fit: cover;
@@ -331,13 +332,6 @@ for (let i = 0; i < projects.length; i += 2) {
       height: auto;
       aspect-ratio: 1 / 1;
     }
-    /* iOS Safari doesn't resolve `top: -11%` against the aspect-ratio height;
-       give the parallax headroom via margin-top (resolves against width, and
-       the mobile tile is square so -11% width == -11% height). */
-    .work-media img {
-      top: 0;
-      margin-top: -11%;
-    }
     .work-info { gap: 8px; }
     .work-title { font-size: 20px; line-height: 1.1; }
     .work-desc { font-size: 16px; line-height: 1.375; }
@@ -346,6 +340,10 @@ for (let i = 0; i < projects.length; i += 2) {
   @media (prefers-reduced-motion: reduce) {
     .ptitle-word {
       opacity: 1;
+    }
+    /* No parallax → no headroom needed; a plain centered cover crop. */
+    .work-media img {
+      height: 100%;
     }
   }
 </style>
