@@ -25,7 +25,7 @@ export interface AboutPageCopy {
 
 export const aboutPage: Record<Lang, AboutPageCopy> = {
   sk: {
-    metaTitle: "O nás — Fotta // Popadič",
+    metaTitle: "O nás — Fotta Popadič",
     heroTitle: "Za každou čiarou vidíme ľudské príbehy",
     intro:
       "Tvoríme tiché priestory pre skutočný život. Naša architektúra nemá byť hlučná, ale pravdivá – rodí sa z dialógu a poctivého remesla. Pozrite sa, ako tento postoj formujeme už od úplného začiatku.",
@@ -70,7 +70,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
     ],
   },
   cz: {
-    metaTitle: "O nás — Fotta // Popadič",
+    metaTitle: "O nás — Fotta Popadič",
     heroTitle: "Za každou čárou vidíme lidské příběhy",
     intro:
       "Tvoříme tiché prostory pro skutečný život. Naše architektura nemá být hlučná, ale pravdivá – rodí se z dialogu a poctivého řemesla. Podívejte se, jak tento postoj formujeme už od úplného začátku.",
@@ -115,7 +115,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
     ],
   },
   en: {
-    metaTitle: "About us — Fotta // Popadič",
+    metaTitle: "About us — Fotta Popadič",
     heroTitle: "Behind every line we see human stories",
     intro:
       "We create quiet spaces for real life. Our architecture is not meant to be loud but truthful – born of dialogue and honest craft. See how we have been shaping this stance from the very beginning.",
