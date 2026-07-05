@@ -38,6 +38,15 @@ const t = home[lang];
 
 const pitchLine1 = t.footer.pitch1.split(" ");
 const pitchLine2 = t.footer.pitch2.split(" ");
+
+// Google Maps links to the studio's own business listings (exact pin +
+// reviews + directions), supplied by the client — more precise than a
+// geocoded address search. Locale/tracking params (hl, entry, g_ep)
+// stripped so Maps opens in the visitor's own language.
+const mapsBardejov =
+  "https://www.google.com/maps/place/Fotta+Popadi%C4%8D+Architekt/@49.3041466,21.3043425,17z/data=!3m1!4b1!4m6!3m5!1s0x473e810faeaf144b:0xd85e508bc1807ae5!8m2!3d49.3041466!4d21.3043425!16s%2Fg%2F11ckr41yl0";
+const mapsKosice =
+  "https://www.google.com/maps/place/Fotta+Popadi%C4%8D+Architekt/@48.7207062,21.2513944,17z/data=!3m1!4b1!4m6!3m5!1s0x473ee1cb2b7bec2f:0xf7123e40b0eda948!8m2!3d48.7207062!4d21.2539693!16s%2Fg%2F11yxspt79w";
 ---
 
 <footer class="footer" aria-labelledby="footer-heading">
@@ -120,13 +129,13 @@ const pitchLine2 = t.footer.pitch2.split(" ");
       <div class="footer-locations">
         <address class="footer-location" data-footer-image="bardejov">
           <p class="footer-location-name">Bardejov</p>
-          <p>Priemyselná 3767, 085 01 Bardejov, {t.footer.country}</p>
+          <p><a href={mapsBardejov} target="_blank" rel="noopener noreferrer">Priemyselná 3767, 085 01 Bardejov, {t.footer.country}</a></p>
           <p>{t.footer.phone} <a href="tel:+421907183302">+421 907 183 302</a></p>
           <p>{t.footer.email} <a href="mailto:atelier@fottapopadic.sk">atelier@fottapopadic.sk</a></p>
         </address>
         <address class="footer-location" data-footer-image="kosice">
           <p class="footer-location-name">Košice</p>
-          <p>Dominikánske námestie 590/6, 040 01 Staré Mesto, {t.footer.country}</p>
+          <p><a href={mapsKosice} target="_blank" rel="noopener noreferrer">Dominikánske námestie 590/6, 040 01 Staré Mesto, {t.footer.country}</a></p>
         </address>
       </div>
     </section>
