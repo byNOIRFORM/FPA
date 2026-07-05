@@ -3,10 +3,12 @@ import { revealHero } from "./hero";
 import { isTransitionArrival } from "./page-transition";
 
 /**
- * Intro loader — the official FPA logo, revealed line by line.
+ * Intro loader — isometric house + the official FPA logo mark.
  *
- * Sequence (normal flow — same beats/timings as the previous house +
- * wordmark version, the visuals swapped for the designer's mark):
+ * Sequence (normal flow — identical to the original house + wordmark
+ * choreography; only the text lockup is swapped for the logo):
+ *   0.00s  Icon breathes in (scale 0.94 → 1, opacity 0 → 1, expo.out).
+ *          Walls draw (0–0.6s), roof (0.5–1.0s), ridge (1.05–1.4s).
  *   0.25s  "fotta" line rises into its SVG clip band.
  *   0.40s  "popadič" line rises.
  *   0.55s  "architekt" line rises.
@@ -70,11 +72,73 @@ export function initLoader(): void {
 }
 
 function playIntro(root: HTMLElement, onDone: () => void): void {
+  const paths = root.querySelectorAll<SVGPathElement>(".loader-icon .draw");
+
+  // Prepare each path individually — every path has its own getTotalLength().
+  paths.forEach((p) => {
+    try {
+      const len = p.getTotalLength();
+      p.style.strokeDasharray = String(len);
+      p.style.strokeDashoffset = String(len);
+    } catch {
+      /* If measurement fails (very rare), the CSS fallback keeps it hidden. */
+    }
+  });
+
   const tl = gsap.timeline({
     onComplete: onDone,
   });
 
-  // Line reveal — each logo line slides up into its SVG clip band
+  // 0. Breathe the whole icon in (scale + opacity) so the first frame
+  //    feels "placed", not popped. Soft expo ease for that glassy rise.
+  tl.from(
+    ".loader-icon",
+    {
+      scale: 0.94,
+      opacity: 0,
+      duration: 1.0,
+      ease: "expo.out",
+    },
+    0,
+  );
+
+  // 1. Walls (front, side) — base of the house, drawn first, bottom-up.
+  tl.to(
+    [".draw-front", ".draw-side"],
+    {
+      strokeDashoffset: 0,
+      duration: 0.6,
+      ease: "power3.out",
+      stagger: 0.1,
+    },
+    0,
+  );
+
+  // 2. Roof (left gable, right slope) — second beat.
+  tl.to(
+    [".draw-roof-left", ".draw-roof-right"],
+    {
+      strokeDashoffset: 0,
+      duration: 0.5,
+      ease: "power3.out",
+      stagger: 0.1,
+    },
+    0.5,
+  );
+
+  // 3. Ridge — final accent stroke that ties the roof together.
+  tl.to(
+    ".draw-ridge",
+    {
+      strokeDashoffset: 0,
+      duration: 0.35,
+      ease: "power2.out",
+    },
+    1.05,
+  );
+
+  // 4. Logo reveal — runs OVER the house drawing so the two beats
+  //    interlock. Each logo line slides up into its SVG clip band
   // (yPercent 110 → 0) while fading in, the exact word-mask move the
   // old text lockup used, at the same timeline positions. yPercent on
   // an SVG <g> resolves against the group's own bbox height; 110%
