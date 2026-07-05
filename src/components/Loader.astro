@@ -1,61 +1,72 @@
 ---
 /**
- * Intro loader — Beat 1: isometric house outline + studio name fade.
+ * Intro loader — the official FPA logo, revealed line by line.
  *
- * The house is a pure outline (stroke-only) drawn in true isometric
- * projection: front wall + right wall + front gable + right roof slope,
- * with a separate ridge line connecting the two roof apexes.
+ * The mark (fotta / popadič / architekt) is inlined from the designer's
+ * SVG (master copy: public/images/logo-fpa.svg) — every letter is its
+ * own path. Each of the three lines sits inside an SVG clipPath band
+ * and rises into it from below, exactly the word-mask reveal the old
+ * text lockup used. fill="currentColor" → the mark follows --ink in
+ * both themes.
  *
- * Animation logic lives in src/scripts/loader.ts.
+ * Animation logic lives in src/scripts/loader.ts (same choreography
+ * and timings as the previous house + wordmark version).
  */
 ---
 
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-content">
     <svg
-      class="loader-icon"
-      viewBox="53 44 94 120"
-      width="32"
-      height="40"
-      fill="none"
-      stroke="var(--ink)"
-      stroke-width="10"
-      stroke-linecap="round"
-      stroke-linejoin="round"
+      class="loader-logo"
+      viewBox="37.2 34.9 166.6 125.7"
+      fill="currentColor"
       aria-hidden="true"
     >
-      <!-- Path vertex order is intentionally bottom-up so the stroke
-           draws upward as dashoffset shrinks. -->
-
-      <!-- Front wall: starts at the bottom-front (closest to viewer),
-           then left along the base, up the left edge, across the top,
-           and closes back down to start. -->
-      <path class="draw draw-front" d="M 100 160 L 57 135 L 57 85 L 100 110 Z" />
-
-      <!-- Right wall: starts at bottom-front, right along the base,
-           up the right edge, across the top, closes. -->
-      <path class="draw draw-side" d="M 100 160 L 143 135 L 143 85 L 100 110 Z" />
-
-      <!-- Front gable (left half of roof): starts at the right base of
-           the gable triangle, goes left across the eave line, then up
-           to the apex, closes back. -->
-      <path class="draw draw-roof-left" d="M 100 110 L 57 85 L 78 72 Z" />
-
-      <!-- Right roof slope (right half of roof, parallelogram):
-           starts at the front-bottom corner, around to the back-top. -->
-      <path class="draw draw-roof-right" d="M 100 110 L 143 85 L 122 48 L 78 72 Z" />
-
-      <!-- Ridge: front apex → back apex. -->
-      <path class="draw draw-ridge" d="M 78 72 L 122 48" />
+      <defs>
+        <clipPath id="lg-band-1"><rect x="37.2" y="33.45" width="166.6" height="37.37" /></clipPath>
+        <clipPath id="lg-band-2"><rect x="37.2" y="75.48" width="166.6" height="41.4" /></clipPath>
+        <clipPath id="lg-band-3"><rect x="37.2" y="126.48" width="166.6" height="35.51" /></clipPath>
+      </defs>
+      {/* fotta — mask band; the inner group rises into it */}
+      <g clip-path="url(#lg-band-1)">
+        <g class="lg-line lg-line-1">
+          <path d="M64.624,69.317c3.817,0,6.923-3.106,6.923-6.923V41.921c0-3.818-3.105-6.924-6.923-6.924 c-3.817,0-6.924,3.106-6.924,6.924v20.472C57.7,66.211,60.807,69.317,64.624,69.317z M61.311,41.921 c0-1.827,1.486-3.313,3.313-3.313c1.827,0,3.311,1.486,3.311,3.313v20.472c0,1.827-1.485,3.312-3.311,3.312 c-1.827,0-3.313-1.486-3.313-3.312V41.921z"/>
+          <path d="M44.151,34.997c-3.786,0-6.865,3.058-6.915,6.834h-0.007v0.073c0,0.006-0.002,0.011-0.002,0.017h0.002l-0.002,27.396 h3.611V53.963h10.237v-3.611H40.838l0.002-8.448c0.01-1.819,1.491-3.296,3.311-3.296c1.827,0,3.313,1.486,3.313,3.313v5.118h3.611 v-5.118C51.075,38.103,47.968,34.997,44.151,34.997z"/>
+          <path d="M132.966,41.874c0-3.818-3.107-6.924-6.924-6.924c-3.817,0-6.924,3.106-6.924,6.924v5.118h3.611v-5.118 c0-1.827,1.486-3.313,3.313-3.313s3.313,1.486,3.313,3.313v0.002v8.429h-3.313c-3.817,0-6.924,3.106-6.924,6.923v5.118 c0,3.818,3.107,6.924,6.924,6.924c1.206,0,2.324-0.338,3.313-0.882v0.882h3.611V41.875V41.874z M129.355,62.346 c0,1.827-1.486,3.313-3.313,3.313s-3.313-1.486-3.313-3.313v-5.118c0-1.827,1.486-3.312,3.313-3.312h3.313V62.346z"/>
+          <path d="M105.569,69.317c3.817,0,6.924-3.106,6.924-6.923v-5.118h-3.611v5.118c0,1.827-1.486,3.312-3.313,3.312 s-3.311-1.486-3.311-3.312v-8.431h10.236v-3.611h-10.236V34.997h-3.611v27.397C98.646,66.211,101.751,69.317,105.569,69.317z"/>
+          <path d="M81.784,34.997h-3.611l0.002,27.397h-0.002c0,3.817,3.107,6.923,6.924,6.923s6.923-3.106,6.923-6.923v-5.118h-3.611v5.118 c0,1.827-1.485,3.312-3.311,3.312s-3.313-1.486-3.313-3.312h0.002l-0.002-8.431H92.02v-3.611H81.784V34.997z"/>
+        </g>
+      </g>
+      {/* popadič — mask band; the inner group rises into it */}
+      <g clip-path="url(#lg-band-2)">
+        <g class="lg-line lg-line-2">
+          <path d="M64.624,80.966c-3.817,0-6.924,3.106-6.924,6.923v20.473c0,3.817,3.107,6.923,6.924,6.923 c3.817,0,6.924-3.106,6.924-6.923V87.889C71.548,84.072,68.441,80.966,64.624,80.966z M67.937,108.363 c0,1.827-1.486,3.312-3.313,3.312c-1.827,0-3.313-1.486-3.313-3.312V87.889c0-1.827,1.486-3.312,3.313-3.312 c1.827,0,3.313,1.486,3.313,3.312V108.363z"/>
+          <path d="M129.355,96.32h-3.313c-3.817,0-6.924,3.106-6.924,6.923v5.119c0,3.817,3.107,6.923,6.924,6.923 c1.206,0,2.324-0.338,3.313-0.882v0.882h3.611v-34.32h-3.611V96.32z M129.355,108.363c0,1.827-1.486,3.312-3.313,3.312 s-3.313-1.486-3.313-3.312v-5.119c0-1.827,1.486-3.312,3.313-3.312h3.313V108.363z"/>
+          <path d="M44.151,80.966c-3.817,0-6.924,3.106-6.924,6.923l0.002,0.003l-0.002,27.394h3.611V99.932h3.313 c3.817,0,6.924-3.106,6.924-6.923v-5.119C51.075,84.072,47.968,80.966,44.151,80.966z M47.464,93.008 c0,1.827-1.486,3.312-3.313,3.312h-3.313l0.002-8.428l-0.002-0.003c0-1.827,1.486-3.312,3.313-3.312s3.313,1.486,3.313,3.312 V93.008z"/>
+          <rect x="139.592" y="98.22" width="3.611" height="17.161"/>
+          <path d="M141.398,82.189c-3.195,0-5.796,2.6-5.796,5.796c0,3.195,2.601,5.795,5.796,5.795c3.195,0,5.794-2.6,5.794-5.795 C147.192,84.789,144.593,82.189,141.398,82.189z M141.398,92.425c-2.449,0-4.442-1.992-4.442-4.441 c0-2.449,1.992-4.442,4.442-4.442c2.447,0,4.44,1.992,4.44,4.442C145.838,90.433,143.845,92.425,141.398,92.425z"/>
+          <path d="M85.097,80.966c-3.817,0-6.924,3.106-6.924,6.923l0.002,0.003l-0.002,27.394h3.611V99.932h3.313 c3.817,0,6.923-3.106,6.923-6.923v-5.119C92.02,84.072,88.915,80.966,85.097,80.966z M88.409,93.008 c0,1.827-1.485,3.312-3.311,3.312h-3.313l0.002-8.428l-0.002-0.003c0-1.827,1.486-3.312,3.313-3.312s3.311,1.486,3.311,3.312 V93.008z"/>
+          <rect x="150.956" y="76.977" width="11.59" height="1.354"/>
+          <path d="M163.675,93.102v-5.213c0-3.817-3.105-6.923-6.923-6.923s-6.924,3.106-6.924,6.923v20.473 c0,3.817,3.107,6.923,6.924,6.923s6.923-3.106,6.923-6.923V98.22h-3.611v10.142c0,1.827-1.485,3.312-3.311,3.312 s-3.313-1.486-3.313-3.312V87.889c0-1.827,1.486-3.312,3.313-3.312s3.311,1.486,3.311,3.312v5.213H163.675z"/>
+          <path d="M112.493,87.889c0-3.817-3.107-6.923-6.924-6.923c-3.817,0-6.923,3.106-6.923,6.923v5.119h3.611v-5.119 c0-1.827,1.485-3.312,3.311-3.312s3.313,1.486,3.313,3.312l0.002,0.003l-0.002,8.428h-3.313c-3.817,0-6.923,3.106-6.923,6.923 v5.119c0,3.817,3.105,6.923,6.923,6.923c1.206,0,2.324-0.338,3.313-0.882v0.882h3.611l0.002-27.394L112.493,87.889z M108.882,108.363c0,1.827-1.486,3.312-3.313,3.312s-3.311-1.486-3.311-3.312v-5.119c0-1.827,1.485-3.312,3.311-3.312h3.313 V108.363z"/>
+        </g>
+      </g>
+      {/* architekt — mask band; the inner group rises into it */}
+      <g clip-path="url(#lg-band-3)">
+        <g class="lg-line lg-line-3">
+          <path d="M85.097,129.785c2.324,0,4.214,1.891,4.214,4.215l0.002,5.165h1.806L91.117,134c0-3.32-2.701-6.021-6.02-6.021 c-3.32,0-6.022,2.7-6.022,6.021v20.473c0,3.32,2.701,6.021,6.022,6.021c3.318,0,6.02-2.7,6.02-6.021l0.002-10.189h-1.806 l-0.002,10.189c0,2.324-1.89,4.215-4.214,4.215s-4.216-1.891-4.216-4.215V134C80.881,131.676,82.773,129.785,85.097,129.785z"/>
+          <path d="M105.569,143.334h-4.214V127.98h-1.806v32.514h1.806V145.14h4.214c2.324,0,4.216,1.891,4.216,4.215h0.002l-0.002,11.139 h1.806l0.002-11.139h-0.002C111.59,146.035,108.889,143.334,105.569,143.334z"/>
+          <rect x="120.022" y="144.284" width="1.806" height="16.21"/>
+          <path d="M132.063,127.98h-1.806l0.002,26.494h-0.002c0,0.006,0.002,0.011,0.002,0.017v0.028h0.003 c0.025,3.299,2.712,5.976,6.017,5.976c3.32,0,6.022-2.7,6.022-6.021v-5.119h-1.806v5.119c0,2.324-1.892,4.215-4.216,4.215 c-2.318,0-4.204-1.882-4.214-4.198l-0.002-9.351h10.237v-1.806h-10.237V127.98z"/>
+          <path d="M156.752,127.98c-3.32,0-6.022,2.7-6.022,6.021v20.473c0,3.32,2.701,6.021,6.022,6.021c3.318,0,6.02-2.7,6.02-6.021 v-5.119h-1.806v5.119c0,2.324-1.89,4.215-4.214,4.215c-2.324,0-4.216-1.891-4.216-4.215v-9.239h10.236V134 C162.772,130.68,160.071,127.98,156.752,127.98z M160.966,143.428h-8.43V134c0-2.324,1.892-4.215,4.216-4.215 c2.324,0,4.214,1.891,4.214,4.215V143.428z"/>
+          <path d="M67.754,144.237c1.726-1.06,2.89-2.948,2.89-5.118V134c0-3.32-2.701-6.021-6.02-6.021c-3.32,0-6.022,2.7-6.022,6.021 h0.002l-0.002,26.494h1.806V145.14h4.216c2.324,0,4.214,1.891,4.214,4.215h0.002l-0.002,11.139h1.806l0.002-11.139h-0.002 C70.644,147.185,69.479,145.297,67.754,144.237z M60.408,143.334v-4.17h0.002V134h-0.002c0-2.324,1.892-4.215,4.216-4.215 c2.324,0,4.214,1.891,4.214,4.215v5.119c0,2.324-1.89,4.215-4.214,4.215H60.408z"/>
+          <path d="M183.245,127.98h-1.806l0.002,11.139h-0.002c0,2.324-1.892,4.215-4.216,4.215h-4.214V127.98h-1.806v32.514h1.806V145.14 h4.214c2.324,0,4.216,1.891,4.216,4.215h0.002l-0.002,11.139h1.806l0.002-11.139h-0.002c0-2.17-1.164-4.058-2.89-5.118 c1.714-1.052,2.87-2.922,2.886-5.073h0.006L183.245,127.98z"/>
+          <path d="M203.718,145.14v-1.806h-10.237V127.98h-1.806l0.002,26.494h-0.002c0,0.006,0.002,0.011,0.002,0.017v0.028h0.003 c0.025,3.299,2.712,5.976,6.017,5.976c3.32,0,6.022-2.7,6.022-6.021v-5.119h-1.806v5.119c0,2.324-1.892,4.215-4.216,4.215 c-2.318,0-4.204-1.882-4.214-4.198l-0.002-9.351H203.718z"/>
+          <path d="M120.925,128.205c-3.195,0-5.796,2.6-5.796,5.795c0,3.196,2.601,5.796,5.796,5.796c3.195,0,5.796-2.6,5.796-5.796 C126.721,130.805,124.12,128.205,120.925,128.205z M120.925,138.442c-2.449,0-4.442-1.992-4.442-4.442 c0-2.448,1.992-4.441,4.442-4.441c2.449,0,4.442,1.992,4.442,4.441C125.366,136.449,123.374,138.442,120.925,138.442z"/>
+          <path d="M44.151,127.98c-3.32,0-6.022,2.7-6.022,6.021v5.119h1.806V134c0-2.324,1.892-4.215,4.216-4.215s4.216,1.891,4.216,4.215 v9.334h-4.216c-3.32,0-6.022,2.7-6.022,6.021v5.119c0,3.32,2.701,6.021,6.022,6.021c1.641,0,3.129-0.664,4.216-1.732v1.732h1.806 V134C50.172,130.68,47.471,127.98,44.151,127.98z M44.151,158.688c-2.324,0-4.216-1.891-4.216-4.215v-5.119 c0-2.324,1.892-4.215,4.216-4.215h4.216v9.334C48.367,156.797,46.475,158.688,44.151,158.688z"/>
+        </g>
+      </g>
     </svg>
-
-    <div class="loader-name">
-      <div class="loader-name-main">
-        <span class="word-mask"><span class="word word-fotta">FOTTA/</span></span>
-        <span class="word-mask"><span class="word word-popadic">/POPADIČ</span></span>
-      </div>
-      <span class="word-mask"><span class="word loader-name-sub">architekt</span></span>
-    </div>
   </div>
 </div>
 
@@ -94,81 +105,24 @@
     justify-content: center;
   }
 
-  .loader-icon {
+  /* The mark — sized to read like the old icon + wordmark lockup;
+     currentColor picks up --ink so it is theme-correct in both modes. */
+  .loader-logo {
     display: block;
-    /* GSAP scales/fades this in via tl.from(); ensures transform-origin
-       is centered so the breathe/settle pulse feels symmetric. */
-    transform-origin: 50% 50%;
-  }
-
-  /* Each path starts hidden via a large dash. loader.ts measures each
-     path's getTotalLength() and overrides these with the exact value
-     before animating offset to 0. */
-  .loader-icon .draw {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
-  }
-
-  .loader-name {
-    margin-top: 12px;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    line-height: 26px;
-  }
-
-  /* No gap — the two halves "FOTTA/" and "/POPADIČ" sit flush so they
-     read as a single word "FOTTA//POPADIČ" once both masks reveal. */
-  .loader-name-main {
-    display: flex;
-    gap: 0;
-    align-items: baseline;
-    justify-content: center;
-  }
-
-  /* Mask wrappers clip the inner .word until it slides up from below.
-     Padding bottom gives descenders breathing room without affecting
-     the line baseline that the flex container uses for alignment. */
-  .word-mask {
-    display: inline-block;
-    overflow: hidden;
-    line-height: 1.15;
-    padding-bottom: 0.1em;
-    vertical-align: bottom;
+    width: clamp(120px, 14vw, 156px);
+    height: auto;
+    color: var(--ink);
   }
 
   /* IMPORTANT: do NOT set transform here. GSAP reads CSS-applied
      translateY(%) as a pixel value (via matrix decomposition) and stores
      it in the `y` channel, so animating `yPercent` then leaves the
-     pixel offset untouched and the word never returns to visible.
+     pixel offset untouched and the line never returns to visible.
      Initial state is set entirely via gsap.set() in loader.ts; opacity:0
      prevents any pre-script flash. */
-  .word {
-    display: inline-block;
+  .lg-line {
     opacity: 0;
     will-change: transform, opacity;
-  }
-
-  /* Switzer Semibold 24px / tracking 0.48px. */
-  .word-fotta,
-  .word-popadic {
-    font-family: var(--font-sans);
-    font-size: 24px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--ink);
-  }
-
-  /* Switzer Regular Italic 24px — "architekt" subtitle. */
-  .loader-name-sub {
-    font-family: var(--font-sans);
-    font-style: italic;
-    font-weight: 400;
-    font-size: 24px;
-    letter-spacing: 0.02em;
-    color: var(--ink);
   }
 
   /* Body scroll lock while loader is active — released by loader.ts. */
@@ -176,14 +130,10 @@
     overflow: hidden;
   }
 
-  /* Reduced motion: show icon + text as a static frame, no drawing,
-     no slide-in. loader.ts will still fade the whole loader out. */
+  /* Reduced motion: show the full mark as a static frame, no slide-in.
+     loader.ts will still fade the whole loader out. */
   @media (prefers-reduced-motion: reduce) {
-    .loader-icon .draw {
-      stroke-dasharray: none;
-      stroke-dashoffset: 0;
-    }
-    .word {
+    .lg-line {
       opacity: 1;
       transform: none;
     }

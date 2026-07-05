@@ -3,18 +3,17 @@ import { revealHero } from "./hero";
 import { isTransitionArrival } from "./page-transition";
 
 /**
- * Intro loader — isometric house + FOTTA//POPADIČ / architekt lockup.
+ * Intro loader — the official FPA logo, revealed line by line.
  *
- * Sequence (normal flow):
- *   0.00s  Icon breathes in (scale 0.94 → 1, opacity 0 → 1, expo.out).
- *          Walls draw (0–0.6s), roof (0.5–1.0s), ridge (1.05–1.4s).
- *   0.25s  "FOTTA/" rises from its mask.
- *   0.40s  "/POPADIČ" rises.
- *   0.55s  "architekt" rises.
+ * Sequence (normal flow — same beats/timings as the previous house +
+ * wordmark version, the visuals swapped for the designer's mark):
+ *   0.25s  "fotta" line rises into its SVG clip band.
+ *   0.40s  "popadič" line rises.
+ *   0.55s  "architekt" line rises.
  *   1.50s  Curtain outro starts: .loader yPercent → -100 (1.0s,
  *          expo.inOut), revealHero() fires in onStart, .loader-content
  *          is counter-translated +vh so the logo stays planted in
- *          place while the curtain travels up around it. Lockup opacity
+ *          place while the curtain travels up around it. Mark opacity
  *          fades to 0 in the last 0.4s.
  *   2.50s  Curtain done → display:none, hero takes over.
  *
@@ -71,95 +70,36 @@ export function initLoader(): void {
 }
 
 function playIntro(root: HTMLElement, onDone: () => void): void {
-  const paths = root.querySelectorAll<SVGPathElement>(".loader-icon .draw");
-
-  // Prepare each path individually — every path has its own getTotalLength().
-  paths.forEach((p) => {
-    try {
-      const len = p.getTotalLength();
-      p.style.strokeDasharray = String(len);
-      p.style.strokeDashoffset = String(len);
-    } catch {
-      /* If measurement fails (very rare), the CSS fallback keeps it hidden. */
-    }
-  });
-
   const tl = gsap.timeline({
     onComplete: onDone,
   });
 
-  // 0. Breathe the whole icon in (scale + opacity) so the first frame
-  //    feels "placed", not popped. Soft expo ease for that glassy rise.
-  tl.from(
-    ".loader-icon",
-    {
-      scale: 0.94,
-      opacity: 0,
-      duration: 1.0,
-      ease: "expo.out",
-    },
-    0,
-  );
-
-  // 1. Walls (front, side) — base of the house, drawn first, bottom-up.
-  tl.to(
-    [".draw-front", ".draw-side"],
-    {
-      strokeDashoffset: 0,
-      duration: 0.6,
-      ease: "power3.out",
-      stagger: 0.1,
-    },
-    0,
-  );
-
-  // 2. Roof (left gable, right slope) — second beat.
-  tl.to(
-    [".draw-roof-left", ".draw-roof-right"],
-    {
-      strokeDashoffset: 0,
-      duration: 0.5,
-      ease: "power3.out",
-      stagger: 0.1,
-    },
-    0.5,
-  );
-
-  // 3. Ridge — final accent stroke that ties the roof together.
-  tl.to(
-    ".draw-ridge",
-    {
-      strokeDashoffset: 0,
-      duration: 0.35,
-      ease: "power2.out",
-    },
-    1.05,
-  );
-
-  // 4. Text reveal — runs OVER the house drawing so the two beats
-  //    interlock. Each word slides up from a mask (yPercent 110 → 0)
-  //    while fading in. The opacity component prevents a one-frame
-  //    flash before gsap.set lands, AND smooths the glass-like feel.
+  // Line reveal — each logo line slides up into its SVG clip band
+  // (yPercent 110 → 0) while fading in, the exact word-mask move the
+  // old text lockup used, at the same timeline positions. yPercent on
+  // an SVG <g> resolves against the group's own bbox height; 110%
+  // clears the band's 1.5-unit padding, so the line starts fully
+  // hidden below its band.
   //
-  //    Note: CSS keeps .word at opacity:0 with NO transform — see the
-  //    comment in the component's <style>. We seed yPercent here so
-  //    GSAP owns the transform channel from the very first frame.
-  gsap.set(".word", { yPercent: 110, opacity: 0 });
+  // Note: CSS keeps .lg-line at opacity:0 with NO transform — see the
+  // comment in the component's <style>. We seed yPercent here so
+  // GSAP owns the transform channel from the very first frame.
+  gsap.set(".lg-line", { yPercent: 110, opacity: 0 });
 
-  // Tight, flowing succession — each word starts as the previous is
+  // Tight, flowing succession — each line starts as the previous is
   // mid-rise, so the three slides read as one continuous wave.
   tl.to(
-    ".word-fotta",
+    ".lg-line-1",
     { yPercent: 0, opacity: 1, duration: 0.6, ease: "expo.out" },
     0.25,
   )
     .to(
-      ".word-popadic",
+      ".lg-line-2",
       { yPercent: 0, opacity: 1, duration: 0.6, ease: "expo.out" },
       0.4,
     )
     .to(
-      ".loader-name-sub",
+      ".lg-line-3",
       { yPercent: 0, opacity: 1, duration: 0.6, ease: "expo.out" },
       0.55,
     );
