@@ -1,7 +1,7 @@
 /**
  * /o-nas (About) page copy — Figma "oNás" (node 3227:348), built section by
  * section as the design lands (currently: hero → word-scrub intro →
- * "Počiatky spoločnosti" → footer; more sections will follow).
+ * "Počiatky ateliéru" → footer; more sections will follow).
  *
  * Values are per-language, 1:1 with a future CMS "about" document.
  */
@@ -30,7 +30,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
     intro:
       "Tvoríme tiché priestory pre skutočný život. Naša architektúra nemá byť hlučná, ale pravdivá – rodí sa z dialógu a poctivého remesla. Pozrite sa, ako tento postoj formujeme už od úplného začiatku.",
     origins: {
-      label: "Počiatky spoločnosti",
+      label: "Počiatky ateliéru",
       col1: [
         "Príbeh ateliéru začal písať Pavol Fotta v roku 1998 v Bardejove. Od prvej skice stavil na nekompromisné stavebné remeslo, priamosť a architektúru, ktorá sa nepotrebuje predvádzať. Viac ako dve desaťročia budoval základy očistené od prvoplánových katalógových trendov a prázdneho marketingu. Každá čiara na výkrese musela mať jasné statické a racionálne opodstatnenie – stavba musela dávať zmysel v prvom rade na stavenisku, nie iba dobre vyzerať na papieri.",
         "Sústredil sa na surovú podstatu: ako dom komunikuje s miestom, ako narába s prirodzeným svetlom a ako dokáže fungovať desiatky rokov bez straty hodnoty. Tento prísny, inžiniersky prístup k materiálu vytvoril pevnú konštrukčnú DNA, na ktorej ateliér stojí dodnes a z ktorej prirodzene vyrástla naša súčasnosť.",
@@ -75,7 +75,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
     intro:
       "Tvoříme tiché prostory pro skutečný život. Naše architektura nemá být hlučná, ale pravdivá – rodí se z dialogu a poctivého řemesla. Podívejte se, jak tento postoj formujeme už od úplného začátku.",
     origins: {
-      label: "Počátky společnosti",
+      label: "Počátky ateliéru",
       col1: [
         "Příběh ateliéru začal psát Pavol Fotta v roce 1998 v Bardejově. Od první skici vsadil na nekompromisní stavební řemeslo, přímost a architekturu, která se nepotřebuje předvádět. Více než dvě desetiletí budoval základy očištěné od prvoplánových katalogových trendů a prázdného marketingu. Každá čára na výkrese musela mít jasné statické a racionální opodstatnění – stavba musela dávat smysl v první řadě na staveništi, ne jen dobře vypadat na papíře.",
         "Soustředil se na syrovou podstatu: jak dům komunikuje s místem, jak nakládá s přirozeným světlem a jak dokáže fungovat desítky let bez ztráty hodnoty. Tento přísný, inženýrský přístup k materiálu vytvořil pevnou konstrukční DNA, na které ateliér stojí dodnes a ze které přirozeně vyrostla naše současnost.",
@@ -120,7 +120,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
     intro:
       "We create quiet spaces for real life. Our architecture is not meant to be loud but truthful – born of dialogue and honest craft. See how we have been shaping this stance from the very beginning.",
     origins: {
-      label: "Company origins",
+      label: "Studio origins",
       col1: [
         "The studio's story was begun by Pavol Fotta in 1998 in Bardejov. From the first sketch he bet on uncompromising building craft, directness and architecture that has no need to show off. For more than two decades he built foundations cleansed of shallow catalogue trends and empty marketing. Every line on the drawing had to have a clear structural and rational justification – a building had to make sense on the construction site first, not merely look good on paper.",
         "He focused on the raw essence: how a house speaks to its place, how it works with natural light and how it can serve for decades without losing value. This strict, engineering-minded approach to material created the firm structural DNA the studio stands on to this day — and out of which our present naturally grew.",
