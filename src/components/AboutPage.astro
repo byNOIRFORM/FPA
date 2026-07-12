@@ -532,19 +532,22 @@ const dragLabel = projectsUI[lang].dragLabel;
     color: var(--text-mute);
   }
 
-  /* ===== TOMÁŠ + DOMINIK — bio left, portrait pair right; the bio's
-     bottom padding ≈ the info block below the photos, so the text edge
-     aligns with the IMAGE edge (Figma pb-80) ===== */
+  /* ===== TOMÁŠ + DOMINIK — bio one grid column in from the gutter
+     (Figma: x=146 → 117/1384, the astory--offset column), portrait pair
+     flush right; the bio's bottom padding ≈ the info block below the
+     photos, so the text edge aligns with the IMAGE edge (Figma pb-80) ===== */
   .ateam-duo-grid {
-    display: grid;
-    grid-template-columns: 32.15% 49.13%; /* 445 · 680 of 1384 */
+    display: flex;
     justify-content: space-between;
-    align-items: end;
+    align-items: flex-end;
   }
   .ateam-duo-bio {
+    width: 32.15%; /* 445/1384 */
+    margin-left: 8.45%; /* 117/1384 — one column in, like .astory-fig--offset */
     padding-bottom: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
   }
   .ateam-duo-photos {
+    width: 49.13%; /* 680/1384 */
     display: flex;
     gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
   }
@@ -717,8 +720,7 @@ const dragLabel = projectsUI[lang].dragLabel;
       text-indent: 0;
       font-size: clamp(28px, 8vw, 32px);
     }
-    .ateam-pavol-grid,
-    .ateam-duo-grid {
+    .ateam-pavol-grid {
       grid-template-columns: 1fr;
       row-gap: clamp(28px, 8vw, 56px);
     }
@@ -726,8 +728,18 @@ const dragLabel = projectsUI[lang].dragLabel;
       width: 100%;
       margin-left: 0;
     }
+    .ateam-duo-grid {
+      flex-direction: column;
+      align-items: stretch;
+      gap: clamp(28px, 8vw, 56px);
+    }
     .ateam-duo-bio {
+      width: 100%;
+      margin-left: 0;
       padding-bottom: 0;
+    }
+    .ateam-duo-photos {
+      width: 100%;
     }
     .ateam-bio p {
       font-size: 18px;
