@@ -252,17 +252,21 @@ export function initAboutPage(): void {
     els.push(...addFigure(tl, media, 0));
   });
 
-  // Inner parallax — each photo drifts ±8 around the -9.0164 centering
+  // Inner parallax — each photo drifts around the -9.0164 centering
   // baseline (-11% of the frame, carried by the scrub itself; see
-  // works.ts / Works.astro for the Safari grey-band story). Same
-  // calibration as the homepage Works grid. Skipped entirely under
-  // reduced motion (early return above).
+  // works.ts / Works.astro for the Safari grey-band story). Same ±8
+  // calibration as the homepage Works grid — except the three team
+  // portraits (Pavol, Dominik, Tomáš): their frames are much smaller,
+  // so the full drift read too strong (client feedback) and they get
+  // half the amplitude. Skipped entirely under reduced motion (early
+  // return above).
   root.querySelectorAll<HTMLElement>(".amedia img").forEach((img) => {
+    const amp = img.closest(".ateam-fig") ? 4 : 8;
     gsap.fromTo(
       img,
-      { yPercent: 8 - 9.0164 },
+      { yPercent: amp - 9.0164 },
       {
-        yPercent: -8 - 9.0164,
+        yPercent: -amp - 9.0164,
         ease: "none",
         scrollTrigger: {
           trigger: img.closest(".amedia"),
