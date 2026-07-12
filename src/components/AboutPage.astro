@@ -6,7 +6,7 @@
  *   hero (photo + word-mask title) → word-scrub intro → "Počiatky
  *   ateliéru" (label · two text columns · photo + caption) → photo story →
  *   team word-scrub → Pavol (photo + bio) → Tomáš + Dominik (bio + photo
- *   pair) → "Náš tím" drag carousel → footer
+ *   pair) → "Náš tím" editorial grid → footer
  *
  * Motion in scripts/about-page.ts — everything reuses the site's motion
  * language 1:1:
@@ -14,15 +14,12 @@
  *     Ken Burns yo-yo after)
  *   - Intros: per-word colour scrub (--reveal)
  *   - Origins/team texts + photos: clip-path curtain on scroll-in (Works
- *     row-1 pattern); the Tomáš/Dominik pair unrolls in reading order
- *   - Carousel: the project-detail drag gallery (drag-gallery.ts +
- *     DragCursor.astro), same cursor, same behaviour
+ *     row-1 pattern); photo pairs/rows unroll in reading order
+ *   - Team grid: hover crossfades each member to their second portrait
  */
 import Footer from "./Footer.astro";
-import DragCursor from "./DragCursor.astro";
 import { type Lang } from "../i18n/home";
 import { aboutPage } from "../i18n/about-page";
-import { projectsUI } from "../i18n/projects";
 
 interface Props {
   lang?: Lang;
@@ -34,11 +31,38 @@ const introWords = t.intro.split(" ");
 const teamIntroWords = t.team.intro.split(" ");
 
 // Lang-agnostic photos (same convention as the story blocks): duo order
-// matches t.team.duo.members (Dominik left, Tomáš right), carousel order
-// matches t.team.gallery (team-1…team-5).
+// matches t.team.duo.members (Dominik left, Tomáš right).
 const duoImages = ["/images/about/dominik.jpg", "/images/about/tomas.jpg"];
-const galleryImages = t.team.gallery.map((_, i) => `/images/about/team-${i + 1}.jpg`);
-const dragLabel = projectsUI[lang].dragLabel;
+
+// Team grid (Figma oNás_V2 3393:216) — [default, hover] portrait pair per
+// member in t.team.members order; null = no photo yet → dark placeholder
+// tile (the CMS case "member added before the photoshoot").
+const memberImages: ([string, string] | null)[] = [
+  ["/images/about/team-1.jpg", "/images/about/team-1b.jpg"],
+  ["/images/about/team-2.jpg", "/images/about/team-2b.jpg"],
+  ["/images/about/team-3.jpg", "/images/about/team-3b.jpg"],
+  ["/images/about/team-4.jpg", "/images/about/team-4b.jpg"],
+  ["/images/about/team-5.jpg", "/images/about/team-5b.jpg"],
+  ["/images/about/team-6.jpg", "/images/about/team-6b.jpg"],
+  ["/images/about/team-7.jpg", "/images/about/team-7b.jpg"],
+  null,
+];
+
+// Rows of three in a 4-column raster; the empty cell alternates — odd rows
+// skip column 3, even rows skip column 2 (the Figma editorial rhythm).
+const teamCols = [
+  [1, 2, 4],
+  [1, 3, 4],
+];
+const memberRows: { name: string; role: string; images: [string, string] | null; col: number }[][] = [];
+t.team.members.forEach((m, i) => {
+  const r = Math.floor(i / 3);
+  (memberRows[r] ??= []).push({
+    ...m,
+    images: memberImages[i] ?? null,
+    col: teamCols[r % 2][i % 3],
+  });
+});
 ---
 
 <article class="apage">
@@ -197,30 +221,42 @@ const dragLabel = projectsUI[lang].dragLabel;
     </div>
   </section>
 
-  {/* ===== NÁŠ TÍM — label + drag carousel: the SAME gallery as the
-      project detail (drag-gallery.ts + DragCursor.astro). Portrait/
-      landscape items alternate per the Figma; touch falls back to
-      native horizontal scroll. ===== */}
-  <section class="ateam-gal" data-gallery aria-label={t.team.galleryLabel}>
+  {/* ===== NÁŠ TÍM — editorial grid (Figma oNás_V2 3393:216): rows of
+      three in a 4-column raster, the empty cell alternating (odd rows
+      skip col 3, even rows col 2). Everyone is visible at once — no one
+      hides behind a drag. Hover crossfades to each member's second
+      portrait; a member without a photo yet gets the dark placeholder
+      tile. ===== */}
+  <section class="ateam-grid-sec" aria-label={t.team.galleryLabel}>
     <div class="awrap">
       <h2 class="ateam-label" data-reveal>{t.team.galleryLabel}</h2>
+      {memberRows.map((row) => (
+        <div class="ateam-grid-row">
+          {row.map((m) => (
+            <figure class="ateam-member" style={`--tcol: ${m.col}`}>
+              {m.images ? (
+                <div class="ateam-portrait" data-reveal>
+                  <img class="ateam-face" src={m.images[0]} alt={m.name} loading="lazy" />
+                  <img
+                    class="ateam-face ateam-face--hover"
+                    src={m.images[1]}
+                    alt=""
+                    loading="lazy"
+                    aria-hidden="true"
+                  />
+                </div>
+              ) : (
+                <div class="ateam-portrait ateam-portrait--empty" data-reveal></div>
+              )}
+              <figcaption class="ateam-info" data-reveal>
+                <span class="ateam-name">{m.name}</span>
+                <span class="ateam-role">{m.role}</span>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      ))}
     </div>
-    <div class="agal-viewport" data-gallery-viewport>
-      <div class="agal-track" data-gallery-track>
-        {t.team.gallery.map((m, i) => (
-          <figure class={`agal-item ${i % 2 ? "agal-item--land" : "agal-item--port"}`}>
-            <div class="agal-media" style={`aspect-ratio: ${i % 2 ? "563 / 498" : "328 / 470"}`}>
-              <img src={galleryImages[i]} alt={m.name} draggable="false" loading="lazy" />
-            </div>
-            <figcaption class="ateam-info">
-              <span class="ateam-name">{m.name}</span>
-              <span class="ateam-role">{m.role}</span>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-    </div>
-    <DragCursor label={dragLabel} />
   </section>
 
   <div class="awrap"><div class="adivider"></div></div>
@@ -555,80 +591,68 @@ const dragLabel = projectsUI[lang].dragLabel;
     flex: 1; /* two equal 328 portraits */
   }
 
-  /* ===== NÁŠ TÍM CAROUSEL — same full-bleed drag track as the project
-     gallery (track starts at the gutter, flows off the right edge as a
-     drag affordance); items keep their Figma widths (445 portrait /
-     563 landscape, capped at design size like .pgal), heights follow
-     each item's aspect-ratio, top-aligned. No parallax on the photos
-     (static media, like the project gallery). ===== */
-  .ateam-gal {
-    position: relative;
+  /* ===== NÁŠ TÍM GRID — 4-column raster, members in rows of three with
+     the empty cell alternating (--tcol carries each member's column from
+     the markup; mobile overrides it back to auto-flow). Portraits carry
+     the same halved ±4 inner parallax as the Pavol/duo portraits — BOTH
+     stacked faces get the identical scrub so the hover crossfade never
+     misaligns. ===== */
+  .ateam-grid-sec {
     padding-top: clamp(48px, 5.55vw, 80px); /* 80 @1440 */
     padding-bottom: clamp(48px, 5.55vw, 80px); /* 80 @1440 → closing divider */
   }
-  .ateam-gal .ateam-label {
+  .ateam-grid-sec .ateam-label {
     margin-bottom: clamp(24px, 2.78vw, 56px); /* 40 @1440 */
   }
-  .agal-viewport {
-    position: relative;
-    width: 100%;
-    overflow: hidden;
+  .ateam-grid-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    column-gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
   }
-  .agal-track {
-    display: flex;
-    align-items: flex-start;
-    gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
-    padding-inline: clamp(16px, 2vw, 48px); /* align first photo to the gutter */
-    width: max-content;
-    will-change: transform;
-    cursor: grab;
+  .ateam-grid-row + .ateam-grid-row {
+    margin-top: clamp(96px, 11.11vw, 160px); /* 160 @1440 — the 80+80 rhythm */
   }
-  .agal-track.is-dragging {
-    cursor: grabbing;
-  }
-  .agal-item {
-    flex: 0 0 auto;
+  .ateam-member {
+    grid-column: var(--tcol);
     margin: 0;
     display: flex;
     flex-direction: column;
     gap: clamp(14px, 1.39vw, 28px); /* 20 @1440 */
   }
-  .agal-item--port {
-    width: clamp(220px, 30.9vw, 445px); /* 445 @1440 */
-  }
-  .agal-item--land {
-    width: clamp(280px, 39.1vw, 563px); /* 563 @1440 */
-  }
-  .agal-media {
+  .ateam-portrait {
     position: relative;
-    width: 100%;
+    aspect-ratio: 328 / 470;
     overflow: hidden;
     background: var(--surface);
   }
-  .agal-media img {
+  /* Oversized for the inner parallax — same 122% headroom as .amedia img;
+     the scrub in about-page.ts carries the centering baseline itself. */
+  .ateam-face {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    height: 100%;
+    height: 122%;
     object-fit: cover;
     display: block;
   }
-  /* Touch devices — native horizontal scroll instead of Draggable
-     (the cursor hides itself in DragCursor.astro). */
-  @media (hover: none) {
-    .agal-viewport {
-      overflow-x: auto;
-      scroll-snap-type: x proximity;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
-    }
-    .agal-viewport::-webkit-scrollbar {
-      display: none;
-    }
-    .agal-track {
-      cursor: auto;
-    }
-    .agal-item {
-      scroll-snap-align: start;
-    }
+  /* The second portrait sits on top and dissolves in on hover — one
+     subtle motion, nothing else moves. A long, soft symmetric curve:
+     photo-to-photo crossfades only start feeling calm and "filmic"
+     around a second (expo.out was tried and read abrupt — its change
+     front-loads; client feedback 2026-07-12). */
+  .ateam-face--hover {
+    opacity: 0;
+    transition: opacity 700ms var(--ease-in-out);
+  }
+  .ateam-member:hover .ateam-face--hover {
+    opacity: 1;
+  }
+  /* Member without a photo yet (added via CMS before the photoshoot) —
+     the Figma dark tile. Fixed #333 works over both themes: a dark card
+     in light mode, an elevated surface in dark mode. */
+  .ateam-portrait--empty {
+    background: #333;
   }
 
   /* ===== Reveal initial states — hidden from first paint; about-page.ts
@@ -639,7 +663,8 @@ const dragLabel = projectsUI[lang].dragLabel;
   .aorigins-label[data-reveal],
   .aorigins-col[data-reveal],
   .ateam-bio[data-reveal],
-  .ateam-label[data-reveal] {
+  .ateam-label[data-reveal],
+  .ateam-portrait[data-reveal] {
     clip-path: inset(100% 0 0 0);
   }
   .aorigins-caption[data-reveal],
@@ -750,16 +775,21 @@ const dragLabel = projectsUI[lang].dragLabel;
     .ateam-role {
       font-size: 15px;
     }
-    .ateam-gal {
+    .ateam-grid-sec {
       padding-top: 28px;
       padding-bottom: 28px;
     }
-    /* Track items keep a readable size in the native-scroll strip. */
-    .agal-item--port {
-      width: clamp(220px, 64vw, 300px);
+    /* The editorial gaps drop on mobile — a plain 2-column flow (the
+       dedicated mobile design will revisit this). */
+    .ateam-grid-row {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: 40px;
     }
-    .agal-item--land {
-      width: clamp(260px, 78vw, 380px);
+    .ateam-grid-row + .ateam-grid-row {
+      margin-top: 40px;
+    }
+    .ateam-member {
+      grid-column: auto;
     }
   }
 
@@ -771,14 +801,16 @@ const dragLabel = projectsUI[lang].dragLabel;
       opacity: 1;
     }
     /* No parallax → no headroom needed; a plain centered cover crop. */
-    .amedia img {
+    .amedia img,
+    .ateam-face {
       height: 100%;
     }
     .amedia[data-reveal],
     .aorigins-label[data-reveal],
     .aorigins-col[data-reveal],
     .ateam-bio[data-reveal],
-    .ateam-label[data-reveal] {
+    .ateam-label[data-reveal],
+    .ateam-portrait[data-reveal] {
       clip-path: none;
     }
     .aorigins-caption[data-reveal],

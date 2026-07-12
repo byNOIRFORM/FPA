@@ -1,7 +1,6 @@
 import { gsap } from "gsap";
 // ScrollTrigger is registered globally in gsap-setup.ts — referencing
 // `scrollTrigger` in a tween config picks it up.
-import { initDragGallery } from "./drag-gallery";
 
 /**
  * /o-nas page motion — everything reuses the site's motion language 1:1:
@@ -19,12 +18,11 @@ import { initDragGallery } from "./drag-gallery";
  *     their caption/info rising just behind; story rows unroll in reading
  *     order, and the Pavol/duo sections sequence like the Services rows
  *     (Pavol: photo → bio; duo: bio → Dominik → Tomáš).
- *  4. TEAM CAROUSEL — the shared project-detail drag gallery
- *     (drag-gallery.ts): Draggable + inertia, "Ťahajte" cursor; touch
- *     devices scroll natively. No reveal, no parallax — same as there.
+ *  4. TEAM GRID — rows curtain in reading order like the story rows;
+ *     the hover portrait swap is pure CSS (AboutPage.astro); portraits
+ *     drift with the same halved ±4 inner parallax as Pavol/duo.
  *
- * Reduced motion: everything snaps to its final state (drag still works,
- * inertia off).
+ * Reduced motion: everything snaps to its final state.
  */
 export function initAboutPage(): void {
   if (typeof window === "undefined") return;
@@ -82,11 +80,6 @@ export function initAboutPage(): void {
   };
   scrubIntro(root.querySelector<HTMLElement>(".aintro"));
   scrubIntro(root.querySelector<HTMLElement>(".ateam-intro"));
-
-  // ===== TEAM CAROUSEL — the shared drag gallery; wired regardless of
-  // reduced motion (drag stays usable there, inertia off). =====
-  const gal = root.querySelector<HTMLElement>(".ateam-gal");
-  if (gal) initDragGallery(gal, reduced);
 
   // ===== 3. SCROLL REVEALS — origins/team texts + every photo =====
   if (reduced) {
@@ -175,8 +168,10 @@ export function initAboutPage(): void {
   // the lower photo off-screen; each keeps its own trigger there instead.
   const grouped = new Set<HTMLElement>();
   if (desktop) {
-    root.querySelectorAll<HTMLElement>(".astory-row").forEach((row) => {
-      const medias = Array.from(row.querySelectorAll<HTMLElement>(".amedia[data-reveal]"));
+    root.querySelectorAll<HTMLElement>(".astory-row, .ateam-grid-row").forEach((row) => {
+      const medias = Array.from(
+        row.querySelectorAll<HTMLElement>(".amedia[data-reveal], .ateam-portrait[data-reveal]"),
+      );
       if (!medias.length) return;
       medias.forEach((m) => grouped.add(m));
       const els: HTMLElement[] = [];
@@ -238,43 +233,48 @@ export function initAboutPage(): void {
 
   // Remaining photos (origins, the wide one — and all of them on mobile)
   // reveal on their own trigger as they scroll in.
-  root.querySelectorAll<HTMLElement>(".amedia[data-reveal]").forEach((media) => {
-    if (grouped.has(media)) return;
-    const els: HTMLElement[] = [];
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: media,
-        start: "top 80%",
-        toggleActions: "play none none none",
-      },
-      onComplete: () => els.forEach((el) => el.removeAttribute("data-reveal")),
+  root
+    .querySelectorAll<HTMLElement>(".amedia[data-reveal], .ateam-portrait[data-reveal]")
+    .forEach((media) => {
+      if (grouped.has(media)) return;
+      const els: HTMLElement[] = [];
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: media,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+        onComplete: () => els.forEach((el) => el.removeAttribute("data-reveal")),
+      });
+      els.push(...addFigure(tl, media, 0));
     });
-    els.push(...addFigure(tl, media, 0));
-  });
 
   // Inner parallax — each photo drifts around the -9.0164 centering
   // baseline (-11% of the frame, carried by the scrub itself; see
   // works.ts / Works.astro for the Safari grey-band story). Same ±8
-  // calibration as the homepage Works grid — except the three team
-  // portraits (Pavol, Dominik, Tomáš): their frames are much smaller,
-  // so the full drift read too strong (client feedback) and they get
-  // half the amplitude. Skipped entirely under reduced motion (early
-  // return above).
-  root.querySelectorAll<HTMLElement>(".amedia img").forEach((img) => {
-    const amp = img.closest(".ateam-fig") ? 4 : 8;
-    gsap.fromTo(
-      img,
-      { yPercent: amp - 9.0164 },
-      {
-        yPercent: -amp - 9.0164,
-        ease: "none",
-        scrollTrigger: {
-          trigger: img.closest(".amedia"),
-          start: "top bottom",
-          end: "bottom top",
-          scrub: true,
+  // calibration as the homepage Works grid — except the small portrait
+  // frames (Pavol, Dominik, Tomáš + the team grid): the full drift read
+  // too strong there (client feedback) and they get half the amplitude.
+  // Grid tiles stack TWO faces (default + hover); both get the identical
+  // tween on the same trigger, so the crossfade stays pixel-aligned.
+  // Skipped entirely under reduced motion (early return above).
+  root
+    .querySelectorAll<HTMLElement>(".amedia img, .ateam-portrait img")
+    .forEach((img) => {
+      const amp = img.closest(".ateam-fig, .ateam-portrait") ? 4 : 8;
+      gsap.fromTo(
+        img,
+        { yPercent: amp - 9.0164 },
+        {
+          yPercent: -amp - 9.0164,
+          ease: "none",
+          scrollTrigger: {
+            trigger: img.closest(".amedia, .ateam-portrait"),
+            start: "top bottom",
+            end: "bottom top",
+            scrub: true,
+          },
         },
-      },
-    );
-  });
+      );
+    });
 }

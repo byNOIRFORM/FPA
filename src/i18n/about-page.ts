@@ -22,15 +22,16 @@ export interface AboutPageCopy {
    *  then the wide 1147 photo; order matches the Figma left→right, top→down.
    *  Images are lang-agnostic and live in AboutPage.astro. */
   story: { alt: string; caption: string }[];
-  /** Team block (Figma "Sekcia 4" → "Náš tím" carousel). Images are
-   *  lang-agnostic and live in AboutPage.astro; `gallery` order matches
-   *  the carousel photos team-1…team-5 left→right. */
+  /** Team block (Figma "Sekcia 4" → "Náš tím" editorial grid, oNás_V2
+   *  3393:216). Images are lang-agnostic and live in AboutPage.astro;
+   *  `members` order matches the grid photos team-1…team-7 reading-order
+   *  (a member may have no photo yet → dark placeholder tile). */
   team: {
     intro: string; // second big word-scrub sentence
     pavol: { bio: string[]; name: string; role: string };
     duo: { bio: string[]; members: { name: string; role: string }[] };
     galleryLabel: string;
-    gallery: { name: string; role: string }[];
+    members: { name: string; role: string }[];
   };
 }
 
@@ -101,12 +102,15 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         ],
       },
       galleryLabel: "Náš tím",
-      gallery: [
+      members: [
         { name: "Ing. Marek Dufala", role: "Projektant" },
         { name: "Ing. arch. Natália Čuntová", role: "Externá architektka" },
         { name: "Petra Lacová", role: "Študentka architektúry" },
-        { name: "Ing. arch. Miriam Karasová", role: "Projektantka" },
+        { name: "Ing. arch. Miriam Sabolová", role: "Projektantka" },
         { name: "Ing. Jozef Bajus", role: "Projektant" },
+        { name: "Ing. arch. Lenka Semanová", role: "Architektka" },
+        { name: "Ing. Peter Hudák", role: "Statik" },
+        { name: "Ing. Katarína Onuferová", role: "Stavebná inžinierka" },
       ],
     },
   },
@@ -176,12 +180,15 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         ],
       },
       galleryLabel: "Náš tým",
-      gallery: [
+      members: [
         { name: "Ing. Marek Dufala", role: "Projektant" },
         { name: "Ing. arch. Natália Čuntová", role: "Externí architektka" },
         { name: "Petra Lacová", role: "Studentka architektury" },
-        { name: "Ing. arch. Miriam Karasová", role: "Projektantka" },
+        { name: "Ing. arch. Miriam Sabolová", role: "Projektantka" },
         { name: "Ing. Jozef Bajus", role: "Projektant" },
+        { name: "Ing. arch. Lenka Semanová", role: "Architektka" },
+        { name: "Ing. Peter Hudák", role: "Statik" },
+        { name: "Ing. Katarína Onuferová", role: "Stavební inženýrka" },
       ],
     },
   },
@@ -251,12 +258,15 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         ],
       },
       galleryLabel: "Our team",
-      gallery: [
+      members: [
         { name: "Ing. Marek Dufala", role: "Project engineer" },
         { name: "Ing. arch. Natália Čuntová", role: "External architect" },
         { name: "Petra Lacová", role: "Architecture student" },
-        { name: "Ing. arch. Miriam Karasová", role: "Project engineer" },
+        { name: "Ing. arch. Miriam Sabolová", role: "Project engineer" },
         { name: "Ing. Jozef Bajus", role: "Project engineer" },
+        { name: "Ing. arch. Lenka Semanová", role: "Architect" },
+        { name: "Ing. Peter Hudák", role: "Structural engineer" },
+        { name: "Ing. Katarína Onuferová", role: "Civil engineer" },
       ],
     },
   },
