@@ -110,9 +110,9 @@ const ariaCur = (key: NonNullable<Props["active"]>) =>
 
   <div class="nav-right">
     <ul class={`nav-links${anim}`}>
-      <li><a class={`nav-flip${activeCls("about")}`} href={aboutHref} data-text={t.nav.links.about} aria-current={ariaCur("about")}><span>{t.nav.links.about}</span></a></li>
       <li><a class={`nav-flip${activeCls("projects")}`} href={projectsHref} data-text={t.nav.links.projects} aria-current={ariaCur("projects")}><span>{t.nav.links.projects}</span></a></li>
       <li><a class={`nav-flip${activeCls("services")}`} href={servicesLink} data-text={t.nav.links.services} aria-current={ariaCur("services")}><span>{t.nav.links.services}</span></a></li>
+      <li><a class={`nav-flip${activeCls("about")}`} href={aboutHref} data-text={t.nav.links.about} aria-current={ariaCur("about")}><span>{t.nav.links.about}</span></a></li>
     </ul>
     <a class={`nav-cta${anim}`} href="#kontakt" data-open-contact>
       <span class="nav-cta-text">{t.nav.cta}</span>

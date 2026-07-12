@@ -49,9 +49,9 @@ const base = langHref[lang];
 const langHrefs = localizedHrefs(Astro.url.pathname);
 const links: MenuLink[] = [
   { label: t.footer.nav.home, href: base },
-  { label: t.footer.nav.about, href: aboutHref[lang] },
   { label: t.footer.nav.projects, href: projectsListHref(lang) },
   { label: t.footer.nav.services, href: servicesHref[lang] },
+  { label: t.footer.nav.about, href: aboutHref[lang] },
   { label: t.nav.cta, href: "#kontakt", contact: true },
 ];
 

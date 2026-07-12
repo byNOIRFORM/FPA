@@ -109,7 +109,7 @@ export const home: Record<Lang, HomeContent> = {
   // ===========================================================
   sk: {
     nav: {
-      links: { about: "O nás,", projects: "Projekty,", services: "Služby" },
+      links: { about: "O nás", projects: "Projekty,", services: "Služby," },
       cta: "Kontaktujte nás",
       menu: "Menu",
       menuAria: "Otvoriť menu",
@@ -262,7 +262,7 @@ export const home: Record<Lang, HomeContent> = {
   // ===========================================================
   cz: {
     nav: {
-      links: { about: "O nás,", projects: "Projekty,", services: "Služby" },
+      links: { about: "O nás", projects: "Projekty,", services: "Služby," },
       cta: "Kontaktujte nás",
       menu: "Menu",
       menuAria: "Otevřít menu",
@@ -415,7 +415,7 @@ export const home: Record<Lang, HomeContent> = {
   // ===========================================================
   en: {
     nav: {
-      links: { about: "About,", projects: "Projects,", services: "Services" },
+      links: { about: "About", projects: "Projects,", services: "Services," },
       cta: "Contact us",
       menu: "Menu",
       menuAria: "Open menu",
