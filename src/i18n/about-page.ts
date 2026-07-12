@@ -1,7 +1,8 @@
 /**
  * /o-nas (About) page copy — Figma "oNás" (node 3227:348), built section by
  * section as the design lands (currently: hero → word-scrub intro →
- * "Počiatky ateliéru" → footer; more sections will follow).
+ * "Počiatky ateliéru" → photo story → team block [word-scrub intro → Pavol →
+ * Tomáš + Dominik → "Náš tím" drag carousel] → footer).
  *
  * Values are per-language, 1:1 with a future CMS "about" document.
  */
@@ -21,6 +22,16 @@ export interface AboutPageCopy {
    *  then the wide 1147 photo; order matches the Figma left→right, top→down.
    *  Images are lang-agnostic and live in AboutPage.astro. */
   story: { alt: string; caption: string }[];
+  /** Team block (Figma "Sekcia 4" → "Náš tím" carousel). Images are
+   *  lang-agnostic and live in AboutPage.astro; `gallery` order matches
+   *  the carousel photos team-1…team-5 left→right. */
+  team: {
+    intro: string; // second big word-scrub sentence
+    pavol: { bio: string[]; name: string; role: string };
+    duo: { bio: string[]; members: { name: string; role: string }[] };
+    galleryLabel: string;
+    gallery: { name: string; role: string }[];
+  };
 }
 
 export const aboutPage: Record<Lang, AboutPageCopy> = {
@@ -68,6 +79,36 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
           "Papier znesie všetko, no realita surového betónu neodpúšťa chyby. Príbeh projektu preto nekončí odovzdaním výkresov. Sme s vami priamo na stavbe, kde formou autorského dozoru garantujeme, že to, čo sme nakreslili, bude v reálnom svete bezchybne fungovať.",
       },
     ],
+    team: {
+      intro:
+        "Architektúra nie je produktom softvéru, ale ľudí. Naše tri dekády overených stavbárskych skúseností preto spájame s energiou novej generácie. Sme dve generácie, tri pohľady a jeden rozrastajúci sa tím, ktorý spoločne formuje tichý priestor pre život.",
+      pavol: {
+        bio: [
+          "Človek, ktorý stál pri samotnom zrode ateliéru a položil mu pevné základy, na ktorých dodnes staviame. S viac ako tromi dekádami neoceniteľných inžinierskych a stavbárskych skúseností vniesol do našej tvorby prísnu technickú disciplínu, nekompromisnú prísnosť a hlboký rešpekt k poctivému stavebnému detailu. Pre Pavla architektúra nikdy nekončila pri čiarach na papieri – skutočná pravda o priestore sa preňho vždy overovala až priamo na stavenisku.",
+          "Jeho celoživotná prax formovala identitu ateliéru ako miesta, kde odvážna kreativita podlieha prísnej logike realizovateľnosti. Dnes, keď vedenie plynule preberá nová generácia, jeho odkaz technickej dokonalosti a remeselnej pravdivosti zostáva naším najpevnejším pilierom.",
+        ],
+        name: "Ing. Pavol Fotta",
+        role: "Zakladateľ ateliéru",
+      },
+      duo: {
+        bio: [
+          "Nová energia, ktorá posúva hranice ateliéru. Tomáš a Dominik plynule prebrali vedenie rodinnej firmy s jasnou víziou – spojiť dekády overených inžinierskych základov s čistým minimalizmom a progresívnymi technológiami.",
+          "Prinášajú do procesu nové štandardy, od 3D tlače a skenovania až po hľadanie surových, pravdivých materiálov. Ich spoločným cieľom je tvoriť architektúru, ktorá vizuálne nekričí, no v reálnom svete funguje absolútne bezchybne.",
+        ],
+        members: [
+          { name: "Dominik Fotta", role: "Partner ateliéru" },
+          { name: "Ing. arch. Ing. Tomáš Popadič", role: "Partner ateliéru" },
+        ],
+      },
+      galleryLabel: "Náš tím",
+      gallery: [
+        { name: "Ing. Marek Dufala", role: "Projektant" },
+        { name: "Ing. arch. Natália Čuntová", role: "Externá architektka" },
+        { name: "Petra Lacová", role: "Študentka architektúry" },
+        { name: "Ing. arch. Miriam Karasová", role: "Projektantka" },
+        { name: "Ing. Jozef Bajus", role: "Projektant" },
+      ],
+    },
   },
   cz: {
     metaTitle: "O nás — Fotta Popadič",
@@ -113,6 +154,36 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
           "Papír snese všechno, ale realita surového betonu chyby neodpouští. Příběh projektu proto nekončí odevzdáním výkresů. Jsme s vámi přímo na stavbě, kde formou autorského dozoru garantujeme, že to, co jsme nakreslili, bude v reálném světě bezchybně fungovat.",
       },
     ],
+    team: {
+      intro:
+        "Architektura není produktem softwaru, ale lidí. Naše tři dekády ověřených stavařských zkušeností proto spojujeme s energií nové generace. Jsme dvě generace, tři pohledy a jeden rozrůstající se tým, který společně formuje tichý prostor pro život.",
+      pavol: {
+        bio: [
+          "Člověk, který stál u samotného zrodu ateliéru a položil mu pevné základy, na kterých dodnes stavíme. S více než třemi dekádami neocenitelných inženýrských a stavařských zkušeností vnesl do naší tvorby přísnou technickou disciplínu, nekompromisní přísnost a hluboký respekt k poctivému stavebnímu detailu. Pro Pavla architektura nikdy nekončila u čar na papíře – skutečná pravda o prostoru se pro něj vždy ověřovala až přímo na staveništi.",
+          "Jeho celoživotní praxe formovala identitu ateliéru jako místa, kde odvážná kreativita podléhá přísné logice realizovatelnosti. Dnes, kdy vedení plynule přebírá nová generace, zůstává jeho odkaz technické dokonalosti a řemeslné pravdivosti naším nejpevnějším pilířem.",
+        ],
+        name: "Ing. Pavol Fotta",
+        role: "Zakladatel ateliéru",
+      },
+      duo: {
+        bio: [
+          "Nová energie, která posouvá hranice ateliéru. Tomáš a Dominik plynule převzali vedení rodinné firmy s jasnou vizí – spojit dekády ověřených inženýrských základů s čistým minimalismem a progresivními technologiemi.",
+          "Přinášejí do procesu nové standardy, od 3D tisku a skenování až po hledání syrových, pravdivých materiálů. Jejich společným cílem je tvořit architekturu, která vizuálně nekřičí, ale v reálném světě funguje naprosto bezchybně.",
+        ],
+        members: [
+          { name: "Dominik Fotta", role: "Partner ateliéru" },
+          { name: "Ing. arch. Ing. Tomáš Popadič", role: "Partner ateliéru" },
+        ],
+      },
+      galleryLabel: "Náš tým",
+      gallery: [
+        { name: "Ing. Marek Dufala", role: "Projektant" },
+        { name: "Ing. arch. Natália Čuntová", role: "Externí architektka" },
+        { name: "Petra Lacová", role: "Studentka architektury" },
+        { name: "Ing. arch. Miriam Karasová", role: "Projektantka" },
+        { name: "Ing. Jozef Bajus", role: "Projektant" },
+      ],
+    },
   },
   en: {
     metaTitle: "About us — Fotta Popadič",
@@ -158,5 +229,35 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
           "Paper can bear anything, but the reality of raw concrete forgives no mistakes. That is why a project's story does not end with the handover of drawings. We stand with you directly on site, where our author's supervision guarantees that what we drew will work flawlessly in the real world.",
       },
     ],
+    team: {
+      intro:
+        "Architecture is not a product of software, but of people. That is why we pair three decades of proven building experience with the energy of a new generation. We are two generations, three perspectives and one growing team, shaping quiet space for life together.",
+      pavol: {
+        bio: [
+          "The man who stood at the very birth of the studio and laid the firm foundations we still build on today. With more than three decades of invaluable engineering and construction experience, he brought strict technical discipline, uncompromising rigour and a deep respect for honest building detail into our work. For Pavol, architecture never ended with lines on paper – the real truth about a space was always proven directly on the construction site.",
+          "His lifelong practice shaped the studio's identity as a place where bold creativity answers to the strict logic of buildability. Today, as the new generation smoothly takes over the lead, his legacy of technical excellence and craft truthfulness remains our firmest pillar.",
+        ],
+        name: "Ing. Pavol Fotta",
+        role: "Founder of the studio",
+      },
+      duo: {
+        bio: [
+          "New energy pushing the studio's boundaries. Tomáš and Dominik smoothly took over the family firm with a clear vision – to combine decades of proven engineering foundations with clean minimalism and progressive technologies.",
+          "They bring new standards into the process, from 3D printing and scanning to the search for raw, truthful materials. Their shared goal is to create architecture that never shouts visually, yet performs absolutely flawlessly in the real world.",
+        ],
+        members: [
+          { name: "Dominik Fotta", role: "Studio partner" },
+          { name: "Ing. arch. Ing. Tomáš Popadič", role: "Studio partner" },
+        ],
+      },
+      galleryLabel: "Our team",
+      gallery: [
+        { name: "Ing. Marek Dufala", role: "Project engineer" },
+        { name: "Ing. arch. Natália Čuntová", role: "External architect" },
+        { name: "Petra Lacová", role: "Architecture student" },
+        { name: "Ing. arch. Miriam Karasová", role: "Project engineer" },
+        { name: "Ing. Jozef Bajus", role: "Project engineer" },
+      ],
+    },
   },
 };

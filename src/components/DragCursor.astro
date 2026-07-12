@@ -1,0 +1,90 @@
+---
+/**
+ * DragCursor — the custom drag-gallery cursor (thisisstudiox style): a
+ * "Ťahajte" ring flanked by a chevron inside its own smaller ring on each
+ * side. The whole cluster follows the mouse — drag-gallery.ts positions it
+ * via GSAP quickTo (centred with xPercent/yPercent -50) and shrinks it
+ * while dragging. Pointer devices only; hidden on touch.
+ *
+ * Shared by the project-detail gallery and the /o-nas team carousel —
+ * one cursor, one look, everywhere.
+ */
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+
+<div class="pgal-cursor" data-gallery-cursor aria-hidden="true">
+  <span class="pgal-cursor-arrow pgal-cursor-arrow--prev">
+    <svg class="pgal-cursor-chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 1 L3 7 L9 13" />
+    </svg>
+  </span>
+  <span class="pgal-cursor-ring">{label}</span>
+  <span class="pgal-cursor-arrow pgal-cursor-arrow--next">
+    <svg class="pgal-cursor-chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M5 1 L11 7 L5 13" />
+    </svg>
+  </span>
+</div>
+
+<style>
+  /* A horizontal cluster of chevron · label ring · chevron. mix-blend-mode
+     keeps it legible over any photo. */
+  .pgal-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9998;
+    display: flex;
+    align-items: center;
+    gap: clamp(10px, 1vw, 18px);
+    pointer-events: none;
+    mix-blend-mode: difference;
+    color: rgba(255, 255, 255, 0.95);
+    opacity: 0;
+    visibility: hidden;
+  }
+  .pgal-cursor-ring {
+    width: clamp(76px, 6.6vw, 104px);
+    height: clamp(76px, 6.6vw, 104px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    display: grid;
+    place-items: center;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  /* Flanking arrows — each chevron sits inside its own ring, a touch smaller
+     than the main label ring (per the brief), matching its border style. */
+  .pgal-cursor-arrow {
+    width: clamp(48px, 4.4vw, 64px);
+    height: clamp(48px, 4.4vw, 64px);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+  }
+  .pgal-cursor-chev {
+    width: clamp(11px, 1vw, 15px);
+    height: auto;
+  }
+  /* drag-gallery.ts hides the direction you can no longer drag (at the start
+     the prev arrow, at the end the next arrow) so the cursor only ever offers
+     a move that's actually possible. */
+  .pgal-cursor-arrow.is-off {
+    display: none;
+  }
+  /* Touch devices — no custom cursor, native horizontal scroll instead. */
+  @media (hover: none) {
+    .pgal-cursor {
+      display: none;
+    }
+  }
+</style>

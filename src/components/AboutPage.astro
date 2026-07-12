@@ -4,18 +4,25 @@
  * by section as the design lands; current spine:
  *
  *   hero (photo + word-mask title) → word-scrub intro → "Počiatky
- *   ateliéru" (label · two text columns · photo + caption) → footer
+ *   ateliéru" (label · two text columns · photo + caption) → photo story →
+ *   team word-scrub → Pavol (photo + bio) → Tomáš + Dominik (bio + photo
+ *   pair) → "Náš tím" drag carousel → footer
  *
  * Motion in scripts/about-page.ts — everything reuses the site's motion
  * language 1:1:
  *   - Hero: homepage hero choreography (image settle 1.1→1, words at 0.85s,
  *     Ken Burns yo-yo after)
- *   - Intro: per-word colour scrub (--reveal)
- *   - Origins: text rises + photo curtain on scroll-in (Works row-1 pattern)
+ *   - Intros: per-word colour scrub (--reveal)
+ *   - Origins/team texts + photos: clip-path curtain on scroll-in (Works
+ *     row-1 pattern); the Tomáš/Dominik pair unrolls in reading order
+ *   - Carousel: the project-detail drag gallery (drag-gallery.ts +
+ *     DragCursor.astro), same cursor, same behaviour
  */
 import Footer from "./Footer.astro";
+import DragCursor from "./DragCursor.astro";
 import { type Lang } from "../i18n/home";
 import { aboutPage } from "../i18n/about-page";
+import { projectsUI } from "../i18n/projects";
 
 interface Props {
   lang?: Lang;
@@ -24,6 +31,14 @@ const { lang = "sk" } = Astro.props;
 const t = aboutPage[lang];
 
 const introWords = t.intro.split(" ");
+const teamIntroWords = t.team.intro.split(" ");
+
+// Lang-agnostic photos (same convention as the story blocks): duo order
+// matches t.team.duo.members (Dominik left, Tomáš right), carousel order
+// matches t.team.gallery (team-1…team-5).
+const duoImages = ["/images/about/dominik.jpg", "/images/about/tomas.jpg"];
+const galleryImages = t.team.gallery.map((_, i) => `/images/about/team-${i + 1}.jpg`);
+const dragLabel = projectsUI[lang].dragLabel;
 ---
 
 <article class="apage">
@@ -124,8 +139,91 @@ const introWords = t.intro.split(" ");
         <figcaption class="astory-caption" data-reveal>{t.story[4].caption}</figcaption>
       </figure>
     </div>
-    <div class="awrap"><div class="adivider"></div></div>
   </section>
+
+  {/* ===== TÍM — word-scrub intro (Figma "Sekcia 4"): left-aligned, 3em
+      editorial indent like Leaders/ServicesManifest ===== */}
+  <section class="ateam-intro">
+    <div class="awrap">
+      <p class="ateam-lede">
+        {teamIntroWords.map((w) => (
+          <>
+            <span class="aword">{w}</span>{" "}
+          </>
+        ))}
+      </p>
+    </div>
+  </section>
+
+  {/* ===== PAVOL — portrait (right-aligned in its column) + bio ===== */}
+  <section class="ateam-pavol">
+    <div class="awrap ateam-pavol-grid">
+      <figure class="ateam-fig">
+        <div class="amedia" data-reveal style="aspect-ratio: 328 / 470">
+          <img src="/images/about/pavol.jpg" alt={t.team.pavol.name} loading="lazy" />
+        </div>
+        <figcaption class="ateam-info" data-reveal>
+          <span class="ateam-name">{t.team.pavol.name}</span>
+          <span class="ateam-role">{t.team.pavol.role}</span>
+        </figcaption>
+      </figure>
+      <div class="ateam-bio" data-reveal>
+        {t.team.pavol.bio.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  {/* ===== TOMÁŠ + DOMINIK — bio left (bottom-aligned to the photos'
+      image edge), portrait pair right; the pair unrolls in reading
+      order (left first) via the shared row stagger ===== */}
+  <section class="ateam-duo">
+    <div class="awrap ateam-duo-grid">
+      <div class="ateam-bio ateam-duo-bio" data-reveal>
+        {t.team.duo.bio.map((p) => <p>{p}</p>)}
+      </div>
+      <div class="ateam-duo-photos">
+        {t.team.duo.members.map((m, i) => (
+          <figure class="ateam-fig">
+            <div class="amedia" data-reveal style="aspect-ratio: 328 / 470">
+              <img src={duoImages[i]} alt={m.name} loading="lazy" />
+            </div>
+            <figcaption class="ateam-info" data-reveal>
+              <span class="ateam-name">{m.name}</span>
+              <span class="ateam-role">{m.role}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* ===== NÁŠ TÍM — label + drag carousel: the SAME gallery as the
+      project detail (drag-gallery.ts + DragCursor.astro). Portrait/
+      landscape items alternate per the Figma; touch falls back to
+      native horizontal scroll. ===== */}
+  <section class="ateam-gal" data-gallery aria-label={t.team.galleryLabel}>
+    <div class="awrap">
+      <h2 class="ateam-label" data-reveal>{t.team.galleryLabel}</h2>
+    </div>
+    <div class="agal-viewport" data-gallery-viewport>
+      <div class="agal-track" data-gallery-track>
+        {t.team.gallery.map((m, i) => (
+          <figure class={`agal-item ${i % 2 ? "agal-item--land" : "agal-item--port"}`}>
+            <div class="agal-media" style={`aspect-ratio: ${i % 2 ? "563 / 498" : "328 / 470"}`}>
+              <img src={galleryImages[i]} alt={m.name} draggable="false" loading="lazy" />
+            </div>
+            <figcaption class="ateam-info">
+              <span class="ateam-name">{m.name}</span>
+              <span class="ateam-role">{m.role}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </div>
+    <DragCursor label={dragLabel} />
+  </section>
+
+  <div class="awrap"><div class="adivider"></div></div>
 
   <Footer lang={lang} />
 </article>
@@ -255,7 +353,8 @@ const introWords = t.intro.split(" ");
     justify-content: space-between;
     align-items: start;
   }
-  .aorigins-label {
+  .aorigins-label,
+  .ateam-label {
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 500;
@@ -276,7 +375,8 @@ const introWords = t.intro.split(" ");
     column-gap: clamp(16px, 1.67vw, 32px); /* 24 @1440 */
     align-items: start;
   }
-  .aorigins-col p {
+  .aorigins-col p,
+  .ateam-bio p {
     font-family: var(--font-sans);
     font-weight: 400;
     font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
@@ -285,7 +385,8 @@ const introWords = t.intro.split(" ");
     color: var(--ink);
     margin: 0 0 1.4em;
   }
-  .aorigins-col p:last-child {
+  .aorigins-col p:last-child,
+  .ateam-bio p:last-child {
     margin-bottom: 0;
   }
 
@@ -374,17 +475,173 @@ const introWords = t.intro.split(" ");
     color: var(--ink);
   }
 
+  /* ===== TÍM — word-scrub intro (Figma Sekcia 4: 48px Medium, full
+     1384 width, editorial 3em indent like Leaders/ServicesManifest) ===== */
+  .ateam-intro,
+  .ateam-pavol,
+  .ateam-duo {
+    padding-block: clamp(48px, 5.55vw, 80px); /* 80 @1440 — the page rhythm */
+  }
+  .ateam-lede {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    text-indent: 3em;
+    font-size: clamp(26px, 3.33vw, 68px); /* 48 @1440 */
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
+
+  /* ===== PAVOL — photo column 563 (inner portrait 328 right-aligned),
+     bio 446 (Figma: gap 142) ===== */
+  .ateam-pavol-grid {
+    display: grid;
+    grid-template-columns: 40.68% 32.23%; /* 563 · 446 of 1384 */
+    column-gap: 10.26%; /* 142/1384 */
+    align-items: start;
+  }
+  .ateam-pavol-grid .ateam-fig {
+    width: 58.26%; /* 328/563 */
+    margin-left: auto; /* right edge of the photo column */
+  }
+  .ateam-fig {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 1.39vw, 28px); /* 20 @1440 */
+  }
+  .ateam-info {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(3px, 0.28vw, 6px); /* 4 @1440 */
+  }
+  .ateam-name,
+  .ateam-role {
+    font-family: var(--font-sans);
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+  .ateam-name {
+    font-weight: 500;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    color: var(--ink);
+  }
+  .ateam-role {
+    font-weight: 400;
+    font-size: clamp(14px, 1.11vw, 22px); /* 16 @1440 */
+    color: var(--text-mute);
+  }
+
+  /* ===== TOMÁŠ + DOMINIK — bio left, portrait pair right; the bio's
+     bottom padding ≈ the info block below the photos, so the text edge
+     aligns with the IMAGE edge (Figma pb-80) ===== */
+  .ateam-duo-grid {
+    display: grid;
+    grid-template-columns: 32.15% 49.13%; /* 445 · 680 of 1384 */
+    justify-content: space-between;
+    align-items: end;
+  }
+  .ateam-duo-bio {
+    padding-bottom: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
+  }
+  .ateam-duo-photos {
+    display: flex;
+    gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
+  }
+  .ateam-duo-photos .ateam-fig {
+    flex: 1; /* two equal 328 portraits */
+  }
+
+  /* ===== NÁŠ TÍM CAROUSEL — same full-bleed drag track as the project
+     gallery (track starts at the gutter, flows off the right edge as a
+     drag affordance); items keep their Figma widths (445 portrait /
+     563 landscape, capped at design size like .pgal), heights follow
+     each item's aspect-ratio, top-aligned. No parallax on the photos
+     (static media, like the project gallery). ===== */
+  .ateam-gal {
+    position: relative;
+    padding-top: clamp(48px, 5.55vw, 80px); /* 80 @1440 */
+    padding-bottom: clamp(48px, 5.55vw, 80px); /* 80 @1440 → closing divider */
+  }
+  .ateam-gal .ateam-label {
+    margin-bottom: clamp(24px, 2.78vw, 56px); /* 40 @1440 */
+  }
+  .agal-viewport {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+  }
+  .agal-track {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(14px, 1.67vw, 32px); /* 24 @1440 */
+    padding-inline: clamp(16px, 2vw, 48px); /* align first photo to the gutter */
+    width: max-content;
+    will-change: transform;
+    cursor: grab;
+  }
+  .agal-track.is-dragging {
+    cursor: grabbing;
+  }
+  .agal-item {
+    flex: 0 0 auto;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 1.39vw, 28px); /* 20 @1440 */
+  }
+  .agal-item--port {
+    width: clamp(220px, 30.9vw, 445px); /* 445 @1440 */
+  }
+  .agal-item--land {
+    width: clamp(280px, 39.1vw, 563px); /* 563 @1440 */
+  }
+  .agal-media {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface);
+  }
+  .agal-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  /* Touch devices — native horizontal scroll instead of Draggable
+     (the cursor hides itself in DragCursor.astro). */
+  @media (hover: none) {
+    .agal-viewport {
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .agal-viewport::-webkit-scrollbar {
+      display: none;
+    }
+    .agal-track {
+      cursor: auto;
+    }
+    .agal-item {
+      scroll-snap-align: start;
+    }
+  }
+
   /* ===== Reveal initial states — hidden from first paint; about-page.ts
      animates and strips the attributes. Label + columns use the SAME
      clip-path curtain as the Services rows (one motion family with the
      photo); only the caption keeps the small fade-up. ===== */
   .amedia[data-reveal],
   .aorigins-label[data-reveal],
-  .aorigins-col[data-reveal] {
+  .aorigins-col[data-reveal],
+  .ateam-bio[data-reveal],
+  .ateam-label[data-reveal] {
     clip-path: inset(100% 0 0 0);
   }
   .aorigins-caption[data-reveal],
-  .astory-caption[data-reveal] {
+  .astory-caption[data-reveal],
+  .ateam-info[data-reveal] {
     opacity: 0;
     transform: translateY(16px);
   }
@@ -450,6 +707,48 @@ const introWords = t.intro.split(" ");
     .astory-caption {
       font-size: 18px;
     }
+    .ateam-intro,
+    .ateam-pavol,
+    .ateam-duo {
+      padding-block: 28px;
+    }
+    /* Editorial indent drops on mobile — same as Leaders/ServicesManifest. */
+    .ateam-lede {
+      text-indent: 0;
+      font-size: clamp(28px, 8vw, 32px);
+    }
+    .ateam-pavol-grid,
+    .ateam-duo-grid {
+      grid-template-columns: 1fr;
+      row-gap: clamp(28px, 8vw, 56px);
+    }
+    .ateam-pavol-grid .ateam-fig {
+      width: 100%;
+      margin-left: 0;
+    }
+    .ateam-duo-bio {
+      padding-bottom: 0;
+    }
+    .ateam-bio p {
+      font-size: 18px;
+    }
+    .ateam-name {
+      font-size: 18px;
+    }
+    .ateam-role {
+      font-size: 15px;
+    }
+    .ateam-gal {
+      padding-top: 28px;
+      padding-bottom: 28px;
+    }
+    /* Track items keep a readable size in the native-scroll strip. */
+    .agal-item--port {
+      width: clamp(220px, 64vw, 300px);
+    }
+    .agal-item--land {
+      width: clamp(260px, 78vw, 380px);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -465,11 +764,14 @@ const introWords = t.intro.split(" ");
     }
     .amedia[data-reveal],
     .aorigins-label[data-reveal],
-    .aorigins-col[data-reveal] {
+    .aorigins-col[data-reveal],
+    .ateam-bio[data-reveal],
+    .ateam-label[data-reveal] {
       clip-path: none;
     }
     .aorigins-caption[data-reveal],
-    .astory-caption[data-reveal] {
+    .astory-caption[data-reveal],
+    .ateam-info[data-reveal] {
       opacity: 1;
       transform: none;
     }

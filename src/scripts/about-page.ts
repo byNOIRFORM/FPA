@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 // ScrollTrigger is registered globally in gsap-setup.ts — referencing
 // `scrollTrigger` in a tween config picks it up.
+import { initDragGallery } from "./drag-gallery";
 
 /**
  * /o-nas page motion — everything reuses the site's motion language 1:1:
@@ -10,13 +11,20 @@ import { gsap } from "gsap";
  *     word-by-word from its masks at the 0.85s beat (1.0s expo.out,
  *     0.05 stagger); the slow Ken Burns yo-yo starts once the reveal
  *     completes. No loader on this subpage → plays on init.
- *  2. INTRO — per-word colour scrub (--reveal), same as every page intro.
- *  3. ORIGINS — the homepage Works row-1 reveal on scroll-in: label + text
- *     columns rise (0.7s power3.out, 0.08 stagger, trigger top 75%), the
- *     photo curtains up (clip-path, 1.0s power3.out, trigger top 80%) with
- *     the caption rising just behind it.
+ *  2. INTROS — per-word colour scrub (--reveal), same as every page intro;
+ *     runs for both scrub blocks (.aintro + .ateam-intro), each on its
+ *     own trigger.
+ *  3. ORIGINS/TEAM TEXTS — the homepage Works row-1 reveal on scroll-in:
+ *     texts unroll with the clip-path curtain, photos curtain up with
+ *     their caption/info rising just behind; story rows unroll in reading
+ *     order, and the Pavol/duo sections sequence like the Services rows
+ *     (Pavol: photo → bio; duo: bio → Dominik → Tomáš).
+ *  4. TEAM CAROUSEL — the shared project-detail drag gallery
+ *     (drag-gallery.ts): Draggable + inertia, "Ťahajte" cursor; touch
+ *     devices scroll natively. No reveal, no parallax — same as there.
  *
- * Reduced motion: everything snaps to its final state.
+ * Reduced motion: everything snaps to its final state (drag still works,
+ * inertia off).
  */
 export function initAboutPage(): void {
   if (typeof window === "undefined") return;
@@ -50,28 +58,37 @@ export function initAboutPage(): void {
     }
   }
 
-  // ===== 2. INTRO WORD-SCRUB =====
-  const words = root.querySelectorAll<HTMLElement>(".aword");
-  if (words.length) {
+  // ===== 2. INTRO WORD-SCRUBS — one per scrub block, own trigger each =====
+  const scrubIntro = (section: HTMLElement | null) => {
+    if (!section) return;
+    const words = section.querySelectorAll<HTMLElement>(".aword");
+    if (!words.length) return;
     if (reduced) {
       gsap.set(words, { "--reveal": 1 });
-    } else {
-      gsap.set(words, { "--reveal": 0 });
-      gsap.to(words, {
-        "--reveal": 1,
-        ease: "none",
-        stagger: { each: 0.18 },
-        scrollTrigger: {
-          trigger: root.querySelector<HTMLElement>(".aintro") ?? root,
-          start: "top 80%",
-          end: "bottom 70%",
-          scrub: 0.6,
-        },
-      });
+      return;
     }
-  }
+    gsap.set(words, { "--reveal": 0 });
+    gsap.to(words, {
+      "--reveal": 1,
+      ease: "none",
+      stagger: { each: 0.18 },
+      scrollTrigger: {
+        trigger: section,
+        start: "top 80%",
+        end: "bottom 70%",
+        scrub: 0.6,
+      },
+    });
+  };
+  scrubIntro(root.querySelector<HTMLElement>(".aintro"));
+  scrubIntro(root.querySelector<HTMLElement>(".ateam-intro"));
 
-  // ===== 3. SCROLL REVEALS — origins text + every photo on the page =====
+  // ===== TEAM CAROUSEL — the shared drag gallery; wired regardless of
+  // reduced motion (drag stays usable there, inertia off). =====
+  const gal = root.querySelector<HTMLElement>(".ateam-gal");
+  if (gal) initDragGallery(gal, reduced);
+
+  // ===== 3. SCROLL REVEALS — origins/team texts + every photo =====
   if (reduced) {
     root.querySelectorAll("[data-reveal]").forEach((el) => el.removeAttribute("data-reveal"));
     return;
@@ -103,6 +120,36 @@ export function initAboutPage(): void {
     }
   }
 
+  const desktop = window.matchMedia("(min-width: 768px)").matches;
+
+  // Shared clip-path curtain for the team texts — used standalone here and
+  // inside the Pavol/duo section sequences below.
+  const teamTextFrom = { clipPath: "inset(100% 0 0 0)" };
+  const teamTextTo = {
+    clipPath: "inset(0% 0 0 0)",
+    duration: 0.9,
+    ease: "expo.out",
+    immediateRender: false,
+  };
+
+  // "Náš tím" label — own trigger. On mobile the Pavol/duo bios reveal
+  // standalone here too (the section sequences below are desktop-only,
+  // same reasoning as the story rows).
+  const soloTeamTexts = desktop
+    ? ".ateam-label[data-reveal]"
+    : ".ateam-label[data-reveal], .ateam-bio[data-reveal]";
+  root.querySelectorAll<HTMLElement>(soloTeamTexts).forEach((el) => {
+    gsap.fromTo(el, teamTextFrom, {
+      ...teamTextTo,
+      scrollTrigger: {
+        trigger: el,
+        start: "top 80%",
+        toggleActions: "play none none none",
+      },
+      onComplete: () => el.removeAttribute("data-reveal"),
+    });
+  });
+
   // Every photo (origins + story blocks) curtains up 1.0s power3.out with
   // its caption rising 0.2 behind — one motion, repeated. Adds one figure
   // (media + caption) to a timeline at the given offset and returns the
@@ -127,7 +174,7 @@ export function initAboutPage(): void {
   // Desktop only: on mobile the rows stack, so a shared trigger would play
   // the lower photo off-screen; each keeps its own trigger there instead.
   const grouped = new Set<HTMLElement>();
-  if (window.matchMedia("(min-width: 768px)").matches) {
+  if (desktop) {
     root.querySelectorAll<HTMLElement>(".astory-row").forEach((row) => {
       const medias = Array.from(row.querySelectorAll<HTMLElement>(".amedia[data-reveal]"));
       if (!medias.length) return;
@@ -143,6 +190,50 @@ export function initAboutPage(): void {
       });
       medias.forEach((media, i) => els.push(...addFigure(tl, media, i * 0.15)));
     });
+  }
+
+  // Pavol + Tomáš/Dominik — one section trigger each, sequenced in reading
+  // order like the Services rows (client request 2026-07-12): Pavol's photo
+  // curtains first with the bio unrolling 0.15 behind; the duo bio unrolls
+  // first, then Dominik (+0.15) and Tomáš (+0.30). Desktop only (see above).
+  if (desktop) {
+    const pavol = root.querySelector<HTMLElement>(".ateam-pavol");
+    const pavolMedia = pavol?.querySelector<HTMLElement>(".amedia[data-reveal]") ?? null;
+    if (pavol && pavolMedia) {
+      grouped.add(pavolMedia);
+      const bio = pavol.querySelector<HTMLElement>(".ateam-bio[data-reveal]");
+      const els: HTMLElement[] = bio ? [bio] : [];
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: pavol,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+        onComplete: () => els.forEach((el) => el.removeAttribute("data-reveal")),
+      });
+      els.push(...addFigure(tl, pavolMedia, 0));
+      if (bio) tl.fromTo(bio, teamTextFrom, teamTextTo, 0.15);
+    }
+
+    const duo = root.querySelector<HTMLElement>(".ateam-duo");
+    if (duo) {
+      const bio = duo.querySelector<HTMLElement>(".ateam-bio[data-reveal]");
+      const medias = Array.from(duo.querySelectorAll<HTMLElement>(".amedia[data-reveal]"));
+      if (bio || medias.length) {
+        medias.forEach((m) => grouped.add(m));
+        const els: HTMLElement[] = bio ? [bio] : [];
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: duo,
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+          onComplete: () => els.forEach((el) => el.removeAttribute("data-reveal")),
+        });
+        if (bio) tl.fromTo(bio, teamTextFrom, teamTextTo, 0);
+        medias.forEach((media, i) => els.push(...addFigure(tl, media, 0.15 + i * 0.15)));
+      }
+    }
   }
 
   // Remaining photos (origins, the wide one — and all of them on mobile)

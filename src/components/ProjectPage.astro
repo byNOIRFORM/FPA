@@ -31,6 +31,7 @@ import {
   projectHref,
   projectsListHref,
 } from "../i18n/projects";
+import DragCursor from "./DragCursor.astro";
 
 interface Props {
   lang?: Lang;
@@ -210,7 +211,7 @@ const singleGallery = gallery.length <= 1;
     </section>
   ) : (
     <section class="pgal" data-gallery aria-label={locale.title}>
-      <div class="pgal-viewport">
+      <div class="pgal-viewport" data-gallery-viewport>
         <div class="pgal-track" data-gallery-track>
           {gallery.map((g, i) => (
             <figure class="pgal-item">
@@ -226,22 +227,9 @@ const singleGallery = gallery.length <= 1;
           ))}
         </div>
       </div>
-      {/* Custom drag cursor (thisisstudiox style) — a "Ťahajte" ring flanked
-          by a chevron inside its own smaller ring on each side; the whole
-          cluster follows the mouse (see project.ts). Pointer devices only. */}
-      <div class="pgal-cursor" data-gallery-cursor aria-hidden="true">
-        <span class="pgal-cursor-arrow pgal-cursor-arrow--prev">
-          <svg class="pgal-cursor-chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 1 L3 7 L9 13" />
-          </svg>
-        </span>
-        <span class="pgal-cursor-ring">{ui.dragLabel}</span>
-        <span class="pgal-cursor-arrow pgal-cursor-arrow--next">
-          <svg class="pgal-cursor-chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 1 L11 7 L5 13" />
-          </svg>
-        </span>
-      </div>
+      {/* Custom drag cursor — shared DragCursor.astro cluster, positioned
+          by drag-gallery.ts. Pointer devices only. */}
+      <DragCursor label={ui.dragLabel} />
     </section>
   )}
 
@@ -632,65 +620,9 @@ const singleGallery = gallery.length <= 1;
     height: 100%;
   }
 
-  /* Custom drag cursor (thisisstudiox style) — a horizontal cluster of
-     chevron · "Ťahajte" ring · chevron. The whole cluster follows the mouse
-     (project.ts positions it via GSAP quickTo, centred with xPercent/yPercent
-     -50, and shrinks it while dragging). mix-blend-mode keeps it legible
-     over any photo. */
-  .pgal-cursor {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 9998;
-    display: flex;
-    align-items: center;
-    gap: clamp(10px, 1vw, 18px);
-    pointer-events: none;
-    mix-blend-mode: difference;
-    color: rgba(255, 255, 255, 0.95);
-    opacity: 0;
-    visibility: hidden;
-  }
-  .pgal-cursor-ring {
-    width: clamp(76px, 6.6vw, 104px);
-    height: clamp(76px, 6.6vw, 104px);
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    display: grid;
-    place-items: center;
-    font-family: var(--font-sans);
-    font-weight: 500;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
-  /* Flanking arrows — each chevron sits inside its own ring, a touch smaller
-     than the main "Ťahajte" ring (per the brief), matching its border style. */
-  .pgal-cursor-arrow {
-    width: clamp(48px, 4.4vw, 64px);
-    height: clamp(48px, 4.4vw, 64px);
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    display: grid;
-    place-items: center;
-    flex: 0 0 auto;
-  }
-  .pgal-cursor-chev {
-    width: clamp(11px, 1vw, 15px);
-    height: auto;
-  }
-  /* project.ts hides the direction you can no longer drag (at the start the
-     prev arrow, at the end the next arrow) so the cursor only ever offers a
-     move that's actually possible. */
-  .pgal-cursor-arrow.is-off {
-    display: none;
-  }
-  /* Touch devices — no custom cursor, native horizontal scroll instead. */
+  /* Custom drag cursor styles live in DragCursor.astro (shared component). */
+  /* Touch devices — native horizontal scroll instead of Draggable. */
   @media (hover: none) {
-    .pgal-cursor {
-      display: none;
-    }
     .pgal-viewport {
       overflow-x: auto;
       scroll-snap-type: x proximity;
