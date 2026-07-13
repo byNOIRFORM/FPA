@@ -37,6 +37,61 @@ const DAMPING = 0.88;
 // pool — in keeping with the brief's "not loud".
 const COUPLING = 0.14;
 
+// ── Audio: a soft plucked-string voice (Karplus–Strong synthesis). Native
+// Web Audio, zero assets — the notes are generated, not loaded. The context
+// only wakes on activation, so it costs nothing until the egg is opened.
+// Kept deliberately quiet: "It isn't loud. But it resonates."
+const MASTER_GAIN = 0.12; // overall level — intentionally low
+const ROOT_HZ = 130.81; // C3 — a warm mid, not tinkly
+const PLUCK_SECONDS = 0.7; // per-note buffer length (natural KS decay)
+const TRIGGER_ON = 0.55; // cursor must genuinely cross a line to sound it
+const TRIGGER_OFF = 0.15; // and leave it before it can ring again (hysteresis)
+const VARIANTS = 2; // pre-rendered takes per note — no two plucks identical
+const PAN_SPREAD = 0.7; // stereo width: left lines sound left (eye ↔ ear)
+const DETUNE_CENTS = 7; // ± per-pluck micro-detune — alive, never off-key
+
+// Karplus–Strong: a burst of noise fed through a short, lightly-damped delay
+// line rings down like a plucked string. Delay length = one wavelength = pitch.
+function makePluckBuffer(
+  ctx: AudioContext,
+  freq: number,
+  seconds: number,
+): AudioBuffer {
+  const sr = ctx.sampleRate;
+  const n = Math.max(2, Math.round(sr / freq)); // delay line = one wavelength
+  const len = Math.floor(sr * seconds);
+  const buffer = ctx.createBuffer(1, len, sr);
+  const out = buffer.getChannelData(0);
+  const line = new Float32Array(n);
+  for (let i = 0; i < n; i++) line[i] = Math.random() * 2 - 1; // pluck = noise
+  const damp = 0.994; // ~1 rings longer; lower = shorter, duller
+  let idx = 0;
+  for (let i = 0; i < len; i++) {
+    out[i] = line[idx];
+    const next = line[(idx + 1) % n];
+    line[idx] = 0.5 * (line[idx] + next) * damp; // lowpass feedback = decay
+    idx = (idx + 1) % n;
+  }
+  // Fade the tail so the note ends like a muted string, not a tape cut —
+  // at these damp values the loop still carries amplitude when the buffer
+  // runs out, and a hard truncation would click.
+  const fade = Math.min(len, Math.floor(sr * 0.15));
+  for (let i = 0; i < fade; i++) {
+    out[len - 1 - i] *= i / fade;
+  }
+  return buffer;
+}
+
+// The lines → an ascending major-pentatonic run (left = low). No two crossings
+// can clash, so any sweep across the grid stays consonant — like a harp.
+function buildPentatonic(count: number, root: number): number[] {
+  const steps = [0, 2, 4, 7, 9]; // major pentatonic, in semitones
+  return Array.from({ length: count }, (_, i) => {
+    const semis = steps[i % steps.length] + 12 * Math.floor(i / steps.length);
+    return root * Math.pow(2, semis / 12);
+  });
+}
+
 export function initGridReveal(): void {
   if (typeof window === "undefined") return;
 
@@ -73,10 +128,18 @@ export function initGridReveal(): void {
   const vel = pos.map(() => 0); // spring velocity per line
   const velPrev = pos.map(() => 0); // frame snapshot for symmetric coupling
   const glow = pos.map(() => 0); // smoothed amplitude → opacity (no flicker)
+  const armed = pos.map(() => true); // per line: ready to sound on next crossing
   let mx = -99999;
+  let mxPrev = -99999; // last frame's x → cursor speed → pluck strength
   let my = 0;
   let raf = 0;
   let active = false;
+
+  // Web Audio — created lazily on first activation (a user gesture has
+  // happened by then, so autoplay policy is satisfied) and reused after.
+  let audioCtx: AudioContext | null = null;
+  let masterGain: GainNode | null = null;
+  let pluckBuffers: AudioBuffer[][] | null = null; // [line][variant]
 
   let holdTimer: number | null = null;
   let charging: HTMLElement | null = null;
@@ -99,6 +162,69 @@ export function initGridReveal(): void {
     }
   };
 
+  // Build the audio graph once, then pre-render one plucked-string buffer per
+  // line (tuned to the pentatonic). Cheap, and only ever runs on activation.
+  const ensureAudio = () => {
+    if (audioCtx) {
+      if (audioCtx.state === "suspended") void audioCtx.resume();
+      return;
+    }
+    const AC =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AC) return;
+    audioCtx = new AC();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = MASTER_GAIN;
+    const lp = audioCtx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 2600; // shave the harsh edge → warm, woody string
+    masterGain.connect(lp);
+    lp.connect(audioCtx.destination);
+    const freqs = buildPentatonic(paths.length, ROOT_HZ);
+    // A few takes per note (different noise bursts) so repeated plucks of
+    // the same line never sound like the same cloned sample.
+    pluckBuffers = freqs.map((f) =>
+      Array.from({ length: VARIANTS }, () =>
+        makePluckBuffer(audioCtx!, f, PLUCK_SECONDS),
+      ),
+    );
+  };
+
+  // Fire one note: a cached pluck buffer through a per-note gain (a 4 ms
+  // attack ramp avoids a click), scaled by how hard the string was struck.
+  const playPluck = (i: number, strength: number) => {
+    if (!audioCtx || !masterGain || !pluckBuffers) return;
+    const takes = pluckBuffers[i];
+    if (!takes) return;
+    const buf = takes[Math.floor(Math.random() * takes.length)];
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+    // Micro-detune each pluck by ± a few cents — far below the threshold of
+    // sounding out of tune, but no two plucks land on the exact same pitch.
+    src.playbackRate.value = Math.pow(
+      2,
+      ((Math.random() * 2 - 1) * DETUNE_CENTS) / 1200,
+    );
+    const g = audioCtx.createGain();
+    const t = audioCtx.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(strength, t + 0.004);
+    src.connect(g);
+    // Place the note where the line is — left lines sound from the left.
+    let tail: AudioNode = g;
+    if (typeof audioCtx.createStereoPanner === "function") {
+      const pan = audioCtx.createStereoPanner();
+      pan.pan.value = (pos[i] - 0.5) * PAN_SPREAD;
+      g.connect(pan);
+      tail = pan;
+    }
+    tail.connect(masterGain);
+    src.start(t);
+    src.stop(t + buf.duration + 0.1); // margin for the detuned (slower) takes
+  };
+
   // Per-frame: each line is a plucked string. The cursor displaces it; the
   // whole line bows (fixed at top + bottom, leaning toward the cursor's
   // height). On release the under-damped spring rings down over a few
@@ -108,6 +234,8 @@ export function initGridReveal(): void {
   const frame = () => {
     const cy = my;
     const n = paths.length;
+    const speed = Math.abs(mx - mxPrev); // px/frame → how hard a string is struck
+    mxPrev = mx;
     // Snapshot velocities so the neighbour coupling reads a consistent
     // previous state (symmetric, no left-to-right bias).
     for (let i = 0; i < n; i++) velPrev[i] = vel[i];
@@ -117,6 +245,18 @@ export function initGridReveal(): void {
       const dx = mx - x;
       const ad = Math.abs(dx);
       const influence = ad < RANGE ? 1 - ad / RANGE : 0;
+
+      // Sound one note when the cursor genuinely crosses a line; re-arm only
+      // after it leaves (hysteresis) so a hovering cursor doesn't retrigger.
+      if (audioCtx) {
+        if (armed[i] && influence > TRIGGER_ON) {
+          playPluck(i, Math.min(1, 0.35 + speed * 0.018));
+          armed[i] = false;
+        } else if (!armed[i] && influence < TRIGGER_OFF) {
+          armed[i] = true;
+        }
+      }
+
       let target = dx * STRENGTH * influence;
       target = Math.max(-MAX_BEND, Math.min(MAX_BEND, target));
 
@@ -185,13 +325,16 @@ export function initGridReveal(): void {
     active = true;
     swallowNextClick();
     measure();
+    ensureAudio();
     for (let i = 0; i < paths.length; i++) {
       bend[i] = 0;
       vel[i] = 0;
       glow[i] = 0;
+      armed[i] = true;
     }
     straighten();
     mx = -99999;
+    mxPrev = -99999;
     my = H / 2;
     overlay.setAttribute("data-active", "");
 
