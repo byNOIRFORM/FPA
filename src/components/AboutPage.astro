@@ -6,7 +6,8 @@
  *   hero (photo + word-mask title) → word-scrub intro → "Počiatky
  *   ateliéru" (label · two text columns · photo + caption) → photo story →
  *   team word-scrub → Pavol (photo + bio) → Tomáš + Dominik (bio + photo
- *   pair) → "Náš tím" editorial grid → footer
+ *   pair) → "Náš tím" editorial grid → "Čo hovoria naši klienti" drag
+ *   carousel → footer
  *
  * Motion in scripts/about-page.ts — everything reuses the site's motion
  * language 1:1:
@@ -16,10 +17,14 @@
  *   - Origins/team texts + photos: clip-path curtain on scroll-in (Works
  *     row-1 pattern); photo pairs/rows unroll in reading order
  *   - Team grid: hover crossfades each member to their second portrait
+ *   - Testimonials: the shared drag gallery with per-slide snap + a
+ *     masked-rise counter; NO auto-rotation (user-driven motion only)
  */
 import Footer from "./Footer.astro";
+import DragCursor from "./DragCursor.astro";
 import { type Lang } from "../i18n/home";
 import { aboutPage } from "../i18n/about-page";
+import { projectsUI } from "../i18n/projects";
 
 interface Props {
   lang?: Lang;
@@ -84,6 +89,21 @@ const cr = Math.floor(ci / 3);
   col: teamCols[cr % 2][ci % 3],
   careers: true,
 });
+
+// Testimonials — the photo shows the client's PROJECT, not their face
+// (real clients write reviews, they don't send portraits). ref-1 is the
+// Figma placeholder; the rest are project shots for now — when the
+// client maps reviews to real projects, these swap 1:1 (and can then
+// deep-link to the project details).
+const testimonialImages = [
+  "/images/about/ref-1.jpg",
+  "/images/works/work-2.jpg",
+  "/images/works/work-3.jpg",
+  "/images/works/work-4.jpg",
+  "/images/works/work-5.jpg",
+];
+const testimonialCount = String(t.testimonials.items.length).padStart(2, "0");
+const dragLabel = projectsUI[lang].dragLabel;
 ---
 
 <article class="apage">
@@ -300,6 +320,47 @@ const cr = Math.floor(ci / 3);
 
   <div class="awrap"><div class="adivider"></div></div>
 
+  {/* ===== REFERENCIE — "Čo hovoria naši klienti:" (Figma 3407:2…22).
+      One slide = project photo (2 grid cols) + 32px quote + the member
+      info lockup. The hildenkaira pattern: slides are STACKED in one
+      grid cell (section height = the tallest quote, no jumps) and the
+      drag gesture swaps them IN PLACE — outgoing fades, incoming rises.
+      The 01/05 counter flips with the site's masked-rise motion. No
+      auto-rotation; tabindex + arrow keys in about-page.ts. ===== */}
+  <section class="atest" aria-label={t.testimonials.label} tabindex="0">
+    <div class="awrap">
+      <div class="atest-head">
+        <h2 class="atest-label" data-reveal>{t.testimonials.label}</h2>
+        <p class="atest-counter">
+          <span class="atest-counter-mask"
+            ><span class="atest-counter-cur" data-testimonial-current aria-live="polite">01</span></span
+          ><span>/</span><span>{testimonialCount}</span>
+        </p>
+      </div>
+      <div class="atest-stack" data-testimonials-stack>
+        {t.testimonials.items.map((item, i) => (
+          <article class="atest-slide" aria-hidden={i === 0 ? undefined : "true"}>
+            <figure class="atest-fig">
+              <div class="amedia" data-reveal style="aspect-ratio: 211 / 302">
+                <img src={testimonialImages[i]} alt="" loading="lazy" draggable="false" />
+              </div>
+            </figure>
+            <div class="atest-body" data-reveal>
+              <blockquote class="atest-quote">“&nbsp;&nbsp;{item.quote}</blockquote>
+              <div class="ateam-info">
+                <span class="ateam-name">{item.name}</span>
+                <span class="ateam-role">{item.role}</span>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+    <DragCursor label={dragLabel} />
+  </section>
+
+  <div class="awrap"><div class="adivider"></div></div>
+
   <Footer lang={lang} />
 </article>
 
@@ -429,7 +490,8 @@ const cr = Math.floor(ci / 3);
     align-items: start;
   }
   .aorigins-label,
-  .ateam-label {
+  .ateam-label,
+  .atest-label {
     font-family: var(--font-sans);
     font-style: normal;
     font-weight: 500;
@@ -694,6 +756,102 @@ const cr = Math.floor(ci / 3);
     background: #333;
   }
 
+  /* ===== REFERENCIE — head row shares the slide's grid so the counter
+     sits exactly on the quote column; slides are viewport-wide and the
+     shared drag gallery snaps them whole. ===== */
+  .atest {
+    padding-block: clamp(48px, 5.55vw, 80px); /* 80 @1440 between dividers */
+  }
+  .atest:focus-visible {
+    outline: 1px solid var(--line);
+    outline-offset: 8px;
+  }
+  .atest-head,
+  .atest-slide {
+    display: grid;
+    grid-template-columns: 15.25% 66.11%; /* photo 211 · quote 915 of 1384 */
+    column-gap: 10.18%; /* quote column starts at 352/1384 (col 4) */
+    align-items: start;
+  }
+  .atest-head {
+    margin-bottom: clamp(24px, 2.78vw, 56px); /* 40 @1440 */
+  }
+  /* The label is wider than the photo column (Figma: loose 213px text
+     over a 211px column) — let it overflow on one line, never wrap. */
+  .atest-label {
+    white-space: nowrap;
+  }
+  .atest-counter {
+    display: flex;
+    align-items: flex-end; /* overflow-hidden mask's baseline is its bottom
+                              edge — bottoms align, digits have no descenders */
+    gap: 0.3em; /* three parts (01 · / · 05) → perfectly symmetric spacing */
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(16px, 1.39vw, 30px); /* 20 @1440 */
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums; /* 01→05 without width wobble */
+    color: var(--text-mute);
+    margin: 0;
+  }
+  /* Masked-rise digit flip — the counter's own word-mask; line-height
+     ≥1.3 per the descender rule (digits are safe, but stay consistent). */
+  .atest-counter-mask {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+  .atest-counter-cur {
+    display: inline-block;
+    will-change: transform;
+  }
+  /* All slides share one grid cell — the section is as tall as the
+     longest quote, so in-place swaps never shift the layout below. */
+  .atest-stack {
+    display: grid;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y; /* vertical scroll stays native, horizontal is ours */
+  }
+  .atest-stack.is-dragging {
+    cursor: grabbing;
+  }
+  .atest-slide {
+    grid-area: 1 / 1;
+  }
+  /* Non-first slides start hidden; the swap in about-page.ts owns
+     visibility from then on (GSAP autoAlpha). */
+  .atest-slide:not(:first-child) {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .atest-fig {
+    margin: 0;
+  }
+  .atest-quote {
+    font-family: var(--font-sans);
+    font-weight: 400;
+    font-size: clamp(20px, 2.22vw, 48px); /* 32 @1440 */
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 0;
+  }
+  .atest-body {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(28px, 3.33vw, 72px); /* 48 @1440 quote → name */
+  }
+  /* Touch devices swipe with the same pointer gesture (touch-action:
+     pan-y above keeps vertical scrolling native); the custom cursor
+     hides itself in DragCursor.astro. */
+  @media (hover: none) {
+    .atest-stack {
+      cursor: auto;
+    }
+  }
+
   /* ===== VOĽNÉ MIESTO — the careers tile that closes the roster: an
      empty 1px-outlined frame (--line = the Figma #A3A3A3, theme-safe).
      On hover the top corners round into a circular arch. Movement, so
@@ -730,7 +888,9 @@ const cr = Math.floor(ci / 3);
   .aorigins-col[data-reveal],
   .ateam-bio[data-reveal],
   .ateam-label[data-reveal],
-  .ateam-portrait[data-reveal] {
+  .ateam-portrait[data-reveal],
+  .atest-label[data-reveal],
+  .atest-body[data-reveal] {
     clip-path: inset(100% 0 0 0);
   }
   .aorigins-caption[data-reveal],
@@ -858,6 +1018,29 @@ const cr = Math.floor(ci / 3);
     .ateam-vacancy-link {
       grid-column: auto;
     }
+    .atest {
+      padding-block: 28px;
+    }
+    .atest-head,
+    .atest-slide {
+      grid-template-columns: 1fr;
+      row-gap: 24px;
+    }
+    .atest-head {
+      grid-template-columns: 1fr auto; /* label left, counter right */
+      align-items: baseline;
+      margin-bottom: 24px;
+    }
+    .atest-fig {
+      width: min(200px, 55%);
+    }
+    .atest-quote {
+      font-size: 20px;
+      line-height: 1.4;
+    }
+    .atest-body {
+      gap: 28px;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -877,7 +1060,9 @@ const cr = Math.floor(ci / 3);
     .aorigins-col[data-reveal],
     .ateam-bio[data-reveal],
     .ateam-label[data-reveal],
-    .ateam-portrait[data-reveal] {
+    .ateam-portrait[data-reveal],
+    .atest-label[data-reveal],
+    .atest-body[data-reveal] {
       clip-path: none;
     }
     .aorigins-caption[data-reveal],

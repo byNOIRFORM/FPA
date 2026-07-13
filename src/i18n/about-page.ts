@@ -36,6 +36,13 @@ export interface AboutPageCopy {
      *  frame linking to Kariéra (same profesia.sk URL as the footer). */
     careers: { name: string; role: string };
   };
+  /** "Čo hovoria naši klienti" — drag/snap testimonial carousel closing
+   *  the page (Figma 3407:2…22). Photos are the clients' PROJECTS (not
+   *  faces — agreed 2026-07-13), lang-agnostic in AboutPage.astro. */
+  testimonials: {
+    label: string;
+    items: { quote: string; name: string; role: string }[];
+  };
 }
 
 export const aboutPage: Record<Lang, AboutPageCopy> = {
@@ -117,6 +124,41 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
       ],
       careers: { name: "Voľné miesto", role: "Možno práve vy" },
     },
+    testimonials: {
+      label: "Čo hovoria naši klienti:",
+      items: [
+        {
+          quote:
+            "Tomáš a Dominik mi robili projekt domu. Vždy si na mňa našli čas, odborne odpovedali na moje otázky a prípadne ma usmernili. Projekt domu odovzdali vo veľmi vysokej kvalite. Tým však naša spolupráca neskončila, keďže stavbu navštevovali počas výstavby v rámci kontroly postupu prác. Moja osobná skúsenosť bola veľmi dobrá, vrelo odporúčam!",
+          name: "Jozef Marcin",
+          role: "Majiteľ domu",
+        },
+        {
+          quote:
+            "Profesionálny prístup od prvej konzultácie až po kolaudáciu. Nič nebolo problém. Odporúčam každému, kto to so stavbou myslí vážne.",
+          name: "Martin Vaľko",
+          role: "Majiteľ rodinného domu",
+        },
+        {
+          quote:
+            "S ateliérom sme prerábali starší dom a báli sme sa, že sa v tom stratíme. Opak bol pravdou – všetko nám vysvetlili ľudsky, bez zbytočných odborných rečí, a výsledok predčil naše očakávania. Dom konečne funguje tak, ako naša rodina žije.",
+          name: "Zuzana Vargová",
+          role: "Rekonštrukcia rodinného domu",
+        },
+        {
+          quote:
+            "Pre našu firmu navrhli administratívnu budovu so skladom. Ocenil som najmä to, ako dokázali skĺbiť naše prevádzkové požiadavky s architektúrou, za ktorú sa nemusíme hanbiť. Rozpočet aj termíny sa dodržali, komunikácia bola vecná a rýchla. Už teraz s nimi riešime ďalšiu etapu areálu.",
+          name: "Ing. Marek Šimko",
+          role: "Konateľ spoločnosti",
+        },
+        {
+          quote:
+            "Kúpili sme pozemok vo svahu, z ktorého mali iní architekti rešpekt. Fotta Popadič z neho spravili najsilnejšiu stránku domu. Terasa s výhľadom, na ktorej sedíme každý večer, je ich zásluha.",
+          name: "Lenka Kravcová",
+          role: "Majiteľka domu",
+        },
+      ],
+    },
   },
   cz: {
     metaTitle: "O nás — Fotta Popadič",
@@ -196,6 +238,41 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
       ],
       careers: { name: "Volné místo", role: "Možná právě vy" },
     },
+    testimonials: {
+      label: "Co říkají naši klienti:",
+      items: [
+        {
+          quote:
+            "Tomáš a Dominik mi dělali projekt domu. Vždy si na mě našli čas, odborně odpověděli na mé otázky a případně mě usměrnili. Projekt domu odevzdali ve velmi vysoké kvalitě. Tím však naše spolupráce neskončila, protože stavbu navštěvovali během výstavby v rámci kontroly postupu prací. Moje osobní zkušenost byla velmi dobrá, vřele doporučuji!",
+          name: "Jozef Marcin",
+          role: "Majitel domu",
+        },
+        {
+          quote:
+            "Profesionální přístup od první konzultace až po kolaudaci. Nic nebylo problém. Doporučuji každému, kdo to se stavbou myslí vážně.",
+          name: "Martin Vaľko",
+          role: "Majitel rodinného domu",
+        },
+        {
+          quote:
+            "S ateliérem jsme předělávali starší dům a báli jsme se, že se v tom ztratíme. Opak byl pravdou – všechno nám vysvětlili lidsky, bez zbytečných odborných řečí, a výsledek předčil naše očekávání. Dům konečně funguje tak, jak naše rodina žije.",
+          name: "Zuzana Vargová",
+          role: "Rekonstrukce rodinného domu",
+        },
+        {
+          quote:
+            "Pro naši firmu navrhli administrativní budovu se skladem. Ocenil jsem především to, jak dokázali skloubit naše provozní požadavky s architekturou, za kterou se nemusíme stydět. Rozpočet i termíny se dodržely, komunikace byla věcná a rychlá. Už teď s nimi řešíme další etapu areálu.",
+          name: "Ing. Marek Šimko",
+          role: "Jednatel společnosti",
+        },
+        {
+          quote:
+            "Koupili jsme pozemek ve svahu, ze kterého měli jiní architekti respekt. Fotta Popadič z něj udělali nejsilnější stránku domu. Terasa s výhledem, na které sedíme každý večer, je jejich zásluha.",
+          name: "Lenka Kravcová",
+          role: "Majitelka domu",
+        },
+      ],
+    },
   },
   en: {
     metaTitle: "About us — Fotta Popadič",
@@ -274,6 +351,41 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         { name: "Ing. Katarína Onuferová", role: "Civil engineer" },
       ],
       careers: { name: "Open position", role: "Maybe it's you" },
+    },
+    testimonials: {
+      label: "What our clients say:",
+      items: [
+        {
+          quote:
+            "Tomáš and Dominik designed our house. They always found time for me, answered my questions with real expertise and steered me in the right direction when needed. The design was delivered in excellent quality — and our cooperation did not end there, as they kept visiting the site during construction to check on the progress of the works. My personal experience was very good, I warmly recommend them!",
+          name: "Jozef Marcin",
+          role: "Homeowner",
+        },
+        {
+          quote:
+            "A professional approach from the first consultation to the final sign-off. Nothing was ever a problem. I recommend them to anyone who is serious about building.",
+          name: "Martin Vaľko",
+          role: "Family house owner",
+        },
+        {
+          quote:
+            "We renovated an older house with the studio and were afraid we would get lost in the process. The opposite was true – they explained everything in plain human terms, without unnecessary jargon, and the result exceeded our expectations. The house finally works the way our family lives.",
+          name: "Zuzana Vargová",
+          role: "Family house renovation",
+        },
+        {
+          quote:
+            "They designed an office building with a warehouse for our company. What I valued most was how they combined our operational requirements with architecture we can be proud of. Budget and deadlines were kept, communication was quick and to the point. We are already working with them on the next phase of the site.",
+          name: "Ing. Marek Šimko",
+          role: "Company director",
+        },
+        {
+          quote:
+            "We bought a sloped plot that other architects were wary of. Fotta Popadič turned it into the strongest feature of the house. The terrace with a view, where we sit every evening, is their doing.",
+          name: "Lenka Kravcová",
+          role: "Homeowner",
+        },
+      ],
     },
   },
 };

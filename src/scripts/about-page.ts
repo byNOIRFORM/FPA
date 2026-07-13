@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 // ScrollTrigger is registered globally in gsap-setup.ts — referencing
 // `scrollTrigger` in a tween config picks it up.
+import { attachDragCursor } from "./drag-gallery";
 
 /**
  * /o-nas page motion — everything reuses the site's motion language 1:1:
@@ -21,8 +22,14 @@ import { gsap } from "gsap";
  *  4. TEAM GRID — rows curtain in reading order like the story rows;
  *     the hover portrait swap is pure CSS (AboutPage.astro); portraits
  *     drift with the same halved ±4 inner parallax as Pavol/duo.
+ *  5. TESTIMONIALS — in-place swap: the drag gesture (pointer delta,
+ *     layout never slides) dissolves the current slide and rises the
+ *     next; the 01/05 counter flips with the masked-rise motion; arrow
+ *     keys page when the section is focused. The "Ťahajte" cursor comes
+ *     from attachDragCursor (drag-gallery.ts). No auto-rotation, ever.
  *
- * Reduced motion: everything snaps to its final state.
+ * Reduced motion: everything snaps to its final state (drag still
+ * works, snap settles instantly).
  */
 export function initAboutPage(): void {
   if (typeof window === "undefined") return;
@@ -92,6 +99,118 @@ export function initAboutPage(): void {
     vacancy.addEventListener("pointerleave", () => cursor.classList.remove("is-view"));
   }
 
+  // ===== TESTIMONIALS — in-place swap (the hildenkaira pattern): the
+  // layout never slides; the drag GESTURE (or swipe/arrow keys) fades
+  // the current slide out and rises the next one in, and the 01/05
+  // counter flips with the site's masked-rise motion. No auto-rotation
+  // — reading happens at the reader's pace.
+  const test = root.querySelector<HTMLElement>(".atest");
+  if (test) {
+    const stack = test.querySelector<HTMLElement>("[data-testimonials-stack]");
+    const counterEl = test.querySelector<HTMLElement>("[data-testimonial-current]");
+    const slides = stack ? Array.from(stack.children).filter((c): c is HTMLElement => c instanceof HTMLElement) : [];
+    const count = slides.length;
+    const cursorApi = stack ? attachDragCursor(test) : null;
+    // The carousel LOOPS (5 → 1 → 5…), so both directions are always
+    // available — chevrons stay on permanently.
+    cursorApi?.setDirections(count > 1, count > 1);
+
+    let current = 0;
+    let counterTl: gsap.core.Timeline | null = null;
+
+    const flipCounter = (label: string) => {
+      if (!counterEl) return;
+      if (reduced) {
+        counterEl.textContent = label;
+        return;
+      }
+      // Old digit slides up out of the mask, the new one rises in — the
+      // word-mask move every reveal on the site uses.
+      counterTl?.kill();
+      counterTl = gsap.timeline();
+      counterTl
+        .to(counterEl, { yPercent: -110, duration: 0.25, ease: "power2.in" })
+        .add(() => {
+          counterEl.textContent = label;
+        })
+        .fromTo(
+          counterEl,
+          { yPercent: 110 },
+          { yPercent: 0, duration: 0.5, ease: "expo.out" },
+        );
+    };
+
+    const setIndex = (next: number) => {
+      const i = ((next % count) + count) % count; // wraps both ways (loop)
+      if (i === current || count < 2) return;
+      const out = slides[current];
+      const inn = slides[i];
+      current = i;
+
+      flipCounter(String(i + 1).padStart(2, "0"));
+      out.setAttribute("aria-hidden", "true");
+      inn.removeAttribute("aria-hidden");
+
+      gsap.killTweensOf([out, inn]);
+      if (reduced) {
+        gsap.set(out, { autoAlpha: 0 });
+        gsap.set(inn, { autoAlpha: 1, y: 0 });
+        return;
+      }
+      // Outgoing dissolves, incoming rises gently into place — one calm
+      // motion, nothing slides sideways.
+      gsap.to(out, { autoAlpha: 0, duration: 0.35, ease: "power2.inOut" });
+      gsap.fromTo(
+        inn,
+        { autoAlpha: 0, y: 28 },
+        { autoAlpha: 1, y: 0, duration: 0.8, ease: "expo.out", delay: 0.15 },
+      );
+    };
+
+    // The drag gesture — pointer delta only, the layout itself never
+    // moves. Horizontal intent wins over vertical (touch keeps native
+    // scrolling via touch-action: pan-y).
+    if (stack) {
+      let startX = 0;
+      let startY = 0;
+      let pressed = false;
+      stack.addEventListener("pointerdown", (e: PointerEvent) => {
+        pressed = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        stack.classList.add("is-dragging");
+        cursorApi?.press();
+      });
+      const settle = (e: PointerEvent, fire: boolean) => {
+        if (!pressed) return;
+        pressed = false;
+        stack.classList.remove("is-dragging");
+        cursorApi?.release();
+        if (!fire) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+          setIndex(dx < 0 ? current + 1 : current - 1);
+        }
+      };
+      window.addEventListener("pointerup", (e) => settle(e, true));
+      window.addEventListener("pointercancel", (e) => settle(e, false));
+    }
+
+    // Keyboard navigation — arrows page through slides once the section
+    // is focused (tabindex="0" in the markup); scroll keys stay untouched
+    // elsewhere on the page.
+    test.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        setIndex(current + 1);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        setIndex(current - 1);
+      }
+    });
+  }
+
   // ===== 3. SCROLL REVEALS — origins/team texts + every photo =====
   if (reduced) {
     root.querySelectorAll("[data-reveal]").forEach((el) => el.removeAttribute("data-reveal"));
@@ -136,12 +255,12 @@ export function initAboutPage(): void {
     immediateRender: false,
   };
 
-  // "Náš tím" label — own trigger. On mobile the Pavol/duo bios reveal
-  // standalone here too (the section sequences below are desktop-only,
-  // same reasoning as the story rows).
+  // "Náš tím" label + testimonial label/body — own triggers. On mobile
+  // the Pavol/duo bios reveal standalone here too (the section sequences
+  // below are desktop-only, same reasoning as the story rows).
   const soloTeamTexts = desktop
-    ? ".ateam-label[data-reveal]"
-    : ".ateam-label[data-reveal], .ateam-bio[data-reveal]";
+    ? ".ateam-label[data-reveal], .atest-label[data-reveal], .atest-body[data-reveal]"
+    : ".ateam-label[data-reveal], .atest-label[data-reveal], .atest-body[data-reveal], .ateam-bio[data-reveal]";
   root.querySelectorAll<HTMLElement>(soloTeamTexts).forEach((el) => {
     gsap.fromTo(el, teamTextFrom, {
       ...teamTextTo,
@@ -272,7 +391,7 @@ export function initAboutPage(): void {
   root
     .querySelectorAll<HTMLElement>(".amedia img, .ateam-portrait img")
     .forEach((img) => {
-      const amp = img.closest(".ateam-fig, .ateam-portrait") ? 4 : 8;
+      const amp = img.closest(".ateam-fig, .ateam-portrait, .atest-fig") ? 4 : 8;
       gsap.fromTo(
         img,
         { yPercent: amp - 9.0164 },
