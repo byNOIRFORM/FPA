@@ -81,6 +81,17 @@ export function initAboutPage(): void {
   scrubIntro(root.querySelector<HTMLElement>(".aintro"));
   scrubIntro(root.querySelector<HTMLElement>(".ateam-intro"));
 
+  // ===== VACANCY TILE CURSOR — the careers frame is a link, so the
+  // global cursor enters its "POZRIEŤ" state over it, the same
+  // affordance as the project tiles (works.ts). Pointer devices only;
+  // independent of reduced motion (it's an affordance, not an effect).
+  const vacancy = root.querySelector<HTMLElement>(".ateam-vacancy-link");
+  const cursor = document.getElementById("cursor");
+  if (vacancy && cursor && window.matchMedia("(hover: hover)").matches) {
+    vacancy.addEventListener("pointerenter", () => cursor.classList.add("is-view"));
+    vacancy.addEventListener("pointerleave", () => cursor.classList.remove("is-view"));
+  }
+
   // ===== 3. SCROLL REVEALS — origins/team texts + every photo =====
   if (reduced) {
     root.querySelectorAll("[data-reveal]").forEach((el) => el.removeAttribute("data-reveal"));

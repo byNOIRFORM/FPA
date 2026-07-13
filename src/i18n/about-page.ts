@@ -32,6 +32,9 @@ export interface AboutPageCopy {
     duo: { bio: string[]; members: { name: string; role: string }[] };
     galleryLabel: string;
     members: { name: string; role: string }[];
+    /** The "open position" tile that closes the grid — an outlined empty
+     *  frame linking to Kariéra (same profesia.sk URL as the footer). */
+    careers: { name: string; role: string };
   };
 }
 
@@ -112,6 +115,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         { name: "Ing. Peter Hudák", role: "Statik" },
         { name: "Ing. Katarína Onuferová", role: "Stavebná inžinierka" },
       ],
+      careers: { name: "Voľné miesto", role: "Možno práve vy" },
     },
   },
   cz: {
@@ -190,6 +194,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         { name: "Ing. Peter Hudák", role: "Statik" },
         { name: "Ing. Katarína Onuferová", role: "Stavební inženýrka" },
       ],
+      careers: { name: "Volné místo", role: "Možná právě vy" },
     },
   },
   en: {
@@ -268,6 +273,7 @@ export const aboutPage: Record<Lang, AboutPageCopy> = {
         { name: "Ing. Peter Hudák", role: "Structural engineer" },
         { name: "Ing. Katarína Onuferová", role: "Civil engineer" },
       ],
+      careers: { name: "Open position", role: "Maybe it's you" },
     },
   },
 };
