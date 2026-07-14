@@ -37,13 +37,13 @@ const DAMPING = 0.88;
 // pool — in keeping with the brief's "not loud".
 const COUPLING = 0.14;
 
-// ── Audio: a soft plucked-string voice (Karplus–Strong synthesis). Native
+// ── Audio: a soft harp voice (Karplus–Strong plucked-string synthesis). Native
 // Web Audio, zero assets — the notes are generated, not loaded. The context
 // only wakes on activation, so it costs nothing until the egg is opened.
 // Kept deliberately quiet: "It isn't loud. But it resonates."
 const MASTER_GAIN = 0.12; // overall level — intentionally low
-const ROOT_HZ = 130.81; // C3 — a warm mid, not tinkly
-const PLUCK_SECONDS = 0.7; // per-note buffer length (natural KS decay)
+const ROOT_HZ = 261.63; // C4 — harp register: clear and airy, still not tinkly
+const PLUCK_SECONDS = 1.2; // per-note buffer length (harp strings ring longer)
 const TRIGGER_ON = 0.55; // cursor must genuinely cross a line to sound it
 const TRIGGER_OFF = 0.15; // and leave it before it can ring again (hysteresis)
 const VARIANTS = 2; // pre-rendered takes per note — no two plucks identical
@@ -64,7 +64,18 @@ function makePluckBuffer(
   const out = buffer.getChannelData(0);
   const line = new Float32Array(n);
   for (let i = 0; i < n; i++) line[i] = Math.random() * 2 - 1; // pluck = noise
-  const damp = 0.994; // ~1 rings longer; lower = shorter, duller
+  // Harp, not guitar: the string is set off by a fingertip, not a pick.
+  // Two passes of a two-point average lowpass the noise burst, so the
+  // attack comes out round instead of twangy.
+  for (let pass = 0; pass < 2; pass++) {
+    let prev = line[n - 1];
+    for (let i = 0; i < n; i++) {
+      const cur = line[i];
+      line[i] = 0.5 * (cur + prev);
+      prev = cur;
+    }
+  }
+  const damp = 0.997; // ~1 rings longer; lower = shorter, duller
   let idx = 0;
   for (let i = 0; i < len; i++) {
     out[i] = line[idx];
@@ -75,7 +86,7 @@ function makePluckBuffer(
   // Fade the tail so the note ends like a muted string, not a tape cut —
   // at these damp values the loop still carries amplitude when the buffer
   // runs out, and a hard truncation would click.
-  const fade = Math.min(len, Math.floor(sr * 0.15));
+  const fade = Math.min(len, Math.floor(sr * 0.35));
   for (let i = 0; i < fade; i++) {
     out[len - 1 - i] *= i / fade;
   }
@@ -179,7 +190,7 @@ export function initGridReveal(): void {
     masterGain.gain.value = MASTER_GAIN;
     const lp = audioCtx.createBiquadFilter();
     lp.type = "lowpass";
-    lp.frequency.value = 2600; // shave the harsh edge → warm, woody string
+    lp.frequency.value = 4200; // keep the airy top — glassy harp, not woody guitar
     masterGain.connect(lp);
     lp.connect(audioCtx.destination);
     const freqs = buildPentatonic(paths.length, ROOT_HZ);
