@@ -70,7 +70,7 @@ export const servicesPage: Record<Lang, ServicesPageContent> = {
     manifest:
       "Projekt pre nás nekončí odovzdaním výkresov. Sprevádzame vás od prvej skice až po moment, kedy otočíte kľúč v zámku. Strážime každý krok, aby mal hotový dom presne tú atmosféru, ktorú sme spoločne vymysleli.",
     stages: {
-      title: "Fázy projektu a rozsah naších služieb",
+      title: "Fázy projektu a rozsah našich služieb",
       alt: "Atelier Fotta // Popadič — pohľad z ulice",
     },
     spec: {
