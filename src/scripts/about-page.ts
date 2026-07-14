@@ -385,8 +385,6 @@ export function initAboutPage(): void {
   // calibration as the homepage Works grid — except the small portrait
   // frames (Pavol, Dominik, Tomáš + the team grid): the full drift read
   // too strong there (client feedback) and they get half the amplitude.
-  // Grid tiles stack TWO faces (default + hover); both get the identical
-  // tween on the same trigger, so the crossfade stays pixel-aligned.
   // Skipped entirely under reduced motion (early return above).
   root
     .querySelectorAll<HTMLElement>(".amedia img, .ateam-portrait img")

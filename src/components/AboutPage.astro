@@ -39,19 +39,19 @@ const teamIntroWords = t.team.intro.split(" ");
 // matches t.team.duo.members (Dominik left, Tomáš right).
 const duoImages = ["/images/about/dominik.jpg", "/images/about/tomas.jpg"];
 
-// Team grid (Figma oNás_V2 3393:216) — [default, hover] portrait pair per
-// member in t.team.members order. A `null` renders the dark placeholder
-// tile (the CMS case "member added before the photoshoot" — currently
-// unused, everyone has photos).
-const memberImages: ([string, string] | null)[] = [
-  ["/images/about/team-1.jpg", "/images/about/team-1b.jpg"],
-  ["/images/about/team-2.jpg", "/images/about/team-2b.jpg"],
-  ["/images/about/team-3.jpg", "/images/about/team-3b.jpg"],
-  ["/images/about/team-4.jpg", "/images/about/team-4b.jpg"],
-  ["/images/about/team-5.jpg", "/images/about/team-5b.jpg"],
-  ["/images/about/team-6.jpg", "/images/about/team-6b.jpg"],
-  ["/images/about/team-7.jpg", "/images/about/team-7b.jpg"],
-  ["/images/about/team-8.jpg", "/images/about/team-8b.jpg"],
+// Team grid (Figma oNás_V2 3393:216) — ONE portrait per member in
+// t.team.members order (the hover second-portrait treatment was removed
+// 2026-07-14). A `null` renders the dark placeholder tile (the CMS case
+// "member added before the photoshoot").
+const memberImages: (string | null)[] = [
+  "/images/about/team-1.jpg",
+  "/images/about/team-2.jpg",
+  "/images/about/team-3.jpg",
+  "/images/about/team-4.jpg",
+  "/images/about/team-5.jpg",
+  "/images/about/team-6.jpg",
+  "/images/about/team-7.jpg",
+  "/images/about/team-8.jpg",
 ];
 
 // Rows of three in a 4-column raster; the empty cell alternates — odd rows
@@ -63,7 +63,7 @@ const teamCols = [
 type TeamTile = {
   name: string;
   role: string;
-  images: [string, string] | null;
+  image: string | null;
   col: number;
   careers?: boolean;
 };
@@ -72,7 +72,7 @@ t.team.members.forEach((m, i) => {
   const r = Math.floor(i / 3);
   (memberRows[r] ??= []).push({
     ...m,
-    images: memberImages[i] ?? null,
+    image: memberImages[i] ?? null,
     col: teamCols[r % 2][i % 3],
   });
 });
@@ -85,7 +85,7 @@ const ci = t.team.members.length;
 const cr = Math.floor(ci / 3);
 (memberRows[cr] ??= []).push({
   ...t.team.careers,
-  images: null,
+  image: null,
   col: teamCols[cr % 2][ci % 3],
   careers: true,
 });
@@ -265,13 +265,17 @@ const dragLabel = projectsUI[lang].dragLabel;
   {/* ===== NÁŠ TÍM — editorial grid (Figma oNás_V2 3393:216): rows of
       three in a 4-column raster, the empty cell alternating (odd rows
       skip col 3, even rows col 2). Everyone is visible at once — no one
-      hides behind a drag. Hover crossfades to each member's second
-      portrait; a member without a photo yet gets the dark placeholder
-      tile. ===== */}
+      hides behind a drag. One STATIC portrait per member (the hover
+      second-portrait crossfade was removed 2026-07-14, Michal); a member
+      without a photo gets the dark placeholder tile. Only ROW 1 gets the
+      scroll reveal (`data-reveal` is conditional) — the Works pattern;
+      the roster will grow and every row animating read as too much
+      (Michal, 2026-07-14). Later rows render visible, parallax stays
+      on every photo. ===== */}
   <section class="ateam-grid-sec" aria-label={t.team.galleryLabel}>
     <div class="awrap">
       <h2 class="ateam-label" data-reveal>{t.team.galleryLabel}</h2>
-      {memberRows.map((row) => (
+      {memberRows.map((row, ri) => (
         <div class="ateam-grid-row">
           {row.map((m) =>
             m.careers ? (
@@ -283,8 +287,11 @@ const dragLabel = projectsUI[lang].dragLabel;
                 rel="noopener"
               >
                 <figure class="ateam-member">
-                  <div class="ateam-portrait ateam-portrait--vacancy" data-reveal></div>
-                  <figcaption class="ateam-info" data-reveal>
+                  <div
+                    class="ateam-portrait ateam-portrait--vacancy"
+                    data-reveal={ri === 0 || undefined}
+                  ></div>
+                  <figcaption class="ateam-info" data-reveal={ri === 0 || undefined}>
                     <span class="ateam-name">{m.name}</span>
                     <span class="ateam-role">{m.role}</span>
                   </figcaption>
@@ -292,21 +299,17 @@ const dragLabel = projectsUI[lang].dragLabel;
               </a>
             ) : (
               <figure class="ateam-member" style={`--tcol: ${m.col}`}>
-                {m.images ? (
-                  <div class="ateam-portrait" data-reveal>
-                    <img class="ateam-face" src={m.images[0]} alt={m.name} loading="lazy" />
-                    <img
-                      class="ateam-face ateam-face--hover"
-                      src={m.images[1]}
-                      alt=""
-                      loading="lazy"
-                      aria-hidden="true"
-                    />
+                {m.image ? (
+                  <div class="ateam-portrait" data-reveal={ri === 0 || undefined}>
+                    <img class="ateam-face" src={m.image} alt={m.name} loading="lazy" />
                   </div>
                 ) : (
-                  <div class="ateam-portrait ateam-portrait--empty" data-reveal></div>
+                  <div
+                    class="ateam-portrait ateam-portrait--empty"
+                    data-reveal={ri === 0 || undefined}
+                  ></div>
                 )}
-                <figcaption class="ateam-info" data-reveal>
+                <figcaption class="ateam-info" data-reveal={ri === 0 || undefined}>
                   <span class="ateam-name">{m.name}</span>
                   <span class="ateam-role">{m.role}</span>
                 </figcaption>
@@ -736,18 +739,6 @@ const dragLabel = projectsUI[lang].dragLabel;
     height: 122%;
     object-fit: cover;
     display: block;
-  }
-  /* The second portrait sits on top and dissolves in on hover — one
-     subtle motion, nothing else moves. A long, soft symmetric curve:
-     photo-to-photo crossfades only start feeling calm and "filmic"
-     around a second (expo.out was tried and read abrupt — its change
-     front-loads; client feedback 2026-07-12). */
-  .ateam-face--hover {
-    opacity: 0;
-    transition: opacity 700ms var(--ease-in-out);
-  }
-  .ateam-member:hover .ateam-face--hover {
-    opacity: 1;
   }
   /* Member without a photo yet (added via CMS before the photoshoot) —
      the Figma dark tile. Fixed #333 works over both themes: a dark card

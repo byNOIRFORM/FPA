@@ -24,7 +24,7 @@ export interface AboutPageCopy {
   story: { alt: string; caption: string }[];
   /** Team block (Figma "Sekcia 4" → "Náš tím" editorial grid, oNás_V2
    *  3393:216). Images are lang-agnostic and live in AboutPage.astro;
-   *  `members` order matches the grid photos team-1…team-7 reading-order
+   *  `members` order matches the grid photos team-1…team-8 reading-order
    *  (a member may have no photo yet → dark placeholder tile). */
   team: {
     intro: string; // second big word-scrub sentence
