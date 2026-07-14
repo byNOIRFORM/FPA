@@ -258,13 +258,16 @@ const mapsKosice =
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: 2464px;
-    margin: 0 auto;
     /* py-top: 80 at 1440 — matches Works / Services / Leaders for
        consistent rhythm against Figma reference.
-       Horizontal gutter matches all other sections.
        Bottom 28 at 1440 — Figma footer-links sit at bottom-28. */
-    padding: clamp(48px, 5.55vw, 80px) clamp(16px, 2vw, 48px) clamp(20px, 1.94vw, 36px);
+    padding-block: clamp(48px, 5.55vw, 80px) clamp(20px, 1.94vw, 36px);
+    /* Full-bleed box: no 2464 cap on the section itself, so the hover
+       photo (.footer-media, inset: 0) reaches the viewport edges on
+       screens wider than the canvas. The CONTENT stays on the shared
+       2464 canvas regardless — above 2464 the inline gutter grows by
+       exactly the strip the old centered max-width used to absorb. */
+    padding-inline: max(clamp(16px, 2vw, 48px), calc((100% - 2464px) / 2 + 48px));
     background: var(--bg);
     /* Themeable foreground — defaults to the normal ink colours.
        Every footer text element reads its colour from these two
