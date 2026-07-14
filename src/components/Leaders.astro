@@ -164,8 +164,11 @@ const manifestWords = t.leaders.manifest.split(" ");
     letter-spacing: 0.02em;
     color: var(--ink);
     text-align: left;
+    /* No own max-width — fills the padded wrapper (1384 at the 1440
+       baseline) so it keeps the same proportion on 2560 screens,
+       exactly like the About page's .ateam-lede. A fixed 1384 cap
+       left the text stranded in a narrow left column there. */
     width: 100%;
-    max-width: 1384px;
     margin: 0;
     text-indent: 3em;
   }

@@ -144,12 +144,16 @@ const titleWords = t.intro.title.split(" ");
     font-family: var(--font-sans);
     font-weight: 500;
     font-style: normal;
-    font-size: clamp(28px, 3.33vw, 48px);
+    /* Mirrors the home About headline exactly: 48 at 1440 → 72 at
+       2160+, width 1150 at 1440 → ~80% of the viewport above it.
+       Fixed px caps here made this band visibly smaller than the
+       home headline on 2560 screens. */
+    font-size: clamp(28px, 3.33vw, 72px);
     line-height: 1.25;
     letter-spacing: -0.01em;
     color: var(--ink);
     text-align: center;
-    max-width: 1150px;
+    max-width: clamp(800px, 79.86vw, 2046px);
     margin: 0;
   }
 

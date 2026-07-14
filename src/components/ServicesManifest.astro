@@ -43,8 +43,10 @@ const words = servicesPage[lang].manifest.split(" ");
   }
 
   /* ===== Manifest text — mirrors .leaders-manifest exactly =====
-     Left-aligned, capped at 1384, first line indented (the editorial
-     opening for "Zastrešujeme"). 3em ≈ 144px at the 48px baseline. */
+     Left-aligned, fills the padded wrapper (1384 at the 1440 baseline,
+     keeps proportion on larger screens), first line indented (the
+     editorial opening for "Zastrešujeme"). 3em ≈ 144px at the 48px
+     baseline. */
   .smanifest-text {
     font-family: var(--font-sans);
     font-weight: 500;
@@ -55,7 +57,6 @@ const words = servicesPage[lang].manifest.split(" ");
     color: var(--ink);
     text-align: left;
     width: 100%;
-    max-width: 1384px;
     margin: 0;
     text-indent: 3em;
   }
