@@ -221,11 +221,48 @@ function initCursor(): void {
   let rx = mx;
   let ry = my;
 
+  // Cross-page handoff. An MPA navigation forgets the pointer, and the
+  // ring can't know where the mouse is until the first mousemove — so
+  // on arrival it used to sit in the top-left corner and then fly
+  // across the screen once the mouse moved (visible jump between
+  // pages). Instead: the outgoing page stores the last pointer position
+  // on pagehide, the next page plants the ring there immediately, and
+  // the CSS keeps .cursor invisible until a real position is known
+  // (.is-active) — the cursor reads as persisting across navigations.
+  const POS_KEY = "fpa:cursor";
+  let placed = false;
+  const place = (x: number, y: number) => {
+    mx = sx = rx = x;
+    my = sy = ry = y;
+    square.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    ring.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    cursor.classList.add("is-active");
+    placed = true;
+  };
+  try {
+    const saved = sessionStorage.getItem(POS_KEY);
+    if (saved) {
+      const p = JSON.parse(saved) as { x: number; y: number };
+      if (Number.isFinite(p.x) && Number.isFinite(p.y)) place(p.x, p.y);
+    }
+  } catch {
+    /* Storage unavailable (private mode) — the ring shows on first move. */
+  }
+  window.addEventListener("pagehide", () => {
+    if (!placed) return;
+    try {
+      sessionStorage.setItem(POS_KEY, JSON.stringify({ x: mx, y: my }));
+    } catch {
+      /* best effort */
+    }
+  });
+
   window.addEventListener(
     "mousemove",
     (e) => {
       mx = e.clientX;
       my = e.clientY;
+      if (!placed) place(mx, my);
     },
     { passive: true },
   );

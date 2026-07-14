@@ -134,6 +134,15 @@ ol {
   z-index: 9999;
   pointer-events: none;
   mix-blend-mode: difference;
+  /* Hidden until hero.ts knows the real pointer position (the cross-page
+     handoff in sessionStorage, or the first mousemove) — otherwise the
+     ring flashes at the top-left corner on every fresh document. NO
+     transition on purpose: the reveal must be instant so the cursor
+     reads as persisting across page loads. */
+  opacity: 0;
+}
+.cursor.is-active {
+  opacity: 1;
 }
 
 .cursor-square,
