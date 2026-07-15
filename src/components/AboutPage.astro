@@ -90,17 +90,20 @@ const cr = Math.floor(ci / 3);
   careers: true,
 });
 
-// Testimonials — the photo shows the client's PROJECT, not their face
-// (real clients write reviews, they don't send portraits). ref-1 is the
-// Figma placeholder; the rest are project shots for now — when the
-// client maps reviews to real projects, these swap 1:1 (and can then
-// deep-link to the project details).
-const testimonialImages = [
-  "/images/about/ref-1.jpg",
-  "/images/works/work-2.jpg",
-  "/images/works/work-3.jpg",
-  "/images/works/work-4.jpg",
-  "/images/works/work-5.jpg",
+// Testimonials — the slide image is OPTIONAL (the fluid.glass pattern,
+// Michal 2026-07-15): a CLIENT PORTRAIT renders when the client supplied
+// one (with consent); `null` renders a clean text-only pull-quote slide
+// and nothing shifts (the quote is pinned to its grid column). Current
+// mix (3 with / 2 without, Michal 2026-07-15): placeholder portraits sit
+// on the INVENTED personas only — Jozef Marcin is a real reviewer, so he
+// stays photo-less until his real photo (+consent) arrives. CMS-ready:
+// maps 1:1 to an optional Sanity image field.
+const testimonialImages: (string | null)[] = [
+  null, // Jozef Marcin — real person, no placeholder face
+  "/images/about/ref-valko.jpg",
+  "/images/about/ref-vargova.jpg",
+  "/images/about/ref-simko.jpg",
+  null, // Lenka Kravcová — the text-only variant stays exercised
 ];
 const testimonialCount = String(t.testimonials.items.length).padStart(2, "0");
 const dragLabel = projectsUI[lang].dragLabel;
@@ -343,11 +346,13 @@ const dragLabel = projectsUI[lang].dragLabel;
       <div class="atest-stack" data-testimonials-stack>
         {t.testimonials.items.map((item, i) => (
           <article class="atest-slide" aria-hidden={i === 0 ? undefined : "true"}>
-            <figure class="atest-fig">
-              <div class="amedia" data-reveal style="aspect-ratio: 211 / 302">
-                <img src={testimonialImages[i]} alt="" loading="lazy" draggable="false" />
-              </div>
-            </figure>
+            {testimonialImages[i] && (
+              <figure class="atest-fig">
+                <div class="amedia" data-reveal style="aspect-ratio: 211 / 302">
+                  <img src={testimonialImages[i]} alt="" loading="lazy" draggable="false" />
+                </div>
+              </figure>
+            )}
             <div class="atest-body" data-reveal>
               <blockquote class="atest-quote">“&nbsp;&nbsp;{item.quote}</blockquote>
               <div class="ateam-info">
@@ -819,7 +824,23 @@ const dragLabel = projectsUI[lang].dragLabel;
     visibility: hidden;
   }
   .atest-fig {
+    grid-column: 1;
     margin: 0;
+  }
+  /* ONE raster column, not two (Michal 2026-07-15): 93.5px at the 1440
+     baseline (= (211 − 24 gutter) / 2, i.e. half the label column) — the
+     editorial byline scale. Faces still read at this size and average
+     client-supplied photos survive it. px-clamp instead of % because a
+     percentage of the 15.25% grid column collapses below legibility on
+     tablet widths; the floor keeps the face readable there. */
+  .atest-fig .amedia {
+    width: clamp(72px, 6.49vw, 160px);
+    /* Figma 3393-2: the photo sits in the SECOND raster column of the
+       label column (one column in from the left edge, Michal
+       2026-07-15). Right-aligning inside the fig lands exactly there —
+       the label column is two raster columns wide, so its right edge IS
+       the second column's right edge, at every viewport. */
+    margin-left: auto;
   }
   .atest-quote {
     font-family: var(--font-sans);
@@ -829,7 +850,11 @@ const dragLabel = projectsUI[lang].dragLabel;
     color: var(--ink);
     margin: 0;
   }
+  /* The quote is PINNED to column 2: a photo-less slide (client sent no
+     portrait — the optional-image pattern) must read as a pull-quote in
+     place, not slide left into the photo column. */
   .atest-body {
+    grid-column: 2;
     display: flex;
     flex-direction: column;
     gap: clamp(28px, 3.33vw, 72px); /* 48 @1440 quote → name */
@@ -1016,6 +1041,19 @@ const dragLabel = projectsUI[lang].dragLabel;
     .atest-slide {
       grid-template-columns: 1fr;
       row-gap: 24px;
+    }
+    /* Single column — both land in col 1; a photo-less slide simply
+       starts at the quote (no hole to preserve on mobile). */
+    .atest-fig,
+    .atest-body {
+      grid-column: 1;
+    }
+    /* Byline scale on mobile too — the vw clamp would hit its 72px
+       floor here; 96px reads better on a phone. Flush left like all
+       mobile content (the raster offset is a desktop move). */
+    .atest-fig .amedia {
+      width: 96px;
+      margin-left: 0;
     }
     .atest-head {
       grid-template-columns: 1fr auto; /* label left, counter right */

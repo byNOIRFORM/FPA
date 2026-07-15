@@ -37,8 +37,10 @@ export interface AboutPageCopy {
     careers: { name: string; role: string };
   };
   /** "Čo hovoria naši klienti" — drag/snap testimonial carousel closing
-   *  the page (Figma 3407:2…22). Photos are the clients' PROJECTS (not
-   *  faces — agreed 2026-07-13), lang-agnostic in AboutPage.astro. */
+   *  the page (Figma 3407:2…22). Slide image is OPTIONAL (fluid.glass
+   *  pattern, 2026-07-15): target state is client portraits where
+   *  supplied+consented, text-only pull-quote otherwise; lang-agnostic
+   *  array in AboutPage.astro (project shots as placeholders for now). */
   testimonials: {
     label: string;
     items: { quote: string; name: string; role: string }[];
