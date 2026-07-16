@@ -25,15 +25,9 @@
  *   - Hover image scale 1.04 + cursor "POZRIEŤ" state
  */
 
-interface Project {
-  title: string;
-  description: string;
-  image: string;
-  alt: string;
-}
-
 import { home, type Lang } from "../i18n/home";
-import { worksProjectSlugs, availableProjectSlugs, projectHref, projectsListHref } from "../i18n/projects";
+import { projectsListHref } from "../i18n/projects";
+import { getHomeProjects } from "../lib/projects";
 
 interface Props {
   lang?: Lang;
@@ -41,28 +35,12 @@ interface Props {
 const { lang = "sk" } = Astro.props;
 const t = home[lang];
 
-// Images are language-agnostic; titles / descriptions / alt come from
-// the i18n dictionary (home.ts → works.projects), zipped together in
-// the same order the grid renders them.
-const images = [
-  "/images/works/work-1.jpg",
-  "/images/works/work-2.jpg",
-  "/images/works/work-3.jpg",
-  "/images/works/work-4.jpg",
-  "/images/works/work-5.jpg",
-  "/images/works/work-6.jpg",
-];
-const projects: Project[] = t.works.projects.map((p, i) => ({
-  ...p,
-  image: images[i],
-}));
-
-// A tile links to its detail page only when one exists (phase 1: only
-// "chata-pod-korunami"). The rest stay non-clickable until their detail
-// page is added, at which point the link turns on automatically.
-const projectHrefs = worksProjectSlugs.map((s) =>
-  availableProjectSlugs.has(s) ? projectHref(lang, s) : null,
-);
+// Výber + poradie 6 dlaždíc riadi Studio (singleton homepageProjects,
+// drag & drop v poli referencií); fallback = pôvodná hardcoded šestica
+// z home.ts + works images. Dlaždica bez detailnej stránky má href null
+// a zostáva neklikateľná — link sa zapne sám, keď detail pribudne.
+const projects = await getHomeProjects(lang);
+const projectHrefs = projects.map((p) => p.href);
 ---
 
 <section class="works" id="projekty" aria-labelledby="works-heading">

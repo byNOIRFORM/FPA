@@ -1,14 +1,16 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import ProjectPage from "../../components/ProjectPage.astro";
-import { projects, projectsBySlug } from "../../i18n/projects";
+import { getProjectDetails, getProjectDetail } from "../../lib/projects";
 
-export function getStaticPaths() {
-  return projects.map((p) => ({ params: { slug: p.slug } }));
+export async function getStaticPaths() {
+  // CMS (projekty so zapnutou detailnou stránkou) s fallbackom na
+  // hardcoded i18n zoznam — jeden zdroj pre všetky tri jazyky.
+  return (await getProjectDetails()).map((p) => ({ params: { slug: p.slug } }));
 }
 
 const { slug } = Astro.params;
-const locale = projectsBySlug.get(slug!)!.locales.sk;
+const locale = (await getProjectDetail(slug!))!.locales.sk;
 ---
 
 {/* Subpage — no intro loader; nav is transparent over the hero photo

@@ -20,17 +20,9 @@
  *   - Related: hover a row → preview image swaps (crossfade) + "POZRIEŤ"
  */
 import Footer from "./Footer.astro";
-import { home, type Lang } from "../i18n/home";
-import {
-  projectsBySlug,
-  projectsUI,
-  relatedCategories,
-  worksProjectSlugs,
-  worksImages,
-  availableProjectSlugs,
-  projectHref,
-  projectsListHref,
-} from "../i18n/projects";
+import { type Lang } from "../i18n/home";
+import { projectsUI, projectsListHref } from "../i18n/projects";
+import { getProjectDetail, getRelatedProjects } from "../lib/projects";
 import DragCursor from "./DragCursor.astro";
 
 interface Props {
@@ -39,7 +31,9 @@ interface Props {
 }
 const { lang = "sk", slug } = Astro.props;
 
-const project = projectsBySlug.get(slug);
+// CMS (Sanity project + homepageProjects) s fallbackom na i18n/projects.ts
+// — obidve cesty vracajú identický tvar ProjectDetail.
+const project = await getProjectDetail(slug);
 if (!project) throw new Error(`ProjectPage: unknown slug "${slug}"`);
 const locale = project.locales[lang];
 const ui = projectsUI[lang];
@@ -50,20 +44,9 @@ const metaRows = locale.meta.filter((r) => r.value.trim() !== "");
 
 const projectsAnchor = projectsListHref(lang);
 
-// "Ďalšie projekty" — every OTHER project from the Works grid, with its
-// localised title + category + image (for the hover preview swap).
-const currentIndex = worksProjectSlugs.indexOf(slug);
-const related = home[lang].works.projects
-  .map((p, i) => {
-    const s = worksProjectSlugs[i];
-    return {
-      title: p.title,
-      category: relatedCategories[lang][i],
-      image: worksImages[i],
-      href: availableProjectSlugs.has(s) ? projectHref(lang, s) : projectsAnchor,
-    };
-  })
-  .filter((_, i) => i !== currentIndex);
+// "Ďalšie projekty" — ostatné projekty z homepage výberu, s lokalizovaným
+// názvom + kategóriou + fotkou (hover preview swap).
+const related = await getRelatedProjects(lang, slug);
 
 const previewDefault = related[0]?.image ?? project.heroImage;
 

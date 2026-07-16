@@ -13,41 +13,20 @@
  * (i18n/projects.ts). An editor adds a project → the grid absorbs it.
  */
 import Footer from "./Footer.astro";
-import { home, type Lang } from "../i18n/home";
-import {
-  worksProjectSlugs,
-  availableProjectSlugs,
-  projectHref,
-  worksImages,
-  extraProjects,
-  projectsPageUI,
-} from "../i18n/projects";
+import { type Lang } from "../i18n/home";
+import { projectsPageUI } from "../i18n/projects";
+import { getListingProjects } from "../lib/projects";
 
 interface Props {
   lang?: Lang;
 }
 const { lang = "sk" } = Astro.props;
-const t = home[lang];
 const ui = projectsPageUI[lang];
 
-// 6 Works projects + 6 listing-only projects = the full grid (12).
-const worksList = t.works.projects.map((p, i) => ({
-  title: p.title,
-  description: p.description,
-  alt: p.alt,
-  image: worksImages[i],
-  href: availableProjectSlugs.has(worksProjectSlugs[i])
-    ? projectHref(lang, worksProjectSlugs[i])
-    : null,
-}));
-const extraList = extraProjects.map((p) => ({
-  title: p.title[lang],
-  description: p.description[lang],
-  alt: p.title[lang],
-  image: p.image,
-  href: null as string | null,
-}));
-const projects = [...worksList, ...extraList];
+// Všetky projekty v poradí zo Studia (drag & drop v zozname Všetky
+// projekty); fallback = pôvodných 6 works + 6 listing-only kariet.
+// Karta bez detailnej stránky má href null → nie je klikateľná.
+const projects = await getListingProjects(lang);
 
 // Group into rows, cycling the three homepage row types (r1/r2/r3) every 6
 // cards — the "repeat after 6" layout.

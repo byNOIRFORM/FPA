@@ -1,14 +1,14 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import ProjectPage from "../../../components/ProjectPage.astro";
-import { projects, projectsBySlug } from "../../../i18n/projects";
+import { getProjectDetails, getProjectDetail } from "../../../lib/projects";
 
-export function getStaticPaths() {
-  return projects.map((p) => ({ params: { slug: p.slug } }));
+export async function getStaticPaths() {
+  return (await getProjectDetails()).map((p) => ({ params: { slug: p.slug } }));
 }
 
 const { slug } = Astro.params;
-const locale = projectsBySlug.get(slug!)!.locales.en;
+const locale = (await getProjectDetail(slug!))!.locales.en;
 ---
 
 <BaseLayout

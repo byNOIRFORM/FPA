@@ -16,7 +16,7 @@
  *   - Intros: per-word colour scrub (--reveal)
  *   - Origins/team texts + photos: clip-path curtain on scroll-in (Works
  *     row-1 pattern); photo pairs/rows unroll in reading order
- *   - Team grid: hover crossfades each member to their second portrait
+ *   - Team grid: static portraits, scroll reveal on row 1 only
  *   - Testimonials: the shared drag gallery with per-slide snap + a
  *     masked-rise counter; NO auto-rotation (user-driven motion only)
  */
@@ -25,6 +25,12 @@ import DragCursor from "./DragCursor.astro";
 import { type Lang } from "../i18n/home";
 import { aboutPage } from "../i18n/about-page";
 import { projectsUI } from "../i18n/projects";
+import {
+  fetchTeamMembers,
+  fetchTeamSettings,
+  portraitSrc,
+  type SanityTeamMember,
+} from "../lib/sanity";
 
 interface Props {
   lang?: Lang;
@@ -39,10 +45,15 @@ const teamIntroWords = t.team.intro.split(" ");
 // matches t.team.duo.members (Dominik left, Tomáš right).
 const duoImages = ["/images/about/dominik.jpg", "/images/about/tomas.jpg"];
 
-// Team grid (Figma oNás_V2 3393:216) — ONE portrait per member in
-// t.team.members order (the hover second-portrait treatment was removed
-// 2026-07-14). A `null` renders the dark placeholder tile (the CMS case
-// "member added before the photoshoot").
+// Team grid (Figma oNás_V2 3393:216) — ONE portrait per member (the hover
+// second-portrait treatment was removed 2026-07-14). A `null` renders the
+// dark placeholder tile (the CMS case "member added before the photoshoot").
+//
+// CMS: the roster is the FIRST Sanity-managed content (test rollout,
+// 2026-07-16; schema + Studio live in studio/). Members come from Sanity
+// at build time; when Sanity is unconfigured/unreachable the hardcoded
+// i18n list + local photos below take over — the build never breaks on
+// the CMS.
 const memberImages: (string | null)[] = [
   "/images/about/team-1.jpg",
   "/images/about/team-2.jpg",
@@ -53,6 +64,15 @@ const memberImages: (string | null)[] = [
   "/images/about/team-7.jpg",
   "/images/about/team-8.jpg",
 ];
+const sanityMembers = await fetchTeamMembers();
+const roleOf = (m: SanityTeamMember): string =>
+  (lang === "cz" ? m.roleCz : lang === "en" ? m.roleEn : m.roleSk) || m.roleSk;
+const teamMembers: { name: string; role: string; image: string | null }[] =
+  sanityMembers?.map((m) => ({
+    name: m.name,
+    role: roleOf(m),
+    image: m.portraitUrl ? portraitSrc(m.portraitUrl) : null,
+  })) ?? t.team.members.map((m, i) => ({ ...m, image: memberImages[i] ?? null }));
 
 // Rows of three in a 4-column raster; the empty cell alternates — odd rows
 // skip column 3, even rows skip column 2 (the Figma editorial rhythm).
@@ -68,27 +88,35 @@ type TeamTile = {
   careers?: boolean;
 };
 const memberRows: TeamTile[][] = [];
-t.team.members.forEach((m, i) => {
+teamMembers.forEach((m, i) => {
   const r = Math.floor(i / 3);
   (memberRows[r] ??= []).push({
     ...m,
-    image: memberImages[i] ?? null,
     col: teamCols[r % 2][i % 3],
   });
 });
 
 // The "Voľné miesto" careers tile closes the roster — an outlined empty
 // frame at the next free grid slot, arcing on hover and linking to the
-// job posting (same URL as the footer's Kariéra link).
-const CAREERS_URL = "https://www.profesia.sk/praca/fotta-popadic-architekt/O5302133";
-const ci = t.team.members.length;
-const cr = Math.floor(ci / 3);
-(memberRows[cr] ??= []).push({
-  ...t.team.careers,
-  image: null,
-  col: teamCols[cr % 2][ci % 3],
-  careers: true,
-});
+// job posting. Driven by the Studio singleton "Nastavenia tímu"
+// (2026-07-16): the checkbox drops the tile entirely, the URL points at
+// the current job post. Fallback = today's behaviour (tile on, the
+// long-standing profesia.sk link, same URL as the footer's Kariéra).
+const CAREERS_URL_FALLBACK =
+  "https://www.profesia.sk/praca/fotta-popadic-architekt/O5302133";
+const teamSettings = await fetchTeamSettings();
+const careersOpen = teamSettings?.careersOpen ?? true;
+const CAREERS_URL = teamSettings?.careersUrl || CAREERS_URL_FALLBACK;
+if (careersOpen) {
+  const ci = teamMembers.length;
+  const cr = Math.floor(ci / 3);
+  (memberRows[cr] ??= []).push({
+    ...t.team.careers,
+    image: null,
+    col: teamCols[cr % 2][ci % 3],
+    careers: true,
+  });
+}
 
 // Testimonials — the slide image is OPTIONAL (the fluid.glass pattern,
 // Michal 2026-07-15): a CLIENT PORTRAIT renders when the client supplied
