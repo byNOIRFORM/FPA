@@ -10,20 +10,22 @@
  * Lenis.stop() + overflow:clip.
  *
  * Layout: big title, grey intro, a hairline rule, then N (heading +
- * paragraph) blocks. Content lives in i18n/service-details.ts — only
- * Architektonická štúdia is written so far.
+ * paragraph) blocks. Content comes from the shared services adapter
+ * (lib/services-data.ts): CMS modal sections when written in Sanity,
+ * i18n/service-details.ts as the fallback (only Architektonická štúdia
+ * is written there).
  *
  * Only rendered by the detailed Services variant (so its CSS + JS never
  * ship on the homepage).
  */
-import { serviceDetails } from "../i18n/service-details";
 import type { Lang } from "../i18n/home";
+import { getServicesView } from "../lib/services-data";
 
 interface Props {
   lang?: Lang;
 }
 const { lang = "sk" } = Astro.props;
-const details = serviceDetails[lang];
+const { details } = await getServicesView(lang);
 ---
 
 <aside

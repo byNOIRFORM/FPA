@@ -105,6 +105,68 @@ export function fetchTestimonials(): Promise<SanityTestimonial[] | null> {
   return testimonialsCache;
 }
 
+/** Jedna prekladaná položka zoznamu Obsahuje. */
+export type SanityServiceInclude = {
+  sk?: string | null;
+  cz?: string | null;
+  en?: string | null;
+};
+
+/** Jedna sekcia modalu „Dozvedieť sa viac" (nadpis + odstavec, 3 jazyky). */
+export type SanityServiceSection = {
+  headingSk?: string | null;
+  bodySk?: string | null;
+  headingCz?: string | null;
+  bodyCz?: string | null;
+  headingEn?: string | null;
+  bodyEn?: string | null;
+};
+
+export type SanityService = {
+  _id: string;
+  titleSk: string;
+  titleCz?: string | null;
+  titleEn?: string | null;
+  descSk: string;
+  descCz?: string | null;
+  descEn?: string | null;
+  includes: SanityServiceInclude[] | null;
+  /** Priama URL na Sanity image CDN (bez transformačných parametrov). */
+  photoUrl: string | null;
+  modalIntroSk?: string | null;
+  modalIntroCz?: string | null;
+  modalIntroEn?: string | null;
+  /** Aspoň jedna sekcia = odkaz „Dozvedieť sa viac" sa na webe zobrazí. */
+  modalSections: SanityServiceSection[] | null;
+};
+
+let servicesCache: Promise<SanityService[] | null> | undefined;
+
+/**
+ * Služby — riadky spec-sheetu (hlavná stránka + /sluzby + kontaktný
+ * formulár) v poradí drag & drop zoznamu v Studiu. Preklady sú v Studiu
+ * vnorené do objektov title/desc{sk,cz,en} — tu ich splošťujeme; čísla
+ * 01–05 a striedanie formátov fotiek odvodzuje web z pozície.
+ */
+export function fetchServices(): Promise<SanityService[] | null> {
+  servicesCache ??= groq<SanityService[]>(
+    `*[_type == "service"] | order(orderRank) {
+      _id,
+      "titleSk": title.sk, "titleCz": title.cz, "titleEn": title.en,
+      "descSk": desc.sk, "descCz": desc.cz, "descEn": desc.en,
+      includes[]{ sk, cz, en },
+      "photoUrl": photo.asset->url,
+      "modalIntroSk": modal.intro.sk,
+      "modalIntroCz": modal.intro.cz,
+      "modalIntroEn": modal.intro.en,
+      "modalSections": modal.sections[]{
+        headingSk, bodySk, headingCz, bodyCz, headingEn, bodyEn
+      }
+    }`,
+  ).then((list) => (list && list.length ? list : null));
+  return servicesCache;
+}
+
 /**
  * Transformačné parametre Sanity image CDN — portrét mriežky tímu:
  * 800px šírka pokrýva 328px dlaždicu aj na 2560/retina, auto=format

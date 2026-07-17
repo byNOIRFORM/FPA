@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { orderableDocumentListDeskItem } from "@sanity/orderable-document-list";
 import { CaseIcon } from "@sanity/icons/Case";
+import { ClipboardIcon } from "@sanity/icons/Clipboard";
 import { CommentIcon } from "@sanity/icons/Comment";
 import { DocumentsIcon } from "@sanity/icons/Documents";
 import { ImagesIcon } from "@sanity/icons/Images";
@@ -15,6 +16,11 @@ import { skBundles } from "./i18n/sk";
 // Singletony — vždy jeden pripnutý dokument: bez Vymazať/Duplikovať/
 // Zrušiť publikovanie a mimo dialógu „Vytvoriť nový dokument".
 const SINGLETONS = ["teamSettings", "homepageProjects"];
+
+// Pevná päťka služieb = 5 fáz projektu (Michal, 2026-07-17): dokumenty sa
+// iba upravujú a presúvajú — nevytvárajú, nemažú, neduplikujú. Nová služba
+// je obchodné rozhodnutie a rieši sa s vývojárom, nie klikom v Studiu.
+const FIXED_TYPES = ["service"];
 
 export default defineConfig({
   name: "default",
@@ -57,6 +63,17 @@ export default defineConfig({
                     }),
                   ]),
               ),
+            // Služby — pevná päťka riadkov spec-sheetu (hlavná stránka +
+            // /sluzby + kontaktný formulár). Drag & drop mení poradie;
+            // createIntent: false skrýva tlačidlo vytvárania.
+            orderableDocumentListDeskItem({
+              type: "service",
+              title: "Služby",
+              icon: ClipboardIcon,
+              createIntent: false,
+              S,
+              context,
+            }),
             // Všetok obsah stránky O nás pod jedným uzlom.
             S.listItem()
               .title("O nás")
@@ -106,16 +123,22 @@ export default defineConfig({
   },
   document: {
     actions: (prev, context) =>
-      SINGLETONS.includes(context.schemaType)
+      [...SINGLETONS, ...FIXED_TYPES].includes(context.schemaType)
         ? prev.filter(
             ({ action }) =>
               !["delete", "duplicate", "unpublish"].includes(action ?? ""),
           )
         : prev,
+    // Služby von zo VŠETKÝCH dialógov vytvárania (globálne tlačidlo aj
+    // panely v štruktúre); singletony stačí filtrovať globálne — v
+    // štruktúre sú pripnuté cez S.document, zoznam nemajú.
     newDocumentOptions: (prev, { creationContext }) =>
-      creationContext.type === "global"
-        ? prev.filter((tmpl) => !SINGLETONS.includes(tmpl.templateId))
-        : prev,
+      prev.filter((tmpl) => {
+        if (FIXED_TYPES.includes(tmpl.templateId)) return false;
+        if (creationContext.type === "global")
+          return !SINGLETONS.includes(tmpl.templateId);
+        return true;
+      }),
   },
   studio: {
     components: {

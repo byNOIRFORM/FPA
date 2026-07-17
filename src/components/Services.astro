@@ -32,23 +32,10 @@
  *     Works tiles)
  */
 
-interface Service {
-  num: string;
-  title: string;
-  desc: string;
-  image: string;
-  alt: string;
-  /** Portrait rows are 328×400; landscape are 328×193. Drives
-   *  the .service-media aspect-ratio CSS class. */
-  aspect: "portrait" | "landscape";
-  /** "Obsahuje" bullet list — only rendered in the `detailed` variant. */
-  includes: string[];
-}
-
 import { home, type Lang } from "../i18n/home";
 import ServiceDetail from "./ServiceDetail.astro";
-import { detailIndices } from "../i18n/service-details";
 import { servicesPage } from "../i18n/services-page";
+import { getServicesView } from "../lib/services-data";
 
 interface Props {
   lang?: Lang;
@@ -61,25 +48,11 @@ const { lang = "sk", detailed = false } = Astro.props;
 const t = home[lang];
 const sp = servicesPage[lang];
 
-// num / image / aspect are language-agnostic and stay here; titles,
-// descriptions and alt come from the i18n dictionary (home.ts →
-// services.items), zipped in render order.
-const meta = [
-  { num: "01", image: "/images/services/01-urbanisticka.jpg", aspect: "portrait" as const },
-  { num: "02", image: "/images/services/02-architektonicka.jpg", aspect: "landscape" as const },
-  { num: "03", image: "/images/services/03-uzemne.jpg", aspect: "landscape" as const },
-  { num: "04", image: "/images/services/04-stavebne.jpg", aspect: "portrait" as const },
-  { num: "05", image: "/images/services/05-realizacna.jpg", aspect: "landscape" as const },
-];
-
-// "Obsahuje" lists for the detailed /sluzby variant come from the
-// services-page dictionary (per language); the homepage summary ignores
-// them. Row titles/descriptions still come from home.ts (services.items).
-const services: Service[] = t.services.items.map((s, i) => ({
-  ...meta[i],
-  ...s,
-  includes: sp.spec.includes[i],
-}));
+// CMS: rows, modal contents and pill titles come from the shared
+// build-time adapter (lib/services-data.ts) — Sanity when configured,
+// today's hardcoded i18n otherwise. num / photo rhythm stay positional
+// there, so Studio drag & drop can never break the layout.
+const { rows: services, detailIndices } = await getServicesView(lang);
 ---
 
 <section
@@ -108,12 +81,11 @@ const services: Service[] = t.services.items.map((s, i) => ({
                 </ul>
               </div>
             )}
-            {/* Per-row link — shown on every stage except Urbanistická
-                štúdia (index 0). It opens the detail panel only where
-                detail copy exists (i18n/service-details — just
-                Architektonická štúdia for now); the rest are present but
-                inert placeholders until their copy is written. */}
-            {detailed && i > 0 && (
+            {/* Per-row link — rows 02+ always render it (inert
+                placeholder until modal copy exists); row 01 joins the
+                moment its modal is written in the CMS. It opens the
+                detail panel only where content exists (detailIndices). */}
+            {detailed && (i > 0 || detailIndices.has(i)) && (
               <button
                 type="button"
                 class="service-more"

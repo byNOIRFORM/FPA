@@ -17,6 +17,7 @@
  */
 
 import { home, type Lang } from "../i18n/home";
+import { getServicesView } from "../lib/services-data";
 
 interface Props {
   lang?: Lang;
@@ -24,9 +25,11 @@ interface Props {
 const { lang = "sk" } = Astro.props;
 const t = home[lang];
 
-// First five pills mirror the Services section titles exactly (so a
-// visitor selects the same service they read about); the 6th is "Iné".
-const SERVICES = [...t.services.items.map((s) => s.title), t.contact.serviceOther];
+// Service pills mirror the Services section titles exactly (so a visitor
+// selects the same service they read about); the last is "Iné". Titles
+// come from the shared services adapter — CMS when configured, i18n
+// fallback otherwise — so a rename in Studio updates the form too.
+const SERVICES = [...(await getServicesView(lang)).pillTitles, t.contact.serviceOther];
 ---
 
 <aside
