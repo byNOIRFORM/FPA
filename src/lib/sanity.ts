@@ -74,6 +74,37 @@ export function fetchTeamSettings(): Promise<SanityTeamSettings | null> {
   return settingsCache;
 }
 
+export type SanityTestimonial = {
+  name: string;
+  quoteSk: string;
+  quoteCz?: string | null;
+  quoteEn?: string | null;
+  roleSk: string;
+  roleCz?: string | null;
+  roleEn?: string | null;
+  /** Priama URL na Sanity image CDN (bez transformačných parametrov). */
+  photoUrl: string | null;
+};
+
+let testimonialsCache: Promise<SanityTestimonial[] | null> | undefined;
+
+/**
+ * Referencie klientov — carousel "Čo hovoria naši klienti" na O nás,
+ * v poradí drag & drop zoznamu v Studiu. Citát a rola sú v Studiu vnorené
+ * do objektov quote{sk,cz,en} / role{sk,cz,en} — tu ich splošťujeme.
+ */
+export function fetchTestimonials(): Promise<SanityTestimonial[] | null> {
+  testimonialsCache ??= groq<SanityTestimonial[]>(
+    `*[_type == "testimonial"] | order(orderRank) {
+      name,
+      "quoteSk": quote.sk, "quoteCz": quote.cz, "quoteEn": quote.en,
+      "roleSk": role.sk, "roleCz": role.cz, "roleEn": role.en,
+      "photoUrl": photo.asset->url
+    }`,
+  ).then((list) => (list && list.length ? list : null));
+  return testimonialsCache;
+}
+
 /**
  * Transformačné parametre Sanity image CDN — portrét mriežky tímu:
  * 800px šírka pokrýva 328px dlaždicu aj na 2560/retina, auto=format

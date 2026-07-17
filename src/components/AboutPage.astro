@@ -28,8 +28,9 @@ import { projectsUI } from "../i18n/projects";
 import {
   fetchTeamMembers,
   fetchTeamSettings,
+  fetchTestimonials,
+  imgSrc,
   portraitSrc,
-  type SanityTeamMember,
 } from "../lib/sanity";
 
 interface Props {
@@ -65,12 +66,14 @@ const memberImages: (string | null)[] = [
   "/images/about/team-8.jpg",
 ];
 const sanityMembers = await fetchTeamMembers();
-const roleOf = (m: SanityTeamMember): string =>
-  (lang === "cz" ? m.roleCz : lang === "en" ? m.roleEn : m.roleSk) || m.roleSk;
+// Preklad zo splošteného Sanity dokumentu: CZ/EN s fallbackom na SK
+// (prázdny preklad nikdy nevyrenderuje prázdny string).
+const pickLang = (sk: string, cz?: string | null, en?: string | null): string =>
+  (lang === "cz" ? cz : lang === "en" ? en : sk) || sk;
 const teamMembers: { name: string; role: string; image: string | null }[] =
   sanityMembers?.map((m) => ({
     name: m.name,
-    role: roleOf(m),
+    role: pickLang(m.roleSk, m.roleCz, m.roleEn),
     image: m.portraitUrl ? portraitSrc(m.portraitUrl) : null,
   })) ?? t.team.members.map((m, i) => ({ ...m, image: memberImages[i] ?? null }));
 
@@ -124,8 +127,13 @@ if (careersOpen) {
 // and nothing shifts (the quote is pinned to its grid column). Current
 // mix (3 with / 2 without, Michal 2026-07-15): placeholder portraits sit
 // on the INVENTED personas only — Jozef Marcin is a real reviewer, so he
-// stays photo-less until his real photo (+consent) arrives. CMS-ready:
-// maps 1:1 to an optional Sanity image field.
+// stays photo-less until his real photo (+consent) arrives.
+//
+// CMS: testimonials come from Sanity at build time ("Referencie klientov",
+// drag & drop order); when Sanity is unconfigured/unreachable the
+// hardcoded i18n quotes + local photos below take over — the build never
+// breaks on the CMS. Photo renders at byline scale (max 160px) → w=400
+// covers retina.
 const testimonialImages: (string | null)[] = [
   null, // Jozef Marcin — real person, no placeholder face
   "/images/about/ref-valko.jpg",
@@ -133,7 +141,19 @@ const testimonialImages: (string | null)[] = [
   "/images/about/ref-simko.jpg",
   null, // Lenka Kravcová — the text-only variant stays exercised
 ];
-const testimonialCount = String(t.testimonials.items.length).padStart(2, "0");
+const sanityTestimonials = await fetchTestimonials();
+const testimonials: { quote: string; name: string; role: string; image: string | null }[] =
+  sanityTestimonials?.map((x) => ({
+    quote: pickLang(x.quoteSk, x.quoteCz, x.quoteEn),
+    name: x.name,
+    role: pickLang(x.roleSk, x.roleCz, x.roleEn),
+    image: x.photoUrl ? imgSrc(x.photoUrl, 400) : null,
+  })) ??
+  t.testimonials.items.map((item, i) => ({
+    ...item,
+    image: testimonialImages[i] ?? null,
+  }));
+const testimonialCount = String(testimonials.length).padStart(2, "0");
 const dragLabel = projectsUI[lang].dragLabel;
 ---
 
@@ -372,12 +392,12 @@ const dragLabel = projectsUI[lang].dragLabel;
         </p>
       </div>
       <div class="atest-stack" data-testimonials-stack>
-        {t.testimonials.items.map((item, i) => (
+        {testimonials.map((item, i) => (
           <article class="atest-slide" aria-hidden={i === 0 ? undefined : "true"}>
-            {testimonialImages[i] && (
+            {item.image && (
               <figure class="atest-fig">
                 <div class="amedia" data-reveal style="aspect-ratio: 211 / 302">
-                  <img src={testimonialImages[i]} alt="" loading="lazy" draggable="false" />
+                  <img src={item.image} alt="" loading="lazy" draggable="false" />
                 </div>
               </figure>
             )}

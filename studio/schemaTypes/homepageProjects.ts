@@ -20,11 +20,24 @@ export const homepageProjects = defineType({
       title: "Projekty na homepage",
       type: "array",
       description:
-        "Výber našich prác na hlavnej stránke — vždy presne 6 projektov. Poradie v zozname zodpovedá mriežke na webe (prvý projekt je veľká úvodná dlaždica); mení sa ťahaním za úchyt vľavo.",
+        "Výber našich prác na hlavnej stránke — vždy presne 6 projektov. Prvý projekt v zozname je veľká úvodná dlaždica. Poradie zmeníte ťahaním za úchyt vľavo.",
       of: [
         defineArrayMember({
           type: "reference",
           to: [{ type: "project" }],
+          options: {
+            // Ponuka „Add item“ skrýva projekty, ktoré už vo výbere sú —
+            // vyberá sa len z tých, čo v mriežke ešte chýbajú. Vylučujeme
+            // aj drafts.<id>, aby sa už vybratý projekt nevrátil do ponuky
+            // ako svoj rozpracovaný koncept.
+            filter: ({ parent }) => {
+              const taken = (Array.isArray(parent) ? parent : [])
+                .map((item) => (item as { _ref?: string })._ref)
+                .filter((ref): ref is string => Boolean(ref))
+                .flatMap((ref) => [ref, `drafts.${ref}`]);
+              return { filter: "!(_id in $taken)", params: { taken } };
+            },
+          },
         }),
       ],
       validation: (r) => [

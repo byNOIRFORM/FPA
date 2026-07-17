@@ -2,6 +2,7 @@ import { defineConfig } from "sanity";
 import { structureTool } from "sanity/structure";
 import { orderableDocumentListDeskItem } from "@sanity/orderable-document-list";
 import { CaseIcon } from "@sanity/icons/Case";
+import { CommentIcon } from "@sanity/icons/Comment";
 import { DocumentsIcon } from "@sanity/icons/Documents";
 import { ImagesIcon } from "@sanity/icons/Images";
 import { InfoOutlineIcon } from "@sanity/icons/InfoOutline";
@@ -84,6 +85,17 @@ export default defineConfig({
                           .schemaType("teamSettings")
                           .documentId("teamSettings"),
                       ),
+                    S.divider(),
+                    // Referencie klientov — drag & drop poradie = poradie
+                    // v carouseli "Čo hovoria naši klienti". Pod Kariérou,
+                    // v poradí sekcií na stránke O nás (Michal, 2026-07-17).
+                    orderableDocumentListDeskItem({
+                      type: "testimonial",
+                      title: "Referencie klientov",
+                      icon: CommentIcon,
+                      S,
+                      context,
+                    }),
                   ]),
               ),
           ]),

@@ -1,11 +1,13 @@
 import { teamMember } from "./teamMember";
 import { teamSettings } from "./teamSettings";
+import { testimonial } from "./testimonial";
 import { project, photoBlock, textBlock, duoBlock, specBlock } from "./project";
 import { homepageProjects } from "./homepageProjects";
 
 export const schemaTypes = [
   teamMember,
   teamSettings,
+  testimonial,
   project,
   photoBlock,
   textBlock,
