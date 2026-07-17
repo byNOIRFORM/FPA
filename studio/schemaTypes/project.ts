@@ -1,4 +1,10 @@
-import { defineArrayMember, defineField, defineType } from "sanity";
+import {
+  defineArrayMember,
+  defineField,
+  defineType,
+  type ConditionalPropertyCallbackContext,
+  type CustomValidator,
+} from "sanity";
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list";
 import { BlockContentIcon } from "@sanity/icons/BlockContent";
 import { DocumentSheetIcon } from "@sanity/icons/DocumentSheet";
@@ -49,14 +55,12 @@ const LANG_GROUPS = [
 const LANG_LABEL = "Jazyk";
 
 /** Povinné len pri zapnutej detailnej stránke. */
-const requiredForDetail = (r: {
-  custom: (fn: (v: unknown, ctx: { document?: { hasDetail?: boolean } }) => true | string) => unknown;
-}) =>
-  r.custom((v, ctx) =>
-    ctx.document?.hasDetail && !v ? "Povinné pri zapnutej detailnej stránke." : true,
-  );
+const detailRequired: CustomValidator = (v, ctx) =>
+  ctx.document?.hasDetail && !v ? "Povinné pri zapnutej detailnej stránke." : true;
+const requiredForDetail = <R extends { custom(fn: CustomValidator): R }>(r: R): R =>
+  r.custom(detailRequired);
 
-const detailOnly = ({ document }: { document?: { hasDetail?: boolean } }) => !document?.hasDetail;
+const detailOnly = ({ document }: ConditionalPropertyCallbackContext) => !document?.hasDetail;
 
 /* ============================================================
    Bloky obsahu — detail medzi Údajmi o projekte a drag galériou.

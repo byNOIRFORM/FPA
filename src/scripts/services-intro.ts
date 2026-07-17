@@ -80,7 +80,7 @@ function initTitleReveal(): void {
 function initReveal(section: HTMLElement): void {
   const frame = section.querySelector<HTMLElement>(".sintro-frame");
   const photo = section.querySelector<HTMLElement>(".sintro-photo");
-  const blueprint = section.querySelector<HTMLElement>(".sintro-blueprint");
+  const blueprint = section.querySelector<HTMLImageElement>(".sintro-blueprint");
   if (!frame || !photo || !blueprint) return;
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
