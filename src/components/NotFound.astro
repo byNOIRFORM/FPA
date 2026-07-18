@@ -100,6 +100,22 @@ const copy = COPY[lang];
     background: var(--bg);
   }
 
+  /* Light has the SAME seam in reverse (Michal, 2026-07-18): the solid
+     sub nav paints --bg cream (#FAF9F6) while this section sits on the
+     Figma --sheet grey (#F7F8F9) — everywhere else the page below the
+     nav is cream, only here the tints meet. The Figma puts the nav on
+     #F7F8F9 too, so repaint the solid nav to the section tone. Scoped
+     in effect: this component renders only on the 404 routes. Dark
+     needs its own rule back to --bg (higher specificity wins) — there
+     --sheet would reopen the seam this block closes. */
+  :global(body .nav.is-scrolled) {
+    background: var(--sheet);
+  }
+
+  :global(html[data-theme="dark"] body .nav.is-scrolled) {
+    background: var(--bg);
+  }
+
   /* ===== Physics canvas — full-bleed under the type ===== */
   .nf-canvas {
     position: absolute;
