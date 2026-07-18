@@ -255,9 +255,32 @@ export function initAboutPage(): void {
     immediateRender: false,
   };
 
+  // MOBILE reveal diet (Michal, 2026-07-18, same reasoning as the
+  // homepage tiles): the stacked column replays one entrance over and
+  // over. Kept: origins text + the origins photo (the section's FIRST
+  // photo), Pavol, and the grid's first TWO members (Dufala + Čuntová
+  // — the "Náš tím" grid reads as a fresh section, so its opening pair
+  // keeps the entrance). Static: every story block, the Tomáš+Dominik
+  // duo and the rest of the grid — stripping [data-reveal] up front
+  // makes all the loops below skip them naturally.
+  if (!desktop) {
+    const keepTiles = Array.from(
+      root.querySelectorAll<HTMLElement>(".ateam-grid-row .ateam-member"),
+    ).slice(0, 2);
+    root
+      .querySelectorAll<HTMLElement>(
+        ".astory [data-reveal], .ateam-duo [data-reveal], .ateam-grid-row [data-reveal]",
+      )
+      .forEach((el) => {
+        if (keepTiles.some((tile) => tile.contains(el))) return;
+        el.removeAttribute("data-reveal");
+      });
+  }
+
   // "Náš tím" label + testimonial label/body — own triggers. On mobile
-  // the Pavol/duo bios reveal standalone here too (the section sequences
-  // below are desktop-only, same reasoning as the story rows).
+  // Pavol's bio reveals standalone here too (the section sequences
+  // below are desktop-only, same reasoning as the story rows); the duo
+  // bio is already static (stripped above).
   const soloTeamTexts = desktop
     ? ".ateam-label[data-reveal], .atest-label[data-reveal], .atest-body[data-reveal]"
     : ".ateam-label[data-reveal], .atest-label[data-reveal], .atest-body[data-reveal], .ateam-bio[data-reveal]";

@@ -80,7 +80,11 @@ const words = servicesPage[lang].manifest.split(" ");
      narrow column (same call as the Leaders manifest). */
   @media (max-width: 767px) {
     .smanifest {
-      padding: 56px 16px;
+      /* SYMMETRIC air around the manifest (Michal, 2026-07-18): the
+         56px above comes from BuildingTypes' bottom padding — a top
+         padding here stacked it to 112px while the Stages photo band
+         below starts flush, giving only 56px under. 0 + 56 evens it. */
+      padding: 0 16px 56px;
     }
     .smanifest-text {
       text-indent: 0;

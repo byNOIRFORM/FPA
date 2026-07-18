@@ -140,6 +140,12 @@ const titleWords = t.intro.title.split(" ");
     padding: clamp(56px, 6.94vw, 100px) clamp(16px, 2vw, 48px);
     background: var(--bg);
   }
+
+  /* Mobile spacing rule (Michal, 2026-07-18): the sentence is SYMMETRIC
+     — the same 56px above it (from the photo stage) and below it (to
+     "Vypracujeme…"). The clamp's mobile floor gives exactly that on
+     both sides; the fix for the original 112px gap lives in
+     ServicesScope, whose mobile top padding is 0 so nothing stacks. */
   .sintro-title-text {
     font-family: var(--font-sans);
     font-weight: 500;

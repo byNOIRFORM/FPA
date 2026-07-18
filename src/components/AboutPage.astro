@@ -403,9 +403,21 @@ const dragLabel = projectsUI[lang].dragLabel;
             )}
             <div class="atest-body" data-reveal>
               <blockquote class="atest-quote">“&nbsp;&nbsp;{item.quote}</blockquote>
-              <div class="ateam-info">
-                <span class="ateam-name">{item.name}</span>
-                <span class="ateam-role">{item.role}</span>
+              {/* Byline — on MOBILE the client photo renders here, small
+                  beside the name (the fluid.glass pattern); desktop keeps
+                  the standalone figure above and hides this copy. Lazy +
+                  display:none → the duplicate never double-downloads. */}
+              <div class="ateam-info atest-byline">
+                {item.image && (
+                  <img class="atest-byline-photo" src={item.image} alt="" loading="lazy" draggable="false" />
+                )}
+                {/* display:contents wrapper — invisible to the desktop
+                    flex column, becomes the centred text block beside
+                    the photo on mobile. */}
+                <span class="atest-byline-text">
+                  <span class="ateam-name">{item.name}</span>
+                  <span class="ateam-role">{item.role}</span>
+                </span>
               </div>
             </div>
           </article>
@@ -881,6 +893,17 @@ const dragLabel = projectsUI[lang].dragLabel;
      client-supplied photos survive it. px-clamp instead of % because a
      percentage of the 15.25% grid column collapses below legibility on
      tablet widths; the floor keeps the face readable there. */
+  /* The in-byline photo copy is a MOBILE-ONLY element — hidden here,
+     the ≤767 block flips it on and hides .atest-fig instead. The text
+     wrapper is display:contents so the desktop byline column sees the
+     name/role as its direct children, exactly as before. */
+  .atest-byline-photo {
+    display: none;
+  }
+  .atest-byline-text {
+    display: contents;
+  }
+
   .atest-fig .amedia {
     width: clamp(72px, 6.49vw, 160px);
     /* Figma 3393-2: the photo sits in the SECOND raster column of the
@@ -938,9 +961,15 @@ const dragLabel = projectsUI[lang].dragLabel;
      target (999px) gets clamped at render time to half the width, so
      the mouse-in transition looked instant (the visible part finished
      in the first sixth of the tween) while mouse-out played out in the
-     slow tail. Percent→percent keeps the WHOLE 600ms visible both ways. */
-  .ateam-vacancy-link:hover .ateam-portrait--vacancy {
-    border-radius: 50% 50% 0% 0% / 34.9% 34.9% 0% 0%;
+     slow tail. Percent→percent keeps the WHOLE 600ms visible both ways.
+
+     Real-hover devices only (Michal, 2026-07-18): on touch a tap merely
+     emulates :hover on the way to the Kariéra navigation — the arch
+     would flash mid-tap and stick after back-navigation. */
+  @media (hover: hover) {
+    .ateam-vacancy-link:hover .ateam-portrait--vacancy {
+      border-radius: 50% 50% 0% 0% / 34.9% 34.9% 0% 0%;
+    }
   }
 
   /* ===== Reveal initial states — hidden from first paint; about-page.ts
@@ -968,9 +997,15 @@ const dragLabel = projectsUI[lang].dragLabel;
      Responsive — tablet scales via clamp/%; mobile (≤767) stacks.
      ============================================================= */
   @media (max-width: 767px) {
-    .ahero {
-      height: 78vh;
-      min-height: 460px;
+    /* Hero stays FULL viewport height like the homepage and Services
+       heroes — a shorter 78vh mobile variant was tried and dropped for
+       cross-page consistency (Michal, 2026-07-18). */
+    .ahero-inner {
+      /* The desktop vw formula bottoms out at 32px here — Safari's
+         collapsed bottom bar covers part of the title. Same anchor as
+         the homepage hero title (~47px on a 390px phone), so both
+         heroes clear the bar identically (Michal, 2026-07-18). */
+      padding-bottom: clamp(32px, 12vw, 56px);
     }
     .ahero-title {
       max-width: 100%;
@@ -1090,26 +1125,46 @@ const dragLabel = projectsUI[lang].dragLabel;
       grid-template-columns: 1fr;
       row-gap: 24px;
     }
-    /* Single column — both land in col 1; a photo-less slide simply
-       starts at the quote (no hole to preserve on mobile). */
-    .atest-fig,
     .atest-body {
       grid-column: 1;
     }
-    /* Byline scale on mobile too — the vw clamp would hit its 72px
-       floor here; 96px reads better on a phone. Flush left like all
-       mobile content (the raster offset is a desktop move). */
-    .atest-fig .amedia {
+    /* Photo moves INTO the byline, beside the name — the fluid.glass
+       mobile pattern (Michal, 2026-07-18): the standalone figure above
+       the quote disappears; .atest-byline-photo (mobile-only copy in
+       the markup) sits next to the name/role. Photo-less bylines keep
+       the plain flex column via the :has() gate. */
+    .atest-fig {
+      display: none;
+    }
+    .atest-byline:has(.atest-byline-photo) {
+      display: flex;
+      /* Explicit ROW — the base .ateam-info is a column and its
+         flex-direction would leak through, stacking the photo ABOVE
+         the name (the bug this line fixes). Photo left, text beside. */
+      flex-direction: row;
+      align-items: center; /* name block vertically centred on the photo */
+      gap: 16px;
+    }
+    .atest-byline-photo {
+      /* SAME size the standalone mobile figure used to have (96px) —
+         a smaller avatar was tried and rejected (Michal, 2026-07-18). */
+      display: block;
       width: 96px;
-      margin-left: 0;
+      aspect-ratio: 211 / 302;
+      object-fit: cover;
+      flex: 0 0 auto;
+    }
+    /* Beside a photo the wrapper materialises as a tight column — the
+       name/role spacing is the byline's own original gap, untouched. */
+    .atest-byline:has(.atest-byline-photo) .atest-byline-text {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(3px, 0.28vw, 6px);
     }
     .atest-head {
       grid-template-columns: 1fr auto; /* label left, counter right */
       align-items: baseline;
       margin-bottom: 24px;
-    }
-    .atest-fig {
-      width: min(200px, 55%);
     }
     .atest-quote {
       font-size: 20px;

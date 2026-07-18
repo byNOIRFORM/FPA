@@ -472,13 +472,18 @@ export function initGridReveal(): void {
       requestPermission?: () => Promise<string>;
     };
     if (typeof DM.requestPermission === "function") {
+      // iOS: the sensor permission MUST come from a user gesture Safari
+      // RECOGNISES — real-device testing (2026-07-18) showed pointer
+      // events after the long hold don't qualify, and a rejected call
+      // poisons the site's permission state (silent auto-deny from then
+      // on). So: once the grid ACTIVATES, the next CLICK anywhere asks —
+      // click is the one gesture every WebKit permission API accepts; in
+      // practice it's the tap that dismisses the grid. One shot;
+      // ordinary browsing still never meets a dialog.
       let asked = false;
-      const ask = (): void => {
-        // Only the release of a SUCCESSFUL hold (grid open right now);
-        // pointerup is a user gesture, so the permission call is valid.
-        if (!active || asked) return;
+      const askOnTap = (): void => {
+        if (asked) return;
         asked = true;
-        triggers.forEach((el) => el.removeEventListener("pointerup", ask));
         DM.requestPermission!()
           .then((state) => {
             if (state === "granted") listen();
@@ -487,7 +492,11 @@ export function initGridReveal(): void {
             /* zamietnuté / nedostupné — easter egg ostáva na podržaní loga */
           });
       };
-      triggers.forEach((el) => el.addEventListener("pointerup", ask));
+      new MutationObserver(() => {
+        if (!asked && overlay.hasAttribute("data-active")) {
+          document.addEventListener("click", askOnTap, { once: true });
+        }
+      }).observe(overlay, { attributes: true, attributeFilter: ["data-active"] });
     } else {
       listen();
     }
@@ -496,6 +505,12 @@ export function initGridReveal(): void {
   overlay.addEventListener("pointermove", (e) => {
     mx = e.clientX - originX;
     my = e.clientY - originY;
+  });
+  // iOS keeps a timer-created AudioContext suspended until a REAL user
+  // gesture touches it — the first finger on the open grid wakes the
+  // harp (ensureAudio resumes an existing suspended context).
+  overlay.addEventListener("pointerdown", () => {
+    ensureAudio();
   });
   // Cursor leaves the overlay → relax all lines back to straight.
   overlay.addEventListener("pointerleave", () => {

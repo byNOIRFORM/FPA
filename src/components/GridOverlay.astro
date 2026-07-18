@@ -79,6 +79,11 @@ positions[positions.length - 1] = 1; // snap last right edge to content right
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
+    /* Touch: a finger dragged across the strings must stream
+       pointermove — without this the browser claims the drag as a
+       scroll gesture and cancels the pointer, so the lines never bend
+       on mobile. Tap-to-dismiss still fires (a tap is no scroll). */
+    touch-action: none;
   }
 
   .grid-overlay-catch {

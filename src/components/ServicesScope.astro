@@ -197,7 +197,10 @@ const tiles: Tile[] = meta.map((m, i) => ({ ...m, ...t.scope.tiles[i] }));
      ============================================================= */
   @media (max-width: 767px) {
     .sscope {
-      padding: 56px 16px;
+      /* Top 0 — the full 56px above comes from .sintro-title's bottom
+         padding, keeping the intro sentence SYMMETRIC (56 above/below;
+         the two paddings used to stack to 112px). */
+      padding: 0 16px 56px;
     }
     /* Controlled two-line break: "dokumentáciu pre" → its own line. */
     .sscope-label-tail {

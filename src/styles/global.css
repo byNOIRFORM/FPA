@@ -110,6 +110,17 @@ ol {
   color: var(--bg);
 }
 
+/* Grid easter-egg triggers (the logo link): iOS shows its native
+   long-press link menu (Open / Open in New Tab…) which interrupts the
+   2s hold before it can complete — the callout must go. Selection off
+   too so the hold never flashes a text highlight. The link still taps
+   normally. */
+[data-grid-trigger] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* =============================================================
    Custom cursor — circle ring + small filled square in centre.
    Gated purely by pointer CAPABILITY (hover: hover), not viewport

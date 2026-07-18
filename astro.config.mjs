@@ -9,4 +9,13 @@ export default defineConfig({
   devToolbar: {
     enabled: false,
   },
+
+  // Dev-only: let the dev server answer through a cloudflared quick
+  // tunnel (phone previews over HTTPS — sensor APIs need a secure
+  // context). Vite otherwise 403s any non-localhost Host header.
+  vite: {
+    server: {
+      allowedHosts: ['.trycloudflare.com'],
+    },
+  },
 });

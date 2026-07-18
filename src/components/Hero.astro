@@ -347,6 +347,17 @@ const t = home[lang];
       left: 16px;
       right: 16px;
       font-size: clamp(32px, 9.5vw, 44px);
+      /* One continuous word stream instead of the two DESKTOP lines:
+         each forced line wrapped again here (4 rows, with a lonely
+         "Má dať") — dissolving the line wrappers lets the sentence
+         break naturally into 3 rows, like the About hero (Michal,
+         2026-07-18). The phrase span stays one unbreakable unit. */
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0 0.28em;
+    }
+    .hero-title-line {
+      display: contents;
     }
   }
 </style>
