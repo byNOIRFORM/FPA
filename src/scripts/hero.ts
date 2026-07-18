@@ -355,7 +355,7 @@ export function revealHero(): void {
   if (reduced) {
     gsap.set(".hero-media-img", { scale: 1 });
     gsap.set(".hero-media-overlay", { opacity: 0.3 });
-    gsap.set(".hero-title-word, .nav-animate, .hero-scroll", {
+    gsap.set(".hero-title-word, .nav-animate", {
       opacity: 1,
       y: 0,
       yPercent: 0,
@@ -427,17 +427,8 @@ export function revealHero(): void {
     0.85,
   );
 
-  // 5. Scroll cue — slides up + fades in last, signals "you can move".
-  tl.to(
-    ".hero-scroll",
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.7,
-      ease: "power3.out",
-    },
-    1.4,
-  );
+  // (Step 5, the scroll-cue fade-in, was removed with the cue itself —
+  // Michal, 2026-07-18.)
 }
 
 /**

@@ -88,7 +88,19 @@ const label: Record<Lang, string> = {
       background 280ms var(--ease-in-out),
       color 280ms var(--ease-in-out),
       border-color 280ms var(--ease-in-out),
-      transform 280ms var(--ease-in-out);
+      transform 280ms var(--ease-in-out),
+      bottom 420ms var(--ease-in-out);
+  }
+
+  /* Lifted above the footer's bottom row (IntersectionObserver in
+     theme-toggle.ts flips the class) so the fixed button never covers
+     the "Made by NOIRFØRM" credit at page end. Via `bottom`, NOT
+     transform — hover already owns transform. Desktop only: on mobile
+     the bottom row stacks left-aligned, nothing overlaps the button. */
+  @media (min-width: 981px) {
+    .theme-toggle.is-lifted {
+      bottom: clamp(76px, 6.5vw, 108px);
+    }
   }
 
   .theme-toggle:hover {

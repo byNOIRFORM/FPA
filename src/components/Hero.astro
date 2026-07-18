@@ -7,7 +7,6 @@
  *   - .hero-media-overlay: opacity 0 → 0.3 (dark wash fades in)
  *   - .nav-animate: stagger fade + slide down (logo, clock, langs, links, CTA)
  *   - .hero-title-word: word-by-word mask reveal with stagger
- *   - .hero-scroll: fade + slide-up last
  *
  * Hover micro-interactions:
  *   - .nav-flip: text flip mask via ::after content: attr(data-text)
@@ -94,26 +93,9 @@ const t = home[lang];
     ))}
   </h1>
 
-  {/* Scroll cue — informational only. NOT clickable: it tells the
-      user "more content below, use scroll", not "click me". Premium
-      sites trust user agency on scroll. Concrete scroll-to buttons
-      (eg. "SEE ALL PROJECTS") elsewhere will be the click targets. */}
-  <div class="hero-scroll" aria-hidden="true">
-    <svg
-      class="hero-scroll-arrow"
-      width="12"
-      height="28"
-      viewBox="0 0 12 28"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M6 0 V22 M1 18 L6 22 L11 18" />
-    </svg>
-    <span class="hero-scroll-label">{t.hero.scroll}</span>
-  </div>
+  {/* Scroll cue (arrow + label, bottom-right) was removed for now
+      (Michal, 2026-07-18) — copy stays in i18n (hero.scroll) in case
+      it returns. */}
 </section>
 
 <style>
@@ -338,48 +320,6 @@ const t = home[lang];
     transform: scaleX(1);
   }
 
-  /* ===== Scroll cue — bottom-right, downward arrow + Switzer label.
-     Informational only (not clickable). Replaces generic "scroll ↓"
-     with an editorial / architectural mark. ===== */
-  .hero-scroll {
-    position: absolute;
-    bottom: clamp(40px, 3.89vw, 96px);
-    right: clamp(16px, 2vw, 48px);
-    z-index: 5;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: clamp(10px, 0.83vw, 18px);
-    color: #fff;
-    text-decoration: none;
-    opacity: 0;
-    transform: translateY(8px);
-    will-change: transform, opacity;
-  }
-
-  /* Arrow pulses opacity + nudges 3px downward — gentle "scroll" cue.
-     No hover state — this element is purely informational. */
-  .hero-scroll-arrow {
-    display: block;
-    animation: heroScrollPulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-    will-change: transform, opacity;
-  }
-
-  @keyframes heroScrollPulse {
-    0%, 100% { transform: translateY(0); opacity: 0.5; }
-    50%      { transform: translateY(3px); opacity: 0.95; }
-  }
-
-  .hero-scroll-label {
-    font-family: var(--font-sans);
-    /* 10 at 1440 → 14 at 2016+. */
-    font-size: clamp(9px, 0.69vw, 14px);
-    font-weight: 600;
-    letter-spacing: 0.22em;
-    line-height: 1;
-    opacity: 0.75;
-  }
-
   /* ===== Reduced motion ===== */
   @media (prefers-reduced-motion: reduce) {
     .hero-media-img {
@@ -393,12 +333,7 @@ const t = home[lang];
     .hero-title-hover::after {
       transition: none;
     }
-    .hero-scroll {
-      opacity: 1;
-      transform: none;
-    }
-    .hero-grain,
-    .hero-scroll-arrow {
+    .hero-grain {
       animation: none;
     }
   }
@@ -412,12 +347,6 @@ const t = home[lang];
       left: 16px;
       right: 16px;
       font-size: clamp(32px, 9.5vw, 44px);
-    }
-    /* Scroll cue is redundant on touch (scrolling is the native,
-       obvious gesture) and crowds the slogan on a small screen —
-       drop it on mobile, keep it on desktop/tablet. */
-    .hero-scroll {
-      display: none;
     }
   }
 </style>

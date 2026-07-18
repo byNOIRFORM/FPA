@@ -38,6 +38,17 @@ function syncButtons(theme: Theme): void {
 export function initThemeToggle(): void {
   if (typeof window === "undefined") return;
 
+  // Dodge the footer credit: once the footer's bottom row scrolls into
+  // view, lift the fixed button above it (CSS .is-lifted, desktop only)
+  // so "Made by NOIRFØRM" stays readable at page end.
+  const toggle = document.querySelector<HTMLElement>(".theme-toggle");
+  const footerBottom = document.querySelector<HTMLElement>(".footer-bottom");
+  if (toggle && footerBottom) {
+    new IntersectionObserver(([entry]) =>
+      toggle.classList.toggle("is-lifted", entry.isIntersecting),
+    ).observe(footerBottom);
+  }
+
   // Reflect the head-resolved theme onto the buttons on load.
   syncButtons(current());
 
