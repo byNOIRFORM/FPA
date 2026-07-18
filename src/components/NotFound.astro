@@ -107,12 +107,18 @@ const copy = COPY[lang];
      #F7F8F9 too, so repaint the solid nav to the section tone. Scoped
      in effect: this component renders only on the 404 routes. Dark
      needs its own rule back to --bg (higher specificity wins) — there
-     --sheet would reopen the seam this block closes. */
-  :global(body .nav.is-scrolled) {
+     --sheet would reopen the seam this block closes.
+
+     [data-nav-boundary-target] (always present on the nav) is here for
+     SPECIFICITY, not selection: Astro scopes Nav's own rule to
+     .nav[data-astro-cid-…].is-scrolled (0,3,0), which silently beat the
+     plain override (0,2,1) — the first version of this fix never
+     actually applied. The attribute lifts these to (0,3,1)/(0,4,1). */
+  :global(body .nav.is-scrolled[data-nav-boundary-target]) {
     background: var(--sheet);
   }
 
-  :global(html[data-theme="dark"] body .nav.is-scrolled) {
+  :global(html[data-theme="dark"] body .nav.is-scrolled[data-nav-boundary-target]) {
     background: var(--bg);
   }
 

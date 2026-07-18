@@ -98,8 +98,72 @@ async function boot(section: HTMLElement): Promise<void> {
 
   /* ===== Engine + static boundaries ===== */
   // No sleeping — same as the official Matter demos; ~11 bodies awake
-  // cost nothing.
+  // cost nothing. (Also: tilt gravity below must move resting pieces.)
   const engine = Engine.create();
+
+  /* ===== Tilt — mobile gravity follows the phone (≤767 + touch) =====
+     Building stays on the finger (MouseConstraint); a DELIBERATE tilt
+     leans gravity and the pieces tumble — finger builds, tilt
+     demolishes (Michal, 2026-07-18). Calibrated to the resting grip:
+     nobody holds a phone plumb (~30–40° back is normal), so the first
+     stable readings become the neutral pose, a dead zone absorbs hand
+     micro-movement, and beyond it the gravity vector leans smoothly up
+     to a cap — magnitude stays 1, only the direction turns.
+
+     Permissions: NO dialog of its own. iOS only releases sensor events
+     after the motion permission granted through the grid easter egg's
+     2s logo hold (grid-reveal.ts) — until then this listener simply
+     never fires and tilt stays dormant. Android needs no permission. */
+  let applyTilt: () => void = () => {};
+  const tiltMq = window.matchMedia("(hover: none) and (max-width: 767px)");
+  if (tiltMq.matches) {
+    const TILT_DEAD = 5; // ° — hand micro-movement, ignored
+    // GAIN matters because of PHYSICS, not feel: the pieces' concrete
+    // friction (frictionStatic 1.1) only lets them slide once gravity
+    // leans past atan(1.1) ≈ 48° — an honest 1:1 mapping of a
+    // comfortable ~25° phone tilt moved almost nothing. So the phone's
+    // tilt beyond the dead zone is AMPLIFIED: ~10° past the zone starts
+    // toppling, ~20° crosses the sliding threshold, cap at 68°.
+    const TILT_GAIN = 2.6;
+    const TILT_MAX_LEAN = 68; // ° — gravity lean cap (tan 2.5 ≫ friction)
+    const TILT_SMOOTH = 0.1; // per-frame lerp toward the target lean
+    let neutral: number | null = null;
+    let targetLean = 0; // radians
+    let lean = 0;
+    window.addEventListener(
+      "deviceorientation",
+      (e: DeviceOrientationEvent) => {
+        // Rotated to landscape (mq no longer matches): straighten the
+        // gravity instead of freezing it mid-lean; the sensor keeps
+        // streaming, so this also self-recovers on rotating back.
+        if (!tiltMq.matches) {
+          targetLean = 0;
+          return;
+        }
+        const g = e.gamma; // roll: left/right lean of the phone
+        if (g == null) return;
+        if (neutral == null) {
+          // The VERY FIRST reading = the resting pose. Phones stream at
+          // ~60 Hz, so this is the grip the page opened in; DevTools
+          // sensor emulation fires only on slider changes — an N-sample
+          // average would eat the tester's first drags and calibrate to
+          // a mid-drag pose (the "tilt does nothing" trap).
+          neutral = g;
+          return;
+        }
+        const d = g - neutral;
+        const beyond = Math.max(0, Math.abs(d) - TILT_DEAD) * TILT_GAIN;
+        targetLean =
+          (Math.sign(d) * Math.min(TILT_MAX_LEAN, beyond) * Math.PI) / 180;
+      },
+      { passive: true },
+    );
+    applyTilt = () => {
+      lean += (targetLean - lean) * TILT_SMOOTH;
+      engine.gravity.x = Math.sin(lean);
+      engine.gravity.y = Math.cos(lean);
+    };
+  }
   const WALL = 120;
   let walls: M.Body[] = [];
   const buildWalls = (): void => {
@@ -339,6 +403,7 @@ async function boot(section: HTMLElement): Promise<void> {
     // catch-up storm.
     acc = Math.min(acc + (now - last), 100);
     last = now;
+    applyTilt();
     while (acc >= STEP) {
       Engine.update(engine, STEP);
       clampVelocities();

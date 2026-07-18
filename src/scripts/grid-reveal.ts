@@ -155,16 +155,34 @@ export function initGridReveal(): void {
   let holdTimer: number | null = null;
   let charging: HTMLElement | null = null;
 
+  // Mobile (≤767): the editorial grid is 5 columns / 16px margins /
+  // 20px gutters (Michal, 2026-07-18). Margins come free — the overlay
+  // box pads the same clamp() as the sections (16px there); columns are
+  // computed in px because the FIXED 20px gutter isn't a stable fraction
+  // of the content the way the desktop 12-col constants are.
+  const MOBILE_COLS = 5;
+  const MOBILE_GUTTER = 20;
+  let mobileGrid = false;
+
   const measure = () => {
     const r = svg.getBoundingClientRect();
     W = r.width;
     H = r.height;
     originX = r.left;
     originY = r.top;
+    mobileGrid = window.matchMedia("(max-width: 767px)").matches;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   };
 
-  const xOf = (i: number) => pos[i] * W;
+  const xOf = (i: number): number => {
+    if (!mobileGrid) return pos[i] * W;
+    // 5 cols × 2 edges = 10 live lines; the other 14 paths park far
+    // off-screen — invisible, unpluckable, physically inert, so the
+    // physics/audio loops need no special-casing.
+    if (i >= MOBILE_COLS * 2) return -99999;
+    const colw = (W - (MOBILE_COLS - 1) * MOBILE_GUTTER) / MOBILE_COLS;
+    return Math.floor(i / 2) * (colw + MOBILE_GUTTER) + (i % 2) * colw;
+  };
 
   const straighten = () => {
     for (let i = 0; i < paths.length; i++) {
@@ -397,6 +415,83 @@ export function initGridReveal(): void {
       if (charging || active) e.preventDefault();
     });
   });
+
+  // ── MOBILE SHAKE — the phone's doorway to the same secret ──
+  // (Michal, 2026-07-18) PHONES ONLY (≤767 + touch): tablet and desktop
+  // keep just the 2s hold. Shaking toggles the grid: two distinct jolts
+  // of the accelerometer inside a short window, with a cooldown so one
+  // long shake doesn't open-and-close it. iOS 13+ gates devicemotion
+  // behind a permission that MUST be requested from a user gesture — we
+  // ask on the pointer-RELEASE of a COMPLETED 2s hold (the grid is open
+  // at that moment): plain logo taps never meet a dialog, and whoever
+  // truly found the secret unlocks the shake shortcut right where it
+  // makes sense. Android needs no permission and just works.
+  if (
+    window.matchMedia("(hover: none)").matches &&
+    window.matchMedia("(max-width: 767px)").matches
+  ) {
+    const SHAKE_DELTA = 14; // m/s² jump between samples ≈ a real jolt
+    const SHAKE_JOLTS = 2;
+    const SHAKE_WINDOW = 700; // ms — jolts must cluster to count
+    const SHAKE_COOLDOWN = 1600;
+    let lastX: number | null = null;
+    let lastY = 0;
+    let lastZ = 0;
+    let jolts: number[] = [];
+    let cooledAt = 0;
+
+    const onMotion = (e: DeviceMotionEvent) => {
+      const a = e.accelerationIncludingGravity;
+      if (!a || a.x == null || a.y == null || a.z == null) return;
+      if (lastX === null) {
+        lastX = a.x;
+        lastY = a.y;
+        lastZ = a.z;
+        return;
+      }
+      const d = Math.hypot(a.x - lastX, a.y - lastY, a.z - lastZ);
+      lastX = a.x;
+      lastY = a.y;
+      lastZ = a.z;
+      const now = performance.now();
+      if (now - cooledAt < SHAKE_COOLDOWN) return;
+      if (d < SHAKE_DELTA) return;
+      jolts = jolts.filter((t) => now - t < SHAKE_WINDOW);
+      jolts.push(now);
+      if (jolts.length >= SHAKE_JOLTS) {
+        jolts = [];
+        cooledAt = now;
+        if (active) dismiss();
+        else activate();
+      }
+    };
+
+    const listen = () =>
+      window.addEventListener("devicemotion", onMotion, { passive: true });
+    const DM = DeviceMotionEvent as unknown as {
+      requestPermission?: () => Promise<string>;
+    };
+    if (typeof DM.requestPermission === "function") {
+      let asked = false;
+      const ask = (): void => {
+        // Only the release of a SUCCESSFUL hold (grid open right now);
+        // pointerup is a user gesture, so the permission call is valid.
+        if (!active || asked) return;
+        asked = true;
+        triggers.forEach((el) => el.removeEventListener("pointerup", ask));
+        DM.requestPermission!()
+          .then((state) => {
+            if (state === "granted") listen();
+          })
+          .catch(() => {
+            /* zamietnuté / nedostupné — easter egg ostáva na podržaní loga */
+          });
+      };
+      triggers.forEach((el) => el.addEventListener("pointerup", ask));
+    } else {
+      listen();
+    }
+  }
 
   overlay.addEventListener("pointermove", (e) => {
     mx = e.clientX - originX;
