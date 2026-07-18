@@ -27,7 +27,7 @@
 // resolution: each span is inline-block and wraps as a natural
 // word boundary, so line breaks follow the container width
 // exactly as they would for plain text.
-import { home, langHref, servicesHref, aboutHref, type Lang } from "../i18n/home";
+import { home, langHref, servicesHref, aboutHref, careersHref, type Lang } from "../i18n/home";
 import { projectsListHref } from "../i18n/projects";
 
 interface Props {
@@ -191,9 +191,10 @@ const mapsKosice =
           <li><a href={projectsListHref(lang)} class="nav-flip" data-text={t.footer.nav.projects}><span>{t.footer.nav.projects}</span></a></li>
           <li><a href={servicesHref[lang]} class="nav-flip" data-text={t.footer.nav.services}><span>{t.footer.nav.services}</span></a></li>
           <li><a href={aboutHref[lang]} class="nav-flip" data-text={t.footer.nav.about}><span>{t.footer.nav.about}</span></a></li>
-          {/* Kariéra — no page yet; temporarily points at the studio's old
-              profesia.sk job post (new tab, it's an external site). */}
-          <li><a href="https://www.profesia.sk/praca/fotta-popadic-architekt/O5302133" target="_blank" rel="noopener" class="nav-flip" data-text={t.footer.nav.careers}><span>{t.footer.nav.careers}</span></a></li>
+          {/* Kariéra — the page doesn't exist yet, so this lands on the
+              404 by design (see careersHref in i18n/home.ts for the
+              pending Tomáš/Dominik decision and both follow-up paths). */}
+          <li><a href={careersHref[lang]} class="nav-flip" data-text={t.footer.nav.careers}><span>{t.footer.nav.careers}</span></a></li>
         </ul>
       </section>
 

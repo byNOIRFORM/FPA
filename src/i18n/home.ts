@@ -593,6 +593,20 @@ export const aboutHref: Record<Lang, string> = {
 };
 
 /**
+ * Language-aware path to the Kariéra page — which does not exist YET, so
+ * the link deliberately lands on the 404 ("tento priestor zatiaľ
+ * existuje len v našich skiciach" fits it perfectly). Once Tomáš and
+ * Dominik decide: dedicated page → build it at these paths, no link
+ * changes; profesia.sk only → wire the footer to the CMS singleton
+ * Kariéra (teamSettings.careersUrl) instead. (Michal, 2026-07-18)
+ */
+export const careersHref: Record<Lang, string> = {
+  sk: "/kariera",
+  cz: "/cz/kariera",
+  en: "/en/kariera",
+};
+
+/**
  * Map the CURRENT pathname to its equivalent in every language, so the
  * SK/CZ/EN switch keeps you on the same page (homepage ↔ homepage,
  * /sluzby ↔ /cz/sluzby ↔ /en/sluzby) instead of always bouncing to the
