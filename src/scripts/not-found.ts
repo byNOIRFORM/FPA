@@ -316,6 +316,24 @@ async function boot(section: HTMLElement): Promise<void> {
   let raf = 0;
   let last = performance.now();
   let acc = 0;
+  // Terminal velocity — a grabbed piece could be slung out of frame
+  // like a jet (Michal, 2026-07-18): cap linear + angular speed after
+  // every step. Throws stay playful (spawn rain enters at 16–24, so
+  // the cap never blunts the intro), long falls get an air-drag feel.
+  const MAX_SPEED = 32;
+  const MAX_SPIN = 0.6;
+  const clampVelocities = (): void => {
+    for (const b of pieces) {
+      if (b.speed > MAX_SPEED) {
+        const f = MAX_SPEED / b.speed;
+        Body.setVelocity(b, { x: b.velocity.x * f, y: b.velocity.y * f });
+      }
+      if (Math.abs(b.angularVelocity) > MAX_SPIN) {
+        Body.setAngularVelocity(b, Math.sign(b.angularVelocity) * MAX_SPIN);
+      }
+    }
+  };
+
   const frame = (now: number): void => {
     // Cap the backlog (tab switches) so we never spiral into a
     // catch-up storm.
@@ -323,6 +341,7 @@ async function boot(section: HTMLElement): Promise<void> {
     last = now;
     while (acc >= STEP) {
       Engine.update(engine, STEP);
+      clampVelocities();
       acc -= STEP;
     }
     ctx.clearRect(0, 0, vw, vh);
