@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import NotFound from "../components/NotFound.astro";
+---
+
+{/* 404 — static hosts serve one /404.html, so SK only (primary market).
+    No intro loader; sub nav so the visitor can walk anywhere. */}
+<BaseLayout
+  title="404 — Fotta Popadič"
+  description="Objekt, ktorý hľadáte, na tejto parcele nestojí."
+  loader={false}
+  navVariant="sub"
+  lang="sk"
+>
+  <NotFound />
+</BaseLayout>

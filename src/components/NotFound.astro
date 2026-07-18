@@ -1,0 +1,236 @@
+---
+/**
+ * NotFound — the 404 page (Figma node 3475:3, "Architektonický Tetris").
+ *
+ * Two layers:
+ *   1. A full-viewport Matter.js CANVAS underneath — CAD-styled building
+ *      pieces (foundation slab, column, I-beam, roof truss) fall in on
+ *      load; the visitor can grab, throw and stack them. Pure play —
+ *      nothing is scored or rewarded (Michal, 2026-07-18). Physics +
+ *      blueprint drawing live in scripts/not-found.ts.
+ *   2. A centred typographic layer on top (Figma: everything on the
+ *      page axis) — big 404 (Switzer Medium, 248 @1440), one paragraph,
+ *      the site's standard dark CTA back to the homepage. The layer is
+ *      pointer-events:none so drags pass through; only the CTA
+ *      re-enables them. All text is user-select:none so dragging never
+ *      flashes a text selection.
+ *
+ * Background is --sheet (#F7F8F9, the contact-panel grey from the
+ * Figma), NOT the cream --bg.
+ *
+ * SK only by design: static hosts serve a single /404.html.
+ */
+const copy = {
+  heading: "404",
+  sub: "Aj tie najlepšie plány občas potrebujú revíziu. Objekt, ktorý hľadáte, na tejto parcele nestojí – buď sa zmenilo zadanie, alebo tento priestor zatiaľ existuje len v našich skiciach.",
+  cta: "Späť do ateliéru",
+};
+---
+
+<section class="nf" aria-labelledby="nf-heading">
+  {/* Physics parcel — decorative/interactive, invisible to readers. */}
+  <canvas class="nf-canvas" aria-hidden="true"></canvas>
+
+  <div class="nf-ui">
+    <div class="nf-message">
+      <h1 class="nf-heading" id="nf-heading">{copy.heading}</h1>
+      <p class="nf-sub">{copy.sub}</p>
+      <a class="nf-cta" href="/">
+        <span class="nf-cta-text">{copy.cta}</span>
+        <svg
+          class="nf-cta-arrow"
+          width="16"
+          height="10"
+          viewBox="0 0 16 10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .nf {
+    position: relative;
+    height: 100dvh;
+    min-height: 560px;
+    overflow: hidden;
+    background: var(--sheet);
+    /* Theme toggle: the nav bar animates its background over 420ms —
+       without the SAME transition here the section flips instantly and
+       the nav visibly lags behind (invisible elsewhere only because the
+       nav sits transparent over photo heroes). */
+    transition: background 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* Dark: the sub-nav bar paints --bg (#222) — the section must match,
+     or a lighter --sheet band shows a seam under the nav. The --sheet
+     grey is a light-theme move from the Figma only. */
+  :global([data-theme="dark"]) .nf {
+    background: var(--bg);
+  }
+
+  /* ===== Physics canvas — full-bleed under the type ===== */
+  .nf-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    /* Piece-dragging owns the gestures (mobile would scroll otherwise). */
+    touch-action: none;
+  }
+
+  /* ===== UI layer — pointer-transparent except the CTA ===== */
+  .nf-ui {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    padding-inline: clamp(16px, 2vw, 48px);
+  }
+
+  /* Figma Message Container — centred column, 914px of 1440. */
+  .nf-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 914px;
+    width: 100%;
+  }
+
+  .nf-heading {
+    font-family: var(--font-sans);
+    font-style: normal; /* override the global serif-italic heading rule */
+    font-weight: 500; /* Figma: Switzer Medium */
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(110px, 17.22vw, 248px); /* 248 @1440 */
+    line-height: 1;
+    letter-spacing: 0;
+    color: var(--ink);
+    transition: color 420ms cubic-bezier(0.65, 0, 0.35, 1); /* sync s nav */
+    margin: 0 0 clamp(28px, 2.78vw, 40px); /* Figma gap 40 */
+    /* Figma measures the 40/48 gaps from the GLYPH edges (cap trim on
+       every text node) — without trimming, the 248px line box adds its
+       own leading and the page reads much airier than the design.
+       Unsupported browsers just get slightly larger gaps. */
+    text-box: trim-both cap alphabetic;
+  }
+
+  .nf-sub {
+    font-family: var(--font-sans);
+    font-size: clamp(16px, 1.39vw, 20px); /* 20 @1440 */
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    color: var(--ink);
+    transition: color 420ms cubic-bezier(0.65, 0, 0.35, 1); /* sync s nav */
+    margin: 0 0 clamp(32px, 3.33vw, 48px); /* Figma gap 48 */
+    text-box: trim-both cap alphabetic;
+  }
+
+  /* ===== CTA — the site-wide dark button (About/Hero pattern) ===== */
+  .nf-cta {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(10px, 0.83vw, 12px);
+    width: clamp(180px, 14.65vw, 211px);
+    padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    text-decoration: none;
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: clamp(14px, 1.11vw, 16px);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    overflow: hidden;
+    pointer-events: auto; /* the only clickable thing in the UI layer */
+  }
+
+  .nf-cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--btn-bg-hover);
+    transform: translateX(-101%);
+    transition: transform 520ms cubic-bezier(0.65, 0, 0.35, 1);
+    will-change: transform;
+    z-index: 0;
+  }
+
+  .nf-cta:hover::before {
+    transform: translateX(0);
+  }
+
+  .nf-cta > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .nf-cta-text {
+    display: inline-block;
+    transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .nf-cta:hover .nf-cta-text {
+    transform: translateX(3px);
+  }
+
+  .nf-cta-arrow {
+    display: block;
+    flex: 0 0 auto;
+    transition: transform 440ms cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .nf-cta:hover .nf-cta-arrow {
+    transform: translateX(7px);
+  }
+
+  /* ===== Entrance — one quiet fade-rise, no scroll choreography ===== */
+  .nf-heading,
+  .nf-sub,
+  .nf-cta {
+    animation: nf-rise 700ms var(--ease-out) both;
+  }
+
+  .nf-sub {
+    animation-delay: 90ms;
+  }
+
+  .nf-cta {
+    animation-delay: 180ms;
+  }
+
+  @keyframes nf-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nf-heading,
+    .nf-sub,
+    .nf-cta {
+      animation: none;
+    }
+  }
+</style>
