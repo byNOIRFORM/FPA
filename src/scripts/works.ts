@@ -33,6 +33,12 @@ import { gsap } from "gsap";
  *
  * Reduced motion: scroll-driven layers (1–3) snap to final state.
  * Hover layer (4) stays — it's interaction-triggered.
+ *
+ * MOBILE (≤767): reveals only on the LEAD tile — first media curtains,
+ * first tile's text staggers; every other tile appears static (Michal,
+ * 2026-07-18: the stacked single column replays the same entrance
+ * tile after tile, which reads as too much animation on a phone).
+ * Parallax (1) and hover (4) are unaffected.
  */
 export function initWorks(): void {
   if (typeof window === "undefined") return;
@@ -46,6 +52,9 @@ export function initWorks(): void {
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const canHover = window.matchMedia("(hover: hover)").matches;
+  // ≤767 = the stacked single-column layout → reveals on the lead tile
+  // only (see the header comment).
+  const isMobile = window.matchMedia("(max-width: 767px)").matches;
 
   // ===== 1. INNER PARALLAX (every tile) =====
   // ±8% drift — clearly visible ambient motion, but still
@@ -87,11 +96,15 @@ export function initWorks(): void {
   const firstRow = section.querySelector<HTMLElement>(".works-row--1");
   if (firstRow) {
     const medias = firstRow.querySelectorAll<HTMLElement>(".work-media");
+    // Mobile: the row stacks, so the "pair" is gone anyway — curtain
+    // only the lead media; its partner simply stands (fromTo touches
+    // only the targets, everything else keeps its unclipped CSS state).
+    const targets = isMobile ? Array.from(medias).slice(0, 1) : medias;
     if (reduced) {
       gsap.set(medias, { clipPath: "inset(0% 0 0 0)" });
     } else {
       gsap.fromTo(
-        medias,
+        targets,
         { clipPath: "inset(100% 0 0 0)" },
         {
           clipPath: "inset(0% 0 0 0)",
@@ -124,7 +137,15 @@ export function initWorks(): void {
         .forEach((el) => el.removeAttribute("data-reveal"));
     });
   } else {
-    tiles.forEach((tile) => {
+    tiles.forEach((tile, i) => {
+      // Mobile: only the lead tile staggers its text in — the rest
+      // appear static (strip the CSS-hidden [data-reveal] state).
+      if (isMobile && i > 0) {
+        tile
+          .querySelectorAll<HTMLElement>("[data-reveal]")
+          .forEach((el) => el.removeAttribute("data-reveal"));
+        return;
+      }
       const title = tile.querySelector<HTMLElement>(".work-title");
       const desc = tile.querySelector<HTMLElement>(".work-desc");
       if (!title || !desc) return;

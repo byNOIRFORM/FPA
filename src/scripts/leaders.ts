@@ -23,9 +23,11 @@ import { gsap } from "gsap";
  *      flow — no reveal animation, simply appears after the
  *      pinned cards with its 48px margin-top.
  *
- *   3. MOBILE FALLBACK (≤ 1024px)
- *      Pin disabled in CSS. Each card reveals via its own
- *      scroll trigger as it enters the viewport.
+ *   3. MOBILE FALLBACK (≤ 767px)
+ *      Pin disabled in CSS. Only the LEAD card (Pavol) reveals via
+ *      its own scroll trigger; Dominik and Tomáš appear static
+ *      (Michal, 2026-07-18: the stacked column replaying the same
+ *      entrance three times reads as too much animation on a phone).
  *
  * Reduced motion: snap manifest words to dark, all cards fully
  * revealed.
@@ -84,11 +86,21 @@ export function initLeaders(): void {
   // MOBILE — per-card scroll triggers, no sticky pin.
   // -------------------------------------------------------------
   if (isMobile) {
-    cards.forEach((card) => {
+    cards.forEach((card, i) => {
       const media = card.querySelector<HTMLElement>(".leader-media");
       const name = card.querySelector<HTMLElement>(".leader-name");
       const desc = card.querySelector<HTMLElement>(".leader-desc");
       if (!media || !name || !desc) return;
+
+      // Only Pavol (card 0) animates in — the other two snap to the
+      // final state immediately (same moves as the reduced path).
+      if (i > 0) {
+        gsap.set(card, { y: 0, opacity: 1 });
+        gsap.set(media, { clipPath: "inset(0% 0 0 0)" });
+        name.removeAttribute("data-reveal");
+        desc.removeAttribute("data-reveal");
+        return;
+      }
 
       gsap
         .timeline({
