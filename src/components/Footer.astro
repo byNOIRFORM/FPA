@@ -758,39 +758,54 @@ const mapsKosice =
      contrast on the darkening photo and linger, so they'd appear to
      leave AFTER the CTA (which never flips). Keeping them on their ink
      colour means they all just drop opacity together. */
-  .footer:has([data-footer-image]:hover) .footer-location {
-    --footer-fg: #fff;
-    --footer-fg-mute: rgba(255, 255, 255, 0.72);
+  /* The whole reveal exists only on devices with a REAL hover (mouse /
+     trackpad) — on touch, a tap merely emulates :hover on the way to
+     the Google Maps navigation and the photo would flash (or stick
+     after back-navigation). Touch keeps the plain address links
+     (Michal, 2026-07-18). */
+  @media (hover: hover) {
+    .footer:has([data-footer-image]:hover) .footer-location {
+      --footer-fg: #fff;
+      --footer-fg-mute: rgba(255, 255, 255, 0.72);
+    }
+
+    .footer:has([data-footer-image]:hover) .footer-media {
+      opacity: 1;
+    }
+
+    /* Pick the photo that matches the hovered location. */
+    .footer:has([data-footer-image="bardejov"]:hover) .footer-media-img[data-image="bardejov"],
+    .footer:has([data-footer-image="kosice"]:hover) .footer-media-img[data-image="kosice"] {
+      opacity: 1;
+    }
+
+    /* Everything else fades out, leaving the locations column. */
+    .footer:has([data-footer-image]:hover) .footer-logo,
+    .footer:has([data-footer-image]:hover) .footer-pitch,
+    .footer:has([data-footer-image]:hover) .footer-cta,
+    .footer:has([data-footer-image]:hover) .footer-bottom,
+    .footer:has([data-footer-image]:hover) .footer-grid > .footer-col:not(:has([data-footer-image])),
+    .footer:has([data-footer-image]:hover) .footer-nav-pair,
+    .footer:has([data-footer-image]:hover) .footer-col:has([data-footer-image]) .footer-col-label {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* The location that is NOT being hovered stays on the photo but
+       dimmed — a subtle "disabled" variant, while the hovered one reads
+       as active (full white). It stays interactive, so moving the cursor
+       onto it swaps the active location (and its photo). */
+    .footer:has([data-footer-image]:hover) .footer-location[data-footer-image]:not(:hover) {
+      opacity: 0.4;
+    }
   }
 
-  .footer:has([data-footer-image]:hover) .footer-media {
-    opacity: 1;
-  }
-
-  /* Pick the photo that matches the hovered location. */
-  .footer:has([data-footer-image="bardejov"]:hover) .footer-media-img[data-image="bardejov"],
-  .footer:has([data-footer-image="kosice"]:hover) .footer-media-img[data-image="kosice"] {
-    opacity: 1;
-  }
-
-  /* Everything else fades out, leaving the locations column. */
-  .footer:has([data-footer-image]:hover) .footer-logo,
-  .footer:has([data-footer-image]:hover) .footer-pitch,
-  .footer:has([data-footer-image]:hover) .footer-cta,
-  .footer:has([data-footer-image]:hover) .footer-bottom,
-  .footer:has([data-footer-image]:hover) .footer-grid > .footer-col:not(:has([data-footer-image])),
-  .footer:has([data-footer-image]:hover) .footer-nav-pair,
-  .footer:has([data-footer-image]:hover) .footer-col:has([data-footer-image]) .footer-col-label {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* The location that is NOT being hovered stays on the photo but
-     dimmed — a subtle "disabled" variant, while the hovered one reads
-     as active (full white). It stays interactive, so moving the cursor
-     onto it swaps the active location (and its photo). */
-  .footer:has([data-footer-image]:hover) .footer-location[data-footer-image]:not(:hover) {
-    opacity: 0.4;
+  /* No hover → the media layer can't ever show; display:none also stops
+     the two lazy photos from downloading on touch devices at all. */
+  @media (hover: none) {
+    .footer-media {
+      display: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
