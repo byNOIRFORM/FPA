@@ -3,7 +3,10 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import NotFound from "../components/NotFound.astro";
 ---
 
-{/* 404 — static hosts serve one /404.html, so SK only (primary market).
+{/* 404 — static hosts serve this ONE /404.html for every unmatched URL,
+    so the language must be recovered at runtime: the inline script below
+    reads the /cz/ or /en/ prefix from the requested pathname and hops to
+    the real localized 404 PAGE (nav and all). SK stays right here.
     No intro loader; sub nav so the visitor can walk anywhere. */}
 <BaseLayout
   title="404 — Fotta Popadič"
@@ -12,5 +15,18 @@ import NotFound from "../components/NotFound.astro";
   navVariant="sub"
   lang="sk"
 >
-  <NotFound />
+  <script is:inline>
+    // Runs during parse, before the SK content below paints — a CZ/EN
+    // visitor never sees a Slovak flash. location.replace keeps the
+    // Back button clean (no redirect hop in history). The /cz/404 and
+    // /en/404 routes are REAL pages, so no redirect loop is possible.
+    (function () {
+      var p = location.pathname;
+      if (/^\/cz(\/|$)/.test(p) && p !== "/cz/404/" && p !== "/cz/404")
+        location.replace("/cz/404/");
+      else if (/^\/en(\/|$)/.test(p) && p !== "/en/404/" && p !== "/en/404")
+        location.replace("/en/404/");
+    })();
+  </script>
+  <NotFound lang="sk" />
 </BaseLayout>

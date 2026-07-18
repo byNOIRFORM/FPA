@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NotFound from "../../components/NotFound.astro";
+---
+
+{/* Localized 404 — a REAL route the root /404.html redirects to when the
+    unmatched URL carries the /cz/ prefix (see pages/404.astro). */}
+<BaseLayout
+  title="404 — Fotta Popadič"
+  description="To, co hledáte, na této parcele nestojí."
+  loader={false}
+  navVariant="sub"
+  lang="cz"
+>
+  <NotFound lang="cz" />
+</BaseLayout>

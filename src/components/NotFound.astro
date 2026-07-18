@@ -18,13 +18,36 @@
  * Background is --sheet (#F7F8F9, the contact-panel grey from the
  * Figma), NOT the cream --bg.
  *
- * SK only by design: static hosts serve a single /404.html.
+ * Languages: static hosts serve a single /404.html (this component with
+ * lang="sk"), but real /cz/404 and /en/404 PAGES exist too — the root
+ * 404 redirects to them by the pathname prefix (see pages/404.astro),
+ * so the visitor gets a fully localized page, nav included.
  */
-const copy = {
-  heading: "404",
-  sub: "Aj tie najlepšie plány občas potrebujú revíziu. To, čo hľadáte, na tejto parcele nestojí – buď sa zmenilo zadanie, alebo tento priestor zatiaľ existuje len v našich skiciach.",
-  cta: "Späť do ateliéru",
+import { langHref, type Lang } from "../i18n/home";
+
+interface Props {
+  lang?: Lang;
+}
+const { lang = "sk" } = Astro.props;
+
+const COPY: Record<Lang, { heading: string; sub: string; cta: string }> = {
+  sk: {
+    heading: "404",
+    sub: "Aj tie najlepšie plány občas potrebujú revíziu. To, čo hľadáte, na tejto parcele nestojí – buď sa zmenilo zadanie, alebo tento priestor zatiaľ existuje len v našich skiciach.",
+    cta: "Späť do ateliéru",
+  },
+  cz: {
+    heading: "404",
+    sub: "I ty nejlepší plány občas potřebují revizi. To, co hledáte, na této parcele nestojí – buď se změnilo zadání, nebo tento prostor zatím existuje jen v našich skicách.",
+    cta: "Zpět do ateliéru",
+  },
+  en: {
+    heading: "404",
+    sub: "Even the best plans need a revision now and then. What you are looking for does not stand on this plot – either the brief has changed, or this space so far exists only in our sketches.",
+    cta: "Back to the studio",
+  },
 };
+const copy = COPY[lang];
 ---
 
 <section class="nf" aria-labelledby="nf-heading">
@@ -35,7 +58,7 @@ const copy = {
     <div class="nf-message">
       <h1 class="nf-heading" id="nf-heading">{copy.heading}</h1>
       <p class="nf-sub">{copy.sub}</p>
-      <a class="nf-cta" href="/">
+      <a class="nf-cta" href={langHref[lang]}>
         <span class="nf-cta-text">{copy.cta}</span>
         <svg
           class="nf-cta-arrow"
