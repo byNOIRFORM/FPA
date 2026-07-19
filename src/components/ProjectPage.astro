@@ -247,11 +247,22 @@ const singleGallery = gallery.length <= 1;
                   <span class="prelated-name">{r.title}</span>
                   <span class="prelated-cat">{r.category}</span>
                 </span>
-                {/* Per-project photo — hidden on desktop (the hover preview
-                    handles imagery there); shown inline on touch/mobile. */}
-                <span class="prelated-photo" aria-hidden="true">
-                  <img src={r.image} alt="" loading="lazy" />
-                </span>
+                {/* Tap affordance — MOBILE only (desktop uses the hover
+                    preview + dim). The site's standard CTA arrow glyph. */}
+                <svg
+                  class="prelated-arrow"
+                  width="16"
+                  height="10"
+                  viewBox="0 0 16 10"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M0 5 H14 M10 1 L14 5 L10 9" />
+                </svg>
               </a>
             </li>
           ))}
@@ -648,10 +659,13 @@ const singleGallery = gallery.length <= 1;
   .prelated {
     padding-block: clamp(48px, 5.55vw, 120px); /* 80 @1440 */
   }
+  /* No flex gap — the two internal gaps differ: label→list keeps 40, but
+     the CTA gets the site's standard closing-CTA gap (48, like the
+     homepage Služby CTA) so it matches every other centred CTA (Michal,
+     2026-07-19). */
   .prelated-inner {
     display: flex;
     flex-direction: column;
-    gap: clamp(24px, 2.78vw, 56px); /* 40 @1440 */
   }
   .prelated-title {
     font-family: var(--font-sans);
@@ -660,7 +674,7 @@ const singleGallery = gallery.length <= 1;
     font-size: clamp(16px, 1.39vw, 30px);
     letter-spacing: 0.02em;
     color: var(--ink);
-    margin: 0;
+    margin: 0 0 clamp(24px, 2.78vw, 56px); /* 40 @1440 → list */
   }
   .prelated-grid {
     display: grid;
@@ -673,20 +687,26 @@ const singleGallery = gallery.length <= 1;
   }
   .prelated-row a {
     display: block;
-    padding-bottom: clamp(16px, 1.94vw, 40px); /* 28 @1440 */
+    padding-bottom: clamp(14px, 1.39vw, 28px); /* 20 @1440 (Michal, 2026-07-19) */
     text-decoration: none;
     color: inherit;
     transition: opacity 0.3s var(--ease-out);
   }
-  /* Name + category share one row; the per-project photo is desktop-hidden
-     (the single hover preview on the right handles imagery there). */
+  /* No trailing gap under the LAST row so the list box ends exactly at
+     the last project's text — the sticky preview releases and its bottom
+     lands on that same line (Michal, 2026-07-19). */
+  .prelated-row:last-child a {
+    padding-bottom: 0;
+  }
+  /* Name + category share one row. */
   .prelated-head {
     display: grid;
     grid-template-columns: 37.38% 48.74%;
     justify-content: space-between;
     align-items: baseline;
   }
-  .prelated-photo {
+  /* Tap arrow is mobile-only (desktop uses the hover preview + dim). */
+  .prelated-arrow {
     display: none;
   }
   .prelated-name,
@@ -709,8 +729,14 @@ const singleGallery = gallery.length <= 1;
       opacity: 1;
     }
   }
+  /* Sticky preview — the image pins while a long list scrolls past
+     (the thisisstudiox "Up next" pattern). It sticks within its grid
+     cell, whose height = the taller list, so it rides from `top` down
+     to where the list ends, then releases. `top` clears the nav bar. */
   .prelated-thumb {
     width: 100%;
+    position: sticky;
+    top: clamp(88px, 11vh, 140px);
   }
   .prelated-thumb-img {
     will-change: opacity;
@@ -726,6 +752,10 @@ const singleGallery = gallery.length <= 1;
     gap: clamp(10px, 0.83vw, 12px);
     width: clamp(180px, 14.65vw, 211px);
     align-self: center;
+    /* Closing-CTA gap — 48 @1440 (like the homepage Služby CTA), with a
+       32px mobile floor so the button reads as a separate chord below
+       the list rather than attached to it (Michal, 2026-07-19). */
+    margin-top: clamp(32px, 3.33vw, 48px);
     padding: clamp(10px, 0.97vw, 14px) clamp(12px, 1.11vw, 16px);
     background: var(--btn-bg);
     color: var(--btn-fg);
@@ -849,8 +879,13 @@ const singleGallery = gallery.length <= 1;
     .prelated-thumb {
       display: none;
     }
+    /* Mobile: JUST the list, spec-table style (Michal, 2026-07-19) —
+       name left, category right, a hairline between rows, tappable to
+       open the project. 20px row padding (more breathing room to the
+       hairline than the spec table's 14). No photos anywhere, so zero
+       related images download. */
     .prelated-row {
-      padding: 28px 0;
+      padding: 20px 0;
       border-bottom: 1px solid var(--line);
     }
     .prelated-row:first-child {
@@ -860,40 +895,38 @@ const singleGallery = gallery.length <= 1;
       border-bottom: none;
       padding-bottom: 0;
     }
-    /* Row = a caption (name over category) then the photo. Name matches the
-       "Ďalšie projekty" label size (16px) in default ink; category sits 8px
-       below in the weak/muted tone; 20px down to the photo. */
+    /* List-item pattern (Michal, 2026-07-19): text block on the LEFT
+       (name over category, stacked), tap arrow ALONE on the right,
+       vertically centred — two clean zones so the row reads as tappable,
+       not as a flat data table. */
     .prelated-row a {
       display: flex;
-      flex-direction: column;
-      gap: 20px;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
       padding-bottom: 0;
     }
     .prelated-head {
+      flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      align-items: flex-start;
+      gap: 6px;
     }
-    .prelated-name,
-    .prelated-cat {
+    .prelated-name {
       font-size: 16px;
       text-align: left;
     }
     .prelated-cat {
+      font-size: 14px;
+      text-align: left;
       color: var(--text-mute);
     }
-    .prelated-photo {
+    .prelated-arrow {
       display: block;
-      width: 100%;
-      aspect-ratio: 3 / 2;
-      overflow: hidden;
-      background: var(--surface);
-    }
-    .prelated-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
+      flex: 0 0 auto;
+      color: var(--ink-mute);
     }
   }
 

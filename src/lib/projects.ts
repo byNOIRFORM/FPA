@@ -295,13 +295,14 @@ function fallbackRelated(lang: Lang, slug: string): RelatedProject[] {
 
 /** Ostatné projekty z homepage výberu — projekt bez detailu vedie na /projekty. */
 export async function getRelatedProjects(lang: Lang, slug: string): Promise<RelatedProject[]> {
-  const [cms, ids] = await Promise.all([fetchProjects(), fetchHomepageProjectIds()]);
-  if (cms && ids && ids.length) {
-    const byId = new Map(cms.map((p) => [p._id, p]));
+  // ALL projects (in the /projekty grid order), not just the homepage
+  // selection (Michal, 2026-07-19) — the "Ďalšie projekty" list is a full
+  // index, with the sticky preview image handling a long scroll.
+  const cms = await fetchProjects();
+  if (cms && cms.length) {
     const anchor = projectsListHref(lang);
-    const rows = ids
-      .map((id) => byId.get(id))
-      .filter((p): p is SanityProject => !!p && !!p.cover?.url && p.slug !== slug)
+    const rows = cms
+      .filter((p) => !!p.cover?.url && p.slug !== slug)
       .map((p) => ({
         title: lf(lang, p.titleSk, p.titleCz, p.titleEn),
         category: categoryLabel(p.category, lang),

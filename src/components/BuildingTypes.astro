@@ -133,12 +133,30 @@ const types: BType[] = meta.map((m, i) => ({ ...m, ...t.buildingTypes.types[i] }
     transition: opacity 500ms var(--ease-out);
   }
 
-  .btypes-row:has(.btypes-item[data-type="bytove"]:hover) .btypes-img[data-type="bytove"],
-  .btypes-row:has(.btypes-item[data-type="verejne"]:hover) .btypes-img[data-type="verejne"],
-  .btypes-row:has(.btypes-item[data-type="priemyselne"]:hover) .btypes-img[data-type="priemyselne"],
-  .btypes-row:has(.btypes-item[data-type="rekreacne"]:hover) .btypes-img[data-type="rekreacne"],
-  .btypes-row:has(.btypes-item[data-type="parky"]:hover) .btypes-img[data-type="parky"] {
+  /* Mouse hover (pointer devices only): the hovered type's photo fades
+     in. Touch tablets get the same via a TAP (.is-active, below);
+     phones get neither (image hidden). */
+  @media (hover: hover) {
+    .btypes-row:has(.btypes-item[data-type="bytove"]:hover) .btypes-img[data-type="bytove"],
+    .btypes-row:has(.btypes-item[data-type="verejne"]:hover) .btypes-img[data-type="verejne"],
+    .btypes-row:has(.btypes-item[data-type="priemyselne"]:hover) .btypes-img[data-type="priemyselne"],
+    .btypes-row:has(.btypes-item[data-type="rekreacne"]:hover) .btypes-img[data-type="rekreacne"],
+    .btypes-row:has(.btypes-item[data-type="parky"]:hover) .btypes-img[data-type="parky"] {
+      opacity: 1;
+    }
+    .btypes-item:hover .btypes-item-text {
+      font-weight: 500;
+    }
+  }
+
+  /* Touch-tablet tap state (building-types.ts adds .is-active on tap):
+     the tapped type's photo shows + its label goes Medium — persistent,
+     unlike the transient mouse hover. */
+  .btypes-img.is-active {
     opacity: 1;
+  }
+  .btypes-item.is-active .btypes-item-text {
+    font-weight: 500;
   }
 
   /* ===== List ===== */
@@ -173,14 +191,28 @@ const types: BType[] = meta.map((m, i) => ({ ...m, ...t.buildingTypes.types[i] }
     letter-spacing: 0.02em;
     color: var(--ink);
     white-space: nowrap;
+    transition: opacity 300ms var(--ease-out);
   }
 
-  /* Active → Medium. Default = first row; on hover = the hovered row.
-     (The :not(:has(:hover)) keeps the first row active only while
-     nothing else is hovered, so the weight never doubles up.) */
-  .btypes-list:not(:has(.btypes-item:hover)) .btypes-item:first-child .btypes-item-text,
-  .btypes-item:hover .btypes-item-text {
+  /* Resting default: the FIRST type is Medium — until a mouse hovers a
+     row (above) or a touch tablet taps one (.is-active). Both
+     :not(:has()) guards stop the weight ever doubling up. */
+  .btypes-list:not(:has(.btypes-item:hover)):not(:has(.btypes-item.is-active))
+    .btypes-item:first-child
+    .btypes-item-text {
     font-weight: 500;
+  }
+
+  /* Hover-a-row → the OTHERS dim to disabled (same 0.35 as the project
+     detail "Ďalšie projekty" list); the hovered row stays full ink.
+     Pointer devices only, so a touch tap never sticks the dim. */
+  @media (hover: hover) {
+    .btypes-list:hover .btypes-item-text {
+      opacity: 0.35;
+    }
+    .btypes-item:hover .btypes-item-text {
+      opacity: 1;
+    }
   }
 
   /* ===== Reduced motion — the global rule already zeroes the fade. ===== */
@@ -189,21 +221,24 @@ const types: BType[] = meta.map((m, i) => ({ ...m, ...t.buildingTypes.types[i] }
      TABLET (768–1199): no rule — the % widths + aspect-ratio scale the
      whole row down proportionally (scaled-down desktop, like Works).
 
-     MOBILE (≤767): stack — full-width image on top, list below. Hover
-     swap is pointer-only, so touch simply shows the default photo.
+     MOBILE (≤767): just the list — NO image, no hover swap (Michal,
+     2026-07-19: the photo + hover add nothing on a phone). display:none
+     also stops the six lazy photos from ever downloading here.
      ============================================================= */
   @media (max-width: 767px) {
     .btypes {
+      /* Top 0 — the 56px gap above comes from the scope section's bottom
+         padding; a top padding here stacked it to 112px, too airy under
+         the last scope photo (Michal, 2026-07-19). Symmetric 56/56 now. */
       gap: 32px;
-      padding: 56px 16px;
+      padding: 0 16px 56px;
     }
     .btypes-row {
       flex-direction: column;
       gap: 32px;
     }
     .btypes-media {
-      flex: none;
-      width: 100%;
+      display: none;
     }
     .btypes-list {
       flex: none;
