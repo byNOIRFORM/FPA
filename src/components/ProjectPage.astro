@@ -142,7 +142,7 @@ const singleGallery = gallery.length <= 1;
                   data-loop-video
                 ></video>
               ) : (
-                <img src={block.media.image} alt={block.media.alt ?? ""} loading="lazy" />
+                <img src={block.media.image} alt={block.media.alt ?? locale.title} loading="lazy" />
               )}
             </figure>
           </div>
@@ -169,12 +169,12 @@ const singleGallery = gallery.length <= 1;
           <div class="pwrap pblock-duo-grid" data-duo>
             <figure class="pblock-duo-left">
               <div class="pmedia" data-reveal style={`aspect-ratio: ${block.left.ratio}`}>
-                <img src={block.left.image} alt={block.left.alt ?? ""} loading="lazy" />
+                <img src={block.left.image} alt={block.left.alt ?? locale.title} loading="lazy" />
               </div>
             </figure>
             <figure class="pblock-duo-right">
               <div class="pmedia" data-reveal style={`aspect-ratio: ${block.right.ratio}`}>
-                <img src={block.right.image} alt={block.right.alt ?? ""} loading="lazy" />
+                <img src={block.right.image} alt={block.right.alt ?? locale.title} loading="lazy" />
               </div>
             </figure>
           </div>
@@ -206,7 +206,7 @@ const singleGallery = gallery.length <= 1;
     <section class="pblock pblock--photo">
       <div class="pwrap">
         <figure class="pmedia" style={`aspect-ratio: ${gallery[0]?.ratio ?? "1384 / 1024"}`}>
-          <img src={gallery[0]?.image ?? project.heroImage} alt="" loading="lazy" />
+          <img src={gallery[0]?.image ?? project.heroImage} alt={locale.title} loading="lazy" />
         </figure>
       </div>
     </section>

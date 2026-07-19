@@ -9,11 +9,13 @@ import PageTransition from "../components/PageTransition.astro";
 import ThemeToggle from "../components/ThemeToggle.astro";
 import GridOverlay from "../components/GridOverlay.astro";
 import Nav from "../components/Nav.astro";
-import { home, type Lang } from "../i18n/home";
+import { home, localizedHrefs, type Lang, LANGS } from "../i18n/home";
 
 interface Props {
   title?: string;
   description?: string;
+  /** Emit robots noindex — error pages (404) that shouldn't be indexed. */
+  noindex?: boolean;
   /** Show the intro house-loader. True on the landing; subpages
    *  (e.g. /sluzby) pass false so they don't replay the full intro
    *  on every navigation. */
@@ -33,12 +35,84 @@ interface Props {
 const {
   title = "Atelier",
   description = "Architektonický ateliér",
+  noindex = false,
   loader = true,
   lang = "sk",
   navVariant = "home",
   navActive,
   navBoundary,
 } = Astro.props;
+
+/* ===== SEO — canonical, hreflang alternates, Open Graph, JSON-LD =====
+   Absolute URLs come off `site` in astro.config (fottapopadic.sk). The
+   language alternates reuse localizedHrefs so canonical + hreflang stay
+   consistent with the same trailing-slash form Astro serves. */
+const alt = localizedHrefs(Astro.url.pathname);
+const abs = (path: string): string => new URL(path, Astro.site).href;
+// PAGE urls follow Astro's directory build format (trailing slash) — the
+// homepage /cz, /en alternates otherwise drop it and mismatch the served
+// /cz/, /en/. Assets (og-image, favicon) keep raw `abs`, no slash.
+const pageUrl = (path: string): string =>
+  abs(path === "/" ? "/" : path.replace(/\/?$/, "/"));
+const canonical = pageUrl(alt[lang]);
+const ogImage = abs("/og-image.jpg");
+const SITE_NAME = "Fotta Popadič architekt";
+// hreflang uses the LANGUAGE code — Czech is "cs", not the country "cz".
+const HREFLANG: Record<Lang, string> = { sk: "sk", cz: "cs", en: "en" };
+const OG_LOCALE: Record<Lang, string> = { sk: "sk_SK", cz: "cs_CZ", en: "en_US" };
+const ogLocaleAlternates = LANGS.filter((l) => l !== lang).map((l) => OG_LOCALE[l]);
+
+/* LocalBusiness structured data — real atelier info from the footer.
+   Two branches (Bardejov + Košice) as departments with their own
+   address + geo, so Google Maps/knowledge panel can place both. */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": "https://fottapopadic.sk/#organization",
+  name: SITE_NAME,
+  url: "https://fottapopadic.sk/",
+  logo: abs("/favicon.svg"),
+  image: ogImage,
+  email: "atelier@fottapopadic.sk",
+  telephone: "+421907183302",
+  foundingDate: "1998",
+  founder: { "@type": "Person", name: "Pavol Fotta" },
+  areaServed: ["SK", "CZ"],
+  sameAs: [
+    "https://www.instagram.com/fotta_popadic_architekt",
+    "https://www.facebook.com/fotta.popadic",
+  ],
+  department: [
+    {
+      "@type": "ProfessionalService",
+      name: "Fotta Popadič architekt — Bardejov",
+      telephone: "+421907183302",
+      email: "atelier@fottapopadic.sk",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Priemyselná 3767",
+        addressLocality: "Bardejov",
+        postalCode: "085 01",
+        addressCountry: "SK",
+      },
+      geo: { "@type": "GeoCoordinates", latitude: 49.3041466, longitude: 21.3043425 },
+    },
+    {
+      "@type": "ProfessionalService",
+      name: "Fotta Popadič architekt — Košice",
+      telephone: "+421907183302",
+      email: "atelier@fottapopadic.sk",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Dominikánske námestie 590/6",
+        addressLocality: "Košice",
+        postalCode: "040 01",
+        addressCountry: "SK",
+      },
+      geo: { "@type": "GeoCoordinates", latitude: 48.7207062, longitude: 21.2539693 },
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -52,6 +126,40 @@ const {
     <meta name="description" content={description} />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    {/* ===== SEO ===== */}
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    {/* Language alternates — same page in SK / CZ / EN, x-default → SK. */}
+    <link rel="alternate" hreflang={HREFLANG.sk} href={pageUrl(alt.sk)} />
+    <link rel="alternate" hreflang={HREFLANG.cz} href={pageUrl(alt.cz)} />
+    <link rel="alternate" hreflang={HREFLANG.en} href={pageUrl(alt.en)} />
+    <link rel="alternate" hreflang="x-default" href={pageUrl(alt.sk)} />
+
+    {/* Open Graph — link/social previews (FB, LinkedIn, iMessage…). */}
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={SITE_NAME} />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    {ogLocaleAlternates.map((l) => (
+      <meta property="og:locale:alternate" content={l} />
+    ))}
+
+    {/* Twitter / X card. */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    {/* LocalBusiness structured data. */}
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
 
     {/* iOS/Android browser-chrome tint. In portrait Safari the status-bar
         strip is CHROME, not page — content can never paint behind the

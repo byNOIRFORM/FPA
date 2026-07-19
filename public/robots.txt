@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://fottapopadic.sk/sitemap-index.xml
