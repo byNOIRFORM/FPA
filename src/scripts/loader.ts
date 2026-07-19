@@ -22,13 +22,20 @@ import { isTransitionArrival } from "./page-transition";
  *   - FAILSAFE_MS timeout force-removes the loader if anything stalls.
  *   - prefers-reduced-motion: skip animation entirely, just show + fade.
  *
- * Pre-launch TODO: gate the loader on sessionStorage so it only plays
- * on the first visit per session. (Tracked in the parked-work memory.)
+ * Once per session: the intro is a first-arrival brand moment, so a
+ * sessionStorage flag makes it play only on the visitor's FIRST homepage
+ * view this session — every later homepage load (reload, or returning
+ * from a subpage) hands straight to the hero. Cleared when the browser
+ * session ends, so a fresh visit later still gets the intro.
  */
 
 // Sits just above the natural ~2.5s outro so the failsafe doesn't cut
 // the curtain rise short. Still well under any user-perceived "stuck".
 const FAILSAFE_MS = 3600;
+
+// Session flag — set on the first homepage view, checked on every later
+// one. try/catch guards private-mode where storage throws.
+const SEEN_KEY = "fpa:loader-seen";
 
 export function initLoader(): void {
   if (typeof window === "undefined") return;
@@ -36,13 +43,24 @@ export function initLoader(): void {
   const root = document.getElementById("loader");
   if (!root) return;
 
-  // Arriving under the page-transition curtain — skip the logo intro
-  // entirely. The curtain owns this entrance; replaying the full
-  // intro on every internal navigation would wear thin. The hero
-  // reveal still plays underneath the lifting curtain.
-  // (isTransitionArrival is captured at import time, so this works
-  // regardless of when page-transition.ts clears the attribute.)
-  if (isTransitionArrival) {
+  // We're on the homepage (the only page with #loader). Read the session
+  // flag, then mark the session as "entered" — any later homepage view
+  // this session skips the intro, whether this one plays or is skipped.
+  let seen = false;
+  try {
+    seen = sessionStorage.getItem(SEEN_KEY) === "1";
+    sessionStorage.setItem(SEEN_KEY, "1");
+  } catch {
+    /* private mode — storage throws; the intro just plays each time */
+  }
+
+  // Skip the logo intro when EITHER:
+  //   - arriving under the page-transition curtain (internal nav — the
+  //     curtain owns this entrance; replaying the intro would wear thin),
+  //   - or it already played this session (seen).
+  // Both hand straight to the hero. (isTransitionArrival is captured at
+  // import time, so it's stable regardless of when the attribute clears.)
+  if (isTransitionArrival || seen) {
     document.body.removeAttribute("data-loader-active");
     root.remove();
     revealHero();
