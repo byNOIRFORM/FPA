@@ -316,8 +316,17 @@ const t = home[lang];
     pointer-events: none;
   }
 
-  .hero-title-hover:hover::after {
+  /* Underline in sync with the photo swap. On MOUSE it's :hover (draws
+     out when the cursor leaves). On TOUCH there's no leave, so hero.ts
+     drives .is-peeking and clears it on the 2.5s auto-revert — otherwise
+     the underline stuck on after the photo reverted (Michal, 2026-07-19). */
+  .hero-title-hover.is-peeking::after {
     transform: scaleX(1);
+  }
+  @media (hover: hover) {
+    .hero-title-hover:hover::after {
+      transform: scaleX(1);
+    }
   }
 
   /* ===== Reduced motion ===== */

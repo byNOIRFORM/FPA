@@ -83,6 +83,10 @@ function initHeroImageSwap(): void {
 
   let activeKey = "default";
   let leaveTimeout: number | null = null;
+  // Touch has no "leave" event, so a tapped photo would stick. On those
+  // devices we auto-revert to the default after a short peek instead.
+  const noHover = window.matchMedia("(hover: none)").matches;
+  const PEEK_MS = 2000;
 
   const show = (key: string) => {
     if (key === activeKey) return;
@@ -135,6 +139,10 @@ function initHeroImageSwap(): void {
     });
   };
 
+  // Touch underline: :hover sticks on touch, so on no-hover devices the
+  // underline is JS-driven (.is-peeking) and cleared with the photo.
+  const clearPeek = () => words.forEach((w) => w.classList.remove("is-peeking"));
+
   words.forEach((word) => {
     const key = word.dataset.hoverImage;
     if (!key) return;
@@ -145,6 +153,19 @@ function initHeroImageSwap(): void {
         leaveTimeout = null;
       }
       show(key);
+      // Touch (fires mouseenter on tap): no mouseleave will come, so both
+      // the photo AND the underline auto-revert after the peek. Reuses
+      // leaveTimeout so a tap on another word cancels this one first
+      // (Michal, 2026-07-19).
+      if (noHover) {
+        clearPeek();
+        word.classList.add("is-peeking");
+        leaveTimeout = window.setTimeout(() => {
+          show("default");
+          clearPeek();
+          leaveTimeout = null;
+        }, PEEK_MS);
+      }
     });
 
     word.addEventListener("mouseleave", () => {
@@ -152,6 +173,7 @@ function initHeroImageSwap(): void {
       // word doesn't briefly snap back to default in between.
       leaveTimeout = window.setTimeout(() => {
         show("default");
+        if (noHover) clearPeek();
         leaveTimeout = null;
       }, 80);
     });
