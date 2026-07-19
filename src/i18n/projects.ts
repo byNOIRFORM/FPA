@@ -50,7 +50,9 @@ export interface SpecRow {
  *            ("Technické špecifikácie")
  */
 export type ContentBlock =
-  | { kind: "photo"; media: ProjectImage }
+  /** `video` (CMS-only) = short muted loop; the photo stays as poster,
+   *  aspect source and reduced-motion/failure fallback. */
+  | { kind: "photo"; media: ProjectImage; video?: string }
   | { kind: "text"; title: Localized<string>; body: Localized<string[]> }
   | { kind: "duo"; left: ProjectImage; right: ProjectImage }
   | { kind: "spec"; title: Localized<string>; rows: Localized<SpecRow[]> };

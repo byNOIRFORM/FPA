@@ -77,8 +77,32 @@ export const photoBlock = defineType({
       title: "Fotka",
       type: "image",
       options: { hotspot: true },
-      description: "Zobrazí sa na celú šírku obsahu s jemnou paralaxou. Ideálne na šírku (~1384 × 780).",
+      description:
+        "Zobrazí sa na celú šírku obsahu s jemnou paralaxou. Ideálne na šírku (~1384 × 780). Pri nahratom videu slúži ako prvý záber (poster) a záloha — zostáva povinná.",
       validation: (r) => r.required().error("Povinné pole."),
+    }),
+    defineField({
+      name: "video",
+      title: "Video (voliteľné)",
+      type: "file",
+      options: { accept: "video/mp4" },
+      description:
+        "Krátka tichá slučka namiesto statickej fotky — prehráva sa automaticky, bez zvuku, dokola. MP4 (H.264), 1080p, 24–30 fps, BEZ zvukovej stopy, ideálne 5–15 sekúnd (~do 15 MB). Export napr.: ffmpeg -i vstup.mov -c:v libx264 -crf 22 -vf scale=1920:-2 -an -movflags +faststart vystup.mp4",
+      // Strážca váhy: veľkosť súboru žije v asset dokumente — async
+      // dotaz, warning nebráni publikovaniu (vzor fotkových strážcov).
+      validation: (r) =>
+        r
+          .custom(async (file: { asset?: { _ref?: string } } | undefined, ctx) => {
+            const ref = file?.asset?._ref;
+            if (!ref) return true;
+            const size = await ctx
+              .getClient({ apiVersion: "2026-07-01" })
+              .fetch<number | null>("*[_id == $id][0].size", { id: ref });
+            if (size && size > 25 * 1024 * 1024)
+              return `Video má ${Math.round(size / 1024 / 1024)} MB — pre svižné načítanie ho stlačte pod ~15–25 MB (kratšia slučka alebo nižší bitrate).`;
+            return true;
+          })
+          .warning(),
     }),
   ],
   preview: {

@@ -192,7 +192,7 @@ export function imgSrc(url: string, w: number): string {
 export type SanityImg = { url: string; w: number; h: number } | null;
 
 export type SanityProjectBlock =
-  | { _type: "photoBlock"; _key: string; img: SanityImg }
+  | { _type: "photoBlock"; _key: string; img: SanityImg; videoUrl?: string | null }
   | {
       _type: "textBlock";
       _key: string;
@@ -284,7 +284,7 @@ export function fetchProjects(): Promise<SanityProject[] | null> {
       "context": context.asset->${IMG},
       blocks[]{
         _type, _key,
-        _type == "photoBlock" => { "img": image.asset->${IMG} },
+        _type == "photoBlock" => { "img": image.asset->${IMG}, "videoUrl": video.asset->url },
         _type == "textBlock" => { titleSk, titleCz, titleEn, bodySk, bodyCz, bodyEn },
         _type == "duoBlock" => { "left": left.asset->${IMG}, "right": right.asset->${IMG} },
         _type == "specBlock" => { titleSk, titleCz, titleEn, rows[]{ labelSk, valueSk, labelCz, valueCz, labelEn, valueEn } }

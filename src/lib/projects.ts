@@ -177,7 +177,14 @@ function localizedText(
 
 function blockFromSanity(b: NonNullable<SanityProject["blocks"]>[number]): ContentBlock | null {
   if (b._type === "photoBlock") {
-    return b.img?.url ? { kind: "photo", media: projectImage(b.img, 2560) } : null;
+    if (!b.img?.url) return null;
+    // Video = krátka tichá slučka; fotka ostáva posterom + fallbackom
+    // (súbor ide priamo zo Sanity CDN, bez transformácií).
+    return {
+      kind: "photo",
+      media: projectImage(b.img, 2560),
+      ...(b.videoUrl ? { video: b.videoUrl } : {}),
+    };
   }
   if (b._type === "duoBlock") {
     return b.left?.url && b.right?.url

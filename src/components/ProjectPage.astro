@@ -125,7 +125,25 @@ const singleGallery = gallery.length <= 1;
         <section class="pblock pblock--photo">
           <div class="pwrap">
             <figure class="pmedia" style={`aspect-ratio: ${block.media.ratio}`}>
-              <img src={block.media.image} alt={block.media.alt ?? ""} loading="lazy" />
+              {block.video ? (
+                /* Short muted loop from the CMS — behaves like a living
+                   photo. NO autoplay attribute: scripts/loop-video.ts
+                   plays it only in-viewport (and never under reduced
+                   motion), so until then the photo shows as poster.
+                   Parallax targets `img` only, videos sit still by
+                   design. */
+                <video
+                  src={block.video}
+                  poster={block.media.image}
+                  muted
+                  loop
+                  playsinline
+                  preload="metadata"
+                  data-loop-video
+                ></video>
+              ) : (
+                <img src={block.media.image} alt={block.media.alt ?? ""} loading="lazy" />
+              )}
             </figure>
           </div>
         </section>
@@ -302,7 +320,8 @@ const singleGallery = gallery.length <= 1;
     overflow: hidden;
     background: var(--surface);
   }
-  .pmedia img {
+  .pmedia img,
+  .pmedia video {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -313,8 +332,10 @@ const singleGallery = gallery.length <= 1;
     will-change: transform;
   }
   /* Static media (gallery items, preview thumb) — no parallax oversize;
-     just cover the frame. */
-  .pmedia--static img {
+     just cover the frame. Video loops join them: parallax drives `img`
+     only, so a scaled video would sit zoomed 30% forever. */
+  .pmedia--static img,
+  .pmedia video {
     transform: none;
     will-change: auto;
   }
