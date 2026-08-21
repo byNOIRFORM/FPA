@@ -1,7 +1,7 @@
 /**
- * Jednorazový seed sekcie Služby — nahrá 5 fáz projektu (01–05) vrátane
- * zoznamov Obsahuje, modalu „Dozvedieť sa viac“ (dnes ho má len
- * Architektonická štúdia) a fotiek z ../public/images/services/.
+ * Jednorazový seed sekcie Služby — nahrá 6 služieb (01–06) vrátane
+ * zoznamov Obsahuje, modalu „Dozvedieť sa viac“ (dnes ho má
+ * Architektonická štúdia a 3D sken) a fotiek z ../public/images/services/.
  *
  * Texty sa NEPREPISUJÚ ručne: skript ich importuje priamo z i18n webu
  * (home.ts + services-page.ts + service-details.ts), takže obsah v CMS
@@ -32,6 +32,7 @@ const PHOTOS = [
   "03-uzemne.jpg",
   "04-stavebne.jpg",
   "05-realizacna.jpg",
+  "06-3d-sken.jpg",
 ];
 
 async function main(): Promise<void> {
@@ -46,8 +47,8 @@ async function main(): Promise<void> {
     en: servicesPage.en.spec.includes,
   };
 
-  if (items.sk.length !== 5 || items.cz.length !== 5 || items.en.length !== 5) {
-    throw new Error("Očakávam presne 5 služieb v každom jazyku (home.ts services.items).");
+  if (items.sk.length !== 6 || items.cz.length !== 6 || items.en.length !== 6) {
+    throw new Error("Očakávam presne 6 služieb v každom jazyku (home.ts services.items).");
   }
 
   let rank = LexoRank.middle();
@@ -61,7 +62,7 @@ async function main(): Promise<void> {
       );
     }
 
-    // Modal — dnes len Architektonická štúdia; entry musí existovať vo
+    // Modal — dnes Architektonická štúdia a 3D sken; entry musí existovať vo
     // všetkých jazykoch, sekcie po riadkoch zipujeme podľa indexu.
     const dSk = serviceDetails.sk.find((d) => d.index === i);
     const dCz = serviceDetails.cz.find((d) => d.index === i);

@@ -34,7 +34,7 @@ export interface ServicesPageContent {
   stages: { title: string; alt: string };
   spec: {
     includesLabel: string;
-    /** "Obsahuje" lists for the 5 stages (01 → 05). */
+    /** "Obsahuje" lists for the 6 services (01 → 06). */
     includes: string[][];
   };
 }
@@ -81,6 +81,7 @@ export const servicesPage: Record<Lang, ServicesPageContent> = {
         ["Sprievodná správa", "Situácia osadenia", "Pôdorysy a rezy", "Zákresy do kontextu"],
         ["Architektúra (mierka 1:50)", "Energetické hodnotenie stavby", "Požiarna bezpečnosť stavby", "Statika", "Zdravotechnika", "Vykurovanie", "Elektroinštalácie", "Vzduchotechnika", "Dopravné riešenie", "Napojenie stavby na inžinierske siete"],
         ["Architektúra (mierka 1:50 až 1:25)", "Energetické hodnotenie stavby", "Požiarna bezpečnosť stavby", "Statika", "Zdravotechnika", "Vykurovanie", "Elektroinštalácie", "Vzduchotechnika", "Dopravné riešenie", "Napojenie stavby na inžinierske siete", "Autorský dozor"],
+        ["Zameranie skutočného stavu (As-Built)", "Podklady pre BIM a CAD", "Mračno bodov (.E57, .RCP, .LGS)", "HDR sférické panorámy", "2D výkresová dokumentácia", "3D BIM model zo skenu"],
       ],
     },
   },
@@ -126,6 +127,7 @@ export const servicesPage: Record<Lang, ServicesPageContent> = {
         ["Průvodní zpráva", "Situace osazení", "Půdorysy a řezy", "Zákresy do kontextu"],
         ["Architektura (měřítko 1:50)", "Energetické hodnocení stavby", "Požární bezpečnost stavby", "Statika", "Zdravotechnika", "Vytápění", "Elektroinstalace", "Vzduchotechnika", "Dopravní řešení", "Napojení stavby na inženýrské sítě"],
         ["Architektura (měřítko 1:50 až 1:25)", "Energetické hodnocení stavby", "Požární bezpečnost stavby", "Statika", "Zdravotechnika", "Vytápění", "Elektroinstalace", "Vzduchotechnika", "Dopravní řešení", "Napojení stavby na inženýrské sítě", "Autorský dozor"],
+        ["Zaměření skutečného stavu (As-Built)", "Podklady pro BIM a CAD", "Mračno bodů (.E57, .RCP, .LGS)", "HDR sférická panoramata", "2D výkresová dokumentace", "3D BIM model ze skenu"],
       ],
     },
   },
@@ -171,6 +173,7 @@ export const servicesPage: Record<Lang, ServicesPageContent> = {
         ["Accompanying report", "Site layout plan", "Floor plans and sections", "Context renderings"],
         ["Architecture (scale 1:50)", "Building energy assessment", "Fire safety", "Structural engineering", "Plumbing", "Heating", "Electrical installations", "HVAC", "Traffic solution", "Utility connections"],
         ["Architecture (scale 1:50 to 1:25)", "Building energy assessment", "Fire safety", "Structural engineering", "Plumbing", "Heating", "Electrical installations", "HVAC", "Traffic solution", "Utility connections", "Author's supervision"],
+        ["As-built survey", "Data for BIM and CAD", "Point cloud (.E57, .RCP, .LGS)", "HDR spherical panoramas", "2D drawing documentation", "3D BIM model from the scan"],
       ],
     },
   },

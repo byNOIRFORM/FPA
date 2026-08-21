@@ -17,9 +17,10 @@ import { skBundles } from "./i18n/sk";
 // Zrušiť publikovanie a mimo dialógu „Vytvoriť nový dokument".
 const SINGLETONS = ["teamSettings", "homepageProjects"];
 
-// Pevná päťka služieb = 5 fáz projektu (Michal, 2026-07-17): dokumenty sa
-// iba upravujú a presúvajú — nevytvárajú, nemažú, neduplikujú. Nová služba
-// je obchodné rozhodnutie a rieši sa s vývojárom, nie klikom v Studiu.
+// Pevný počet služieb = 5 fáz projektu + 3D sken (Michal, 2026-07-17;
+// šiesta pribudla 2026-08-21): dokumenty sa iba upravujú a presúvajú —
+// nevytvárajú, nemažú, neduplikujú. Nová služba je obchodné rozhodnutie
+// a rieši sa s vývojárom, nie klikom v Studiu.
 const FIXED_TYPES = ["service"];
 
 export default defineConfig({
@@ -63,7 +64,7 @@ export default defineConfig({
                     }),
                   ]),
               ),
-            // Služby — pevná päťka riadkov spec-sheetu (hlavná stránka +
+            // Služby — pevná šestka riadkov spec-sheetu (hlavná stránka +
             // /sluzby + kontaktný formulár). Drag & drop mení poradie;
             // createIntent: false skrýva tlačidlo vytvárania.
             orderableDocumentListDeskItem({

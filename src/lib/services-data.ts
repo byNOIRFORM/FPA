@@ -46,6 +46,10 @@ const META = [
   { num: "03", image: "/images/services/03-uzemne.jpg", aspect: "landscape" as const },
   { num: "04", image: "/images/services/04-stavebne.jpg", aspect: "portrait" as const },
   { num: "05", image: "/images/services/05-realizacna.jpg", aspect: "landscape" as const },
+  // 06 3D sken: 06-3d-sken.jpg je zatiaľ KÓPIA fotky 03 (Michal, 2026-08-21)
+  // — vlastná fotka skenovania sa doplní neskôr; vymení sa jeden súbor
+  // tu a jedna fotka v Studiu, nič iné.
+  { num: "06", image: "/images/services/06-3d-sken.jpg", aspect: "landscape" as const },
 ];
 
 export async function getServicesView(lang: Lang): Promise<ServicesView> {

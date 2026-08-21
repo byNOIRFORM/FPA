@@ -3,22 +3,23 @@ import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-li
 import { withPlaceholder } from "../components/placeholderInput";
 
 /**
- * Služba — jeden riadok spec-sheetu služieb (5 fáz projektu, 01–05).
- * Názov a popis sa zobrazujú na hlavnej stránke, na stránke Služby a názvy
- * aj ako výber v kontaktnom formulári; zoznam Obsahuje a modal „Dozvedieť
- * sa viac“ len na stránke Služby.
+ * Služba — jeden riadok spec-sheetu služieb (01–06: päť fáz projektu
+ * + 3D sken). Názov a popis sa zobrazujú na hlavnej stránke, na stránke
+ * Služby a názvy aj ako výber v kontaktnom formulári; zoznam Obsahuje
+ * a modal „Dozvedieť sa viac“ len na stránke Služby.
  *
- * PEVNÁ PÄŤKA (Michal, 2026-07-17): dokumenty sa v Studiu nevytvárajú ani
- * nemažú, iba upravujú — 5 služieb = 5 fáz projektu, čo je obchodné
- * rozhodnutie, nie obsahová drobnosť. Zámky sú v sanity.config.ts
- * (žiadne Vymazať/Duplikovať, createIntent: false na zozname).
+ * PEVNÝ POČET (Michal, 2026-07-17; rozšírené na 6 dňa 2026-08-21):
+ * dokumenty sa v Studiu nevytvárajú ani nemažú, iba upravujú — nová
+ * služba je obchodné rozhodnutie, nie obsahová drobnosť. Zámky sú
+ * v sanity.config.ts (žiadne Vymazať/Duplikovať, createIntent: false
+ * na zozname).
  *
  * UX formulára = rovnaký vzor ako projekty, tím a referencie:
  * jazykové prepínače SK | CZ | EN vnútri sekcií, žiadne taby na úrovni
  * dokumentu.
  *
  *  - Poradie = drag & drop v zozname "Služby" (orderRank spravuje plugin);
- *    čísla 01–05 aj striedanie formátov fotiek dopĺňa web podľa pozície.
+ *    čísla 01–06 aj striedanie formátov fotiek dopĺňa web podľa pozície.
  *  - Fotka je VOLITEĽNÁ: bez nej web použije pôvodnú fotku riadku.
  *  - Modal „Dozvedieť sa viac“: odkaz sa na webe zobrazí automaticky pri
  *    službe, ktorá má v modale aspoň jednu sekciu — a zmizne, keď sa

@@ -85,8 +85,8 @@ export interface HomeContent {
     nav: { home: string; about: string; projects: string; services: string; careers: string };
     backToTop: string;
   };
-  /** Site-wide contact panel (ContactForm.astro). The first five service
-   *  pills reuse services.items[].title; serviceOther is the 6th ("Iné"). */
+  /** Site-wide contact panel (ContactForm.astro). The first six service
+   *  pills reuse services.items[].title; serviceOther is the 7th ("Iné"). */
   contact: {
     closeAria: string;
     title: string;
@@ -173,9 +173,9 @@ export const home: Record<Lang, HomeContent> = {
       cta: "Dozvedieť sa viac",
       items: [
         {
-          title: "Urbanistická štúdia",
+          title: "Územná štúdia",
           desc: "Komplexná analýza územia a návrh urbanistickej koncepcie pre rozsiahle rozvojové projekty alebo revitalizáciu existujúcich celkov. Začíname tu, keď je v hre viac než jedna budova.",
-          alt: "Urbanistická štúdia — situačný model územia",
+          alt: "Územná štúdia — situačný model územia",
         },
         {
           title: "Architektonická štúdia",
@@ -183,19 +183,24 @@ export const home: Record<Lang, HomeContent> = {
           alt: "Architektonická štúdia — skice a materiálové vzorky",
         },
         {
-          title: "Územné rozhodnutie",
-          desc: "Rozhodnutie o umiestnení stavby, ktorým sa určuje stavebný pozemok, podmienky a jeho využitie.",
-          alt: "Územné rozhodnutie — vymeriavanie pozemku",
+          title: "Stavebný zámer",
+          desc: "Dokumentácia, ktorou preukazujeme umiestnenie stavby a jej súlad s územnoplánovacou dokumentáciou. Stavebný úrad ju prerokuje a overí — nahrádza pôvodné územné rozhodnutie.",
+          alt: "Stavebný zámer — vymeriavanie pozemku",
         },
         {
-          title: "Stavebné povolenie",
-          desc: "Určuje záväzné podmienky uskutočnenia a užívania stavby a rozhodne o námietkach účastníkov konania.",
-          alt: "Stavebné povolenie — projektová dokumentácia",
+          title: "Projekt stavby",
+          desc: "Úplná projektová dokumentácia pre povolenie stavby. Určuje záväzné podmienky jej uskutočnenia a užívania a obsahuje architektúru aj všetky profesie.",
+          alt: "Projekt stavby — projektová dokumentácia",
         },
         {
           title: "Realizačná dokumentácia",
           desc: "Podrobná dokumentácia nevyhnutná pre realizáciu stavby. Obsahuje jednotlivé profesie a špecifikáciu detailov.",
           alt: "Realizačná dokumentácia — detaily a špecifikácie",
+        },
+        {
+          title: "3D sken",
+          desc: "Presné digitálne zameranie budov, interiérov a konštrukčných detailov 3D laserovým skenerom. Využívame ho pri vlastných projektoch aj ako samostatnú službu pre architektov, projektantov a realizátorov.",
+          alt: "3D sken — laserové skenovanie objektu",
         },
       ],
     },
@@ -326,9 +331,9 @@ export const home: Record<Lang, HomeContent> = {
       cta: "Dozvědět se více",
       items: [
         {
-          title: "Urbanistická studie",
+          title: "Územní studie",
           desc: "Komplexní analýza území a návrh urbanistické koncepce pro rozsáhlé rozvojové projekty nebo revitalizaci stávajících celků. Začínáme zde, když je ve hře víc než jedna budova.",
-          alt: "Urbanistická studie — situační model území",
+          alt: "Územní studie — situační model území",
         },
         {
           title: "Architektonická studie",
@@ -336,19 +341,24 @@ export const home: Record<Lang, HomeContent> = {
           alt: "Architektonická studie — skici a materiálové vzorky",
         },
         {
-          title: "Územní rozhodnutí",
-          desc: "Rozhodnutí o umístění stavby, kterým se určuje stavební pozemek, podmínky a jeho využití.",
-          alt: "Územní rozhodnutí — vyměřování pozemku",
+          title: "Stavební záměr",
+          desc: "Dokumentace, kterou prokazujeme umístění stavby a její soulad s územněplánovací dokumentací. Stavební úřad ji projedná a ověří — nahrazuje původní územní rozhodnutí.",
+          alt: "Stavební záměr — vyměřování pozemku",
         },
         {
-          title: "Stavební povolení",
-          desc: "Určuje závazné podmínky uskutečnění a užívání stavby a rozhodne o námitkách účastníků řízení.",
-          alt: "Stavební povolení — projektová dokumentace",
+          title: "Projekt stavby",
+          desc: "Úplná projektová dokumentace pro povolení stavby. Určuje závazné podmínky jejího uskutečnění a užívání a obsahuje architekturu i všechny profese.",
+          alt: "Projekt stavby — projektová dokumentace",
         },
         {
           title: "Realizační dokumentace",
           desc: "Podrobná dokumentace nezbytná pro realizaci stavby. Obsahuje jednotlivé profese a specifikaci detailů.",
           alt: "Realizační dokumentace — detaily a specifikace",
+        },
+        {
+          title: "3D sken",
+          desc: "Přesné digitální zaměření budov, interiérů a konstrukčních detailů 3D laserovým skenerem. Využíváme ho u vlastních projektů i jako samostatnou službu pro architekty, projektanty a realizátory.",
+          alt: "3D sken — laserové skenování objektu",
         },
       ],
     },
@@ -479,9 +489,9 @@ export const home: Record<Lang, HomeContent> = {
       cta: "Learn more",
       items: [
         {
-          title: "Urban Study",
+          title: "Land-Use Study",
           desc: "A comprehensive analysis of the site and a proposal for an urban concept for large-scale development projects or the revitalisation of existing complexes. We start here when more than one building is at stake.",
-          alt: "Urban study — site situation model",
+          alt: "Land-use study — site situation model",
         },
         {
           title: "Architectural Study",
@@ -489,19 +499,24 @@ export const home: Record<Lang, HomeContent> = {
           alt: "Architectural study — sketches and material samples",
         },
         {
-          title: "Zoning Decision",
-          desc: "The decision on the placement of the building, defining the plot, the conditions and its use.",
-          alt: "Zoning decision — surveying the plot",
+          title: "Building Intent",
+          desc: "The documentation establishing the placement of the building and its compliance with the land-use plan. The building authority reviews and approves it — it replaces the former zoning decision.",
+          alt: "Building intent — surveying the plot",
         },
         {
-          title: "Building Permit",
-          desc: "It sets the binding conditions for constructing and using the building, and decides on the objections of the parties to the proceedings.",
-          alt: "Building permit — project documentation",
+          title: "Building Project",
+          desc: "The complete project documentation for the building permit. It sets the binding conditions for constructing and using the building and covers architecture along with every engineering trade.",
+          alt: "Building project — project documentation",
         },
         {
           title: "Construction Documentation",
           desc: "Detailed documentation essential for building the project. It covers the individual trades and the specification of details.",
           alt: "Construction documentation — details and specifications",
+        },
+        {
+          title: "3D Scan",
+          desc: "A precise digital survey of buildings, interiors and structural details with a 3D laser scanner. We use it on our own projects and offer it as a standalone service to architects, engineers and contractors.",
+          alt: "3D scan — laser scanning of a building",
         },
       ],
     },
