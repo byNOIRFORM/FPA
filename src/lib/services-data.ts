@@ -8,7 +8,7 @@
  * nedostupné, vracia sa presne dnešný hardcoded obsah (home.ts +
  * services-page.ts + service-details.ts) — build sa NIKDY nerozbije o CMS.
  *
- * Pozičné veci zámerne NEžijú v CMS: čísla 01–05 a rytmus fotiek
+ * Pozičné veci zámerne NEžijú v CMS: čísla 01–06 a rytmus fotiek
  * portrait/landscape (TALL → short → short → TALL → short, t.j. portrait
  * na pozíciách i % 3 === 0) odvodzuje adaptér z poradia riadkov, takže
  * drag & drop v Studiu ich nikdy nerozhodí.
@@ -46,9 +46,6 @@ const META = [
   { num: "03", image: "/images/services/03-uzemne.jpg", aspect: "landscape" as const },
   { num: "04", image: "/images/services/04-stavebne.jpg", aspect: "portrait" as const },
   { num: "05", image: "/images/services/05-realizacna.jpg", aspect: "landscape" as const },
-  // 06 3D sken: 06-3d-sken.jpg je zatiaľ KÓPIA fotky 03 (Michal, 2026-08-21)
-  // — vlastná fotka skenovania sa doplní neskôr; vymení sa jeden súbor
-  // tu a jedna fotka v Studiu, nič iné.
   { num: "06", image: "/images/services/06-3d-sken.jpg", aspect: "landscape" as const },
 ];
 
@@ -71,7 +68,13 @@ export async function getServicesView(lang: Lang): Promise<ServicesView> {
     }));
     return {
       rows,
-      details: serviceDetails[lang],
+      // Prázdny úvod modalu = popis služby — rovnaké pravidlo ako v CMS
+      // vetve nižšie, takže panel otvára tou istou vetou, akou sa riadok
+      // predstavil, a text sa nemusí písať dvakrát.
+      details: serviceDetails[lang].map((d) => ({
+        ...d,
+        intro: d.intro || rows[d.index]?.desc || "",
+      })),
       detailIndices,
       pillTitles: rows.map((r) => r.title),
     };
@@ -93,16 +96,19 @@ export async function getServicesView(lang: Lang): Promise<ServicesView> {
     includes: (s.includes ?? []).map((it) => pick(it.sk, it.cz, it.en)),
   }));
 
-  // Modal má služba s aspoň jednou sekciou; nadpis = názov služby,
-  // úvod = voliteľný text modalu, inak popis služby.
+  // Modal má služba s vlastným úvodom ALEBO aspoň jednou sekciou —
+  // Architektonická štúdia a 3D sken sú samotný úvod, bez sekcií, a link
+  // „Dozvedieť sa viac" im musí svietiť rovnako. Nadpis = názov služby;
+  // prázdny úvod v CMS spadne späť na popis služby.
   const details: ServiceDetailData[] = cms.flatMap((s, i) => {
     const sections = s.modalSections ?? [];
-    if (sections.length === 0) return [];
+    const intro = pick(s.modalIntroSk, s.modalIntroCz, s.modalIntroEn);
+    if (sections.length === 0 && !intro) return [];
     return [
       {
         index: i,
         title: rows[i].title,
-        intro: pick(s.modalIntroSk, s.modalIntroCz, s.modalIntroEn) || rows[i].desc,
+        intro: intro || rows[i].desc,
         sections: sections.map((sec) => ({
           heading: pick(sec.headingSk, sec.headingCz, sec.headingEn),
           body: pick(sec.bodySk, sec.bodyCz, sec.bodyEn),

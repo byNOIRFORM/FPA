@@ -81,16 +81,15 @@ const { rows: services, detailIndices } = await getServicesView(lang);
                 </ul>
               </div>
             )}
-            {/* Per-row link — rows 02+ always render it (inert
-                placeholder until modal copy exists); row 01 joins the
-                moment its modal is written in the CMS. It opens the
-                detail panel only where content exists (detailIndices). */}
-            {detailed && (i > 0 || detailIndices.has(i)) && (
+            {/* Per-row link — renders ONLY where the service has modal
+                copy (detailIndices), so a visible link can never be inert.
+                Empty a modal in Studio and its link disappears with it. */}
+            {detailed && detailIndices.has(i) && (
               <button
                 type="button"
                 class="service-more"
-                data-open-detail={detailIndices.has(i) ? "" : undefined}
-                data-detail-index={detailIndices.has(i) ? i : undefined}
+                data-open-detail
+                data-detail-index={i}
               >
                 <span>{t.services.cta}</span>
                 <svg class="service-more-arrow" width="16" height="10" viewBox="0 0 16 10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

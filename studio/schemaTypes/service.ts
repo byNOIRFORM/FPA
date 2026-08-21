@@ -22,9 +22,10 @@ import { withPlaceholder } from "../components/placeholderInput";
  *    čísla 01–06 aj striedanie formátov fotiek dopĺňa web podľa pozície.
  *  - Fotka je VOLITEĽNÁ: bez nej web použije pôvodnú fotku riadku.
  *  - Modal „Dozvedieť sa viac“: odkaz sa na webe zobrazí automaticky pri
- *    službe, ktorá má v modale aspoň jednu sekciu — a zmizne, keď sa
- *    sekcie zmažú. Nadpis modalu je názov služby; úvod je voliteľný
- *    (prázdny = použije sa popis služby).
+ *    službe, ktorá má v modale vyplnený úvod alebo aspoň jednu sekciu —
+ *    a zmizne, keď sa modal vyprázdni. Nadpis modalu je názov služby.
+ *    Úvod: prázdny riadok = nový odstavec, nevyplnený = popis služby.
+ *    Telo sekcie: viac riadkov pod sebou = odrážkový zoznam.
  */
 
 /** Jazykové taby vnútri sekcie — rovnaké ako pri ostatných typoch. */
@@ -60,7 +61,7 @@ export const service = defineType({
       name: "modal",
       title: "Modal „Dozvedieť sa viac“",
       description:
-        "Vysúvací panel s podrobným textom. Odkaz „Dozvedieť sa viac“ sa pri službe zobrazí automaticky, keď má modal aspoň jednu sekciu. Nadpisom modalu je názov služby.",
+        "Vysúvací panel s podrobným textom. Odkaz „Dozvedieť sa viac“ sa pri službe zobrazí automaticky, keď má modal vyplnený úvod alebo aspoň jednu sekciu — a zmizne, keď modal vyprázdnite. Nadpisom modalu je názov služby.",
     },
   ],
   fields: [
@@ -194,7 +195,8 @@ export const service = defineType({
           name: "intro",
           title: "Úvod (voliteľný)",
           type: "object",
-          description: "Sivý odstavec pod nadpisom modalu. Prázdny = použije sa popis služby.",
+          description:
+            "Sivý text pod nadpisom modalu. PRÁZDNY RIADOK medzi odsekmi = na webe nový odstavec. Nevyplnený = použije sa popis služby.",
           options: { collapsible: false },
           groups: LANG_GROUPS,
           fields: [
@@ -208,7 +210,7 @@ export const service = defineType({
           title: "Sekcie",
           type: "array",
           description:
-            "Bloky nadpis + odstavec pod úvodom. Aspoň jedna sekcia = odkaz „Dozvedieť sa viac“ sa na webe zobrazí.",
+            "Samotný obsah panela — všetko pod deliacou čiarou. Nadpis je VOLITEĽNÝ: hlavný text býva bez neho, nadpis nesie až blok ako „Legislatíva a štandardy“.",
           of: [
             defineArrayMember({
               type: "object",
@@ -218,11 +220,11 @@ export const service = defineType({
               fields: [
                 defineField({
                   name: "headingSk",
-                  title: "Nadpis (SK)",
+                  title: "Nadpis (SK) — voliteľný",
                   type: "string",
                   group: "sk",
-                  components: { input: withPlaceholder("napr. Estetika a príbeh") },
-                  validation: (r) => r.required().error("Povinné pole."),
+                  description: "Nechajte prázdny a blok sa vykreslí ako samotný text bez nadpisu.",
+                  components: { input: withPlaceholder("napr. Legislatíva a štandardy") },
                 }),
                 defineField({
                   name: "bodySk",
@@ -230,14 +232,15 @@ export const service = defineType({
                   type: "text",
                   rows: 4,
                   group: "sk",
+                  description:
+                    "PRÁZDNY RIADOK medzi odsekmi = nový odstavec. Viac RIADKOV tesne pod sebou = odrážkový zoznam (tak sú spravené zoznamy zákonov a vyhlášok).",
                   validation: (r) => r.required().error("Povinné pole."),
                 }),
                 defineField({
                   name: "headingCz",
-                  title: "Nadpis (CZ)",
+                  title: "Nadpis (CZ) — voliteľný",
                   type: "string",
                   group: "cz",
-                  validation: (r) => r.required().error("Povinné pole — doplňte český preklad."),
                 }),
                 defineField({
                   name: "bodyCz",
@@ -249,10 +252,9 @@ export const service = defineType({
                 }),
                 defineField({
                   name: "headingEn",
-                  title: "Nadpis (EN)",
+                  title: "Nadpis (EN) — voliteľný",
                   type: "string",
                   group: "en",
-                  validation: (r) => r.required().error("Povinné pole — doplňte anglický preklad."),
                 }),
                 defineField({
                   name: "bodyEn",
@@ -264,7 +266,11 @@ export const service = defineType({
                 }),
               ],
               preview: {
-                select: { title: "headingSk" },
+                select: { heading: "headingSk", body: "bodySk" },
+                prepare: ({ heading, body }: { heading?: string; body?: string }) => ({
+                  title: heading || (body ? body.split("\n")[0] : "Text bez nadpisu"),
+                  subtitle: heading ? undefined : "bez nadpisu",
+                }),
               },
             }),
           ],

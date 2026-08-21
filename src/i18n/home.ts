@@ -174,32 +174,32 @@ export const home: Record<Lang, HomeContent> = {
       items: [
         {
           title: "Územná štúdia",
-          desc: "Komplexná analýza územia a návrh urbanistickej koncepcie pre rozsiahle rozvojové projekty alebo revitalizáciu existujúcich celkov. Začíname tu, keď je v hre viac než jedna budova.",
+          desc: "Vízia pre väčšie celky. Komplexná analýza a návrh priestorovej koncepcie pre rozsiahlejšie územia, zóny a polyfunkčné celky. Architektúra tu nekončí pri jednej budove, ale formuje celé prostredie.",
           alt: "Územná štúdia — situačný model územia",
         },
         {
           title: "Architektonická štúdia",
-          desc: "Preklopenie Vašich predstáv na papier s architektonickou koordináciou.",
+          desc: "Kreatívny a priestorový koncept, ktorý dáva zámeru jasnú formu. Overujeme potenciál pozemku, hľadáme optimálne proporcie a definujeme vizuálnu identitu budúcej stavby ešte pred investíciou do projektovania.",
           alt: "Architektonická štúdia — skice a materiálové vzorky",
         },
         {
           title: "Stavebný zámer",
-          desc: "Dokumentácia, ktorou preukazujeme umiestnenie stavby a jej súlad s územnoplánovacou dokumentáciou. Stavebný úrad ju prerokuje a overí — nahrádza pôvodné územné rozhodnutie.",
+          desc: "Integrovaný krok k povoleniu. Dokumentácia, ktorá podľa novej legislatívy spája umiestnenie a povolenie stavby do jedného procesu. Definuje kľúčové parametre, architektúru a väzby na okolie.",
           alt: "Stavebný zámer — vymeriavanie pozemku",
         },
         {
           title: "Projekt stavby",
-          desc: "Úplná projektová dokumentácia pre povolenie stavby. Určuje záväzné podmienky jej uskutočnenia a užívania a obsahuje architektúru aj všetky profesie.",
+          desc: "Technické srdce projektu. Komplexná dokumentácia, ktorá transformuje architektonickú víziu do detailných technických riešení. Slúži ako priamy podklad pre overenie úradmi a následnú realizáciu.",
           alt: "Projekt stavby — projektová dokumentácia",
         },
         {
           title: "Realizačná dokumentácia",
-          desc: "Podrobná dokumentácia nevyhnutná pre realizáciu stavby. Obsahuje jednotlivé profesie a špecifikáciu detailov.",
+          desc: "Krok od papiera k hmote. Fáza, v ktorej definujeme každý konštrukčný detail, spoj a materiálové rozhranie. Zabezpečuje, že sa vízia zmení na realitu bez kompromisov na stavbe.",
           alt: "Realizačná dokumentácia — detaily a špecifikácie",
         },
         {
           title: "3D sken",
-          desc: "Presné digitálne zameranie budov, interiérov a konštrukčných detailov 3D laserovým skenerom. Využívame ho pri vlastných projektoch aj ako samostatnú službu pre architektov, projektantov a realizátorov.",
+          desc: "Milimetrová presnosť v digitálnom priestore. Detailné zameranie existujúcich objektov, interiérov a detailov pomocou 3D laserového skenovania. Tvoríme presné mračná bodov pre naše projekty aj externých partnerov.",
           alt: "3D sken — laserové skenovanie objektu",
         },
       ],
@@ -332,32 +332,32 @@ export const home: Record<Lang, HomeContent> = {
       items: [
         {
           title: "Územní studie",
-          desc: "Komplexní analýza území a návrh urbanistické koncepce pro rozsáhlé rozvojové projekty nebo revitalizaci stávajících celků. Začínáme zde, když je ve hře víc než jedna budova.",
+          desc: "Vize pro větší celky. Komplexní analýza a návrh prostorové koncepce pro rozsáhlejší území, zóny a polyfunkční celky. Architektura zde nekončí u jedné budovy, ale formuje celé prostředí.",
           alt: "Územní studie — situační model území",
         },
         {
           title: "Architektonická studie",
-          desc: "Převedení vašich představ na papír s architektonickou koordinací.",
+          desc: "Kreativní a prostorový koncept, který dává záměru jasnou formu. Ověřujeme potenciál pozemku, hledáme optimální proporce a definujeme vizuální identitu budoucí stavby ještě před investicí do projektování.",
           alt: "Architektonická studie — skici a materiálové vzorky",
         },
         {
           title: "Stavební záměr",
-          desc: "Dokumentace, kterou prokazujeme umístění stavby a její soulad s územněplánovací dokumentací. Stavební úřad ji projedná a ověří — nahrazuje původní územní rozhodnutí.",
+          desc: "Integrovaný krok k povolení. Dokumentace, která podle nové legislativy spojuje umístění a povolení stavby do jednoho procesu. Definuje klíčové parametry, architekturu a vazby na okolí.",
           alt: "Stavební záměr — vyměřování pozemku",
         },
         {
           title: "Projekt stavby",
-          desc: "Úplná projektová dokumentace pro povolení stavby. Určuje závazné podmínky jejího uskutečnění a užívání a obsahuje architekturu i všechny profese.",
+          desc: "Technické srdce projektu. Komplexní dokumentace, která transformuje architektonickou vizi do detailních technických řešení. Slouží jako přímý podklad pro ověření úřady a následnou realizaci.",
           alt: "Projekt stavby — projektová dokumentace",
         },
         {
           title: "Realizační dokumentace",
-          desc: "Podrobná dokumentace nezbytná pro realizaci stavby. Obsahuje jednotlivé profese a specifikaci detailů.",
+          desc: "Krok od papíru k hmotě. Fáze, ve které definujeme každý konstrukční detail, spoj a materiálové rozhraní. Zajišťuje, že se vize změní v realitu bez kompromisů na stavbě.",
           alt: "Realizační dokumentace — detaily a specifikace",
         },
         {
           title: "3D sken",
-          desc: "Přesné digitální zaměření budov, interiérů a konstrukčních detailů 3D laserovým skenerem. Využíváme ho u vlastních projektů i jako samostatnou službu pro architekty, projektanty a realizátory.",
+          desc: "Milimetrová přesnost v digitálním prostoru. Detailní zaměření stávajících objektů, interiérů a detailů pomocí 3D laserového skenování. Tvoříme přesná mračna bodů pro naše projekty i externí partnery.",
           alt: "3D sken — laserové skenování objektu",
         },
       ],
@@ -490,32 +490,32 @@ export const home: Record<Lang, HomeContent> = {
       items: [
         {
           title: "Land-Use Study",
-          desc: "A comprehensive analysis of the site and a proposal for an urban concept for large-scale development projects or the revitalisation of existing complexes. We start here when more than one building is at stake.",
+          desc: "A vision for larger wholes. A comprehensive analysis and spatial concept for larger areas, zones and mixed-use complexes. Architecture doesn’t stop at a single building here — it shapes the whole environment.",
           alt: "Land-use study — site situation model",
         },
         {
           title: "Architectural Study",
-          desc: "Translating your ideas onto paper with full architectural coordination.",
+          desc: "A creative and spatial concept that gives the brief a clear form. We test the potential of the plot, look for the ideal proportions and define the visual identity of the future building before you invest in full design work.",
           alt: "Architectural study — sketches and material samples",
         },
         {
           title: "Building Intent",
-          desc: "The documentation establishing the placement of the building and its compliance with the land-use plan. The building authority reviews and approves it — it replaces the former zoning decision.",
+          desc: "An integrated step towards the permit. The documentation that, under the new legislation, merges the siting and the permitting of a building into a single process. It defines the key parameters, the architecture and the links to the surroundings.",
           alt: "Building intent — surveying the plot",
         },
         {
           title: "Building Project",
-          desc: "The complete project documentation for the building permit. It sets the binding conditions for constructing and using the building and covers architecture along with every engineering trade.",
+          desc: "The technical heart of the project. Comprehensive documentation that turns the architectural vision into detailed technical solutions. It serves as the direct basis for official approval and for construction.",
           alt: "Building project — project documentation",
         },
         {
           title: "Construction Documentation",
-          desc: "Detailed documentation essential for building the project. It covers the individual trades and the specification of details.",
+          desc: "The step from paper to matter. The phase where we define every structural detail, joint and material interface. It makes sure the vision becomes reality without compromises on site.",
           alt: "Construction documentation — details and specifications",
         },
         {
           title: "3D Scan",
-          desc: "A precise digital survey of buildings, interiors and structural details with a 3D laser scanner. We use it on our own projects and offer it as a standalone service to architects, engineers and contractors.",
+          desc: "Millimetre precision in digital space. A detailed survey of existing buildings, interiors and details using 3D laser scanning. We create accurate point clouds for our own projects and for external partners.",
           alt: "3D scan — laser scanning of a building",
         },
       ],

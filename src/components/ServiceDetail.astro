@@ -10,10 +10,22 @@
  * Lenis.stop() + overflow:clip.
  *
  * Layout: big title, grey intro, a hairline rule, then N (heading +
- * paragraph) blocks. Content comes from the shared services adapter
- * (lib/services-data.ts): CMS modal sections when written in Sanity,
- * i18n/service-details.ts as the fallback (only Architektonická štúdia
- * is written there).
+ * body) blocks. Content comes from the shared services adapter
+ * (lib/services-data.ts): the CMS modal when written in Sanity,
+ * i18n/service-details.ts as the fallback.
+ *
+ * SHAPE: title → grey lead-in (the service's own row description, so the
+ * panel opens on the same sentence the row promised) → hairline → the
+ * body itself. A section's heading is OPTIONAL: the main text block runs
+ * without one, "Legislatíva a štandardy" carries it.
+ *
+ * TEXT RULES (same for CMS and fallback, so what an editor types in
+ * Studio is what renders):
+ *   - a BLANK LINE splits paragraphs — in the lead-in and in a body;
+ *   - a body written as consecutive LINES (no blank line between them)
+ *     renders as a bullet list — that's the legislation blocks;
+ *   - a service with no sections shows just the lead-in, and the
+ *     hairline rule is dropped so the panel can't end on a stray line.
  *
  * Only rendered by the detailed Services variant (so its CSS + JS never
  * ship on the homepage).
@@ -26,6 +38,13 @@ interface Props {
 }
 const { lang = "sk" } = Astro.props;
 const { details } = await getServicesView(lang);
+
+/** Prázdny riadok = nový odstavec. */
+const paras = (t: string): string[] =>
+  t.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean);
+/** Jednotlivé riadky = položky odrážkového zoznamu. */
+const lines = (t: string): string[] =>
+  t.split(/\n+/).map((x) => x.trim()).filter(Boolean);
 ---
 
 <aside
@@ -59,16 +78,30 @@ const { details } = await getServicesView(lang);
       {details.map((d, i) => (
         <article class="sdetail-detail" data-detail={d.index} hidden={i !== 0}>
           <h2 class="sdetail-title">{d.title}</h2>
-          <p class="sdetail-intro">{d.intro}</p>
-          <div class="sdetail-rule" aria-hidden="true"></div>
-          <div class="sdetail-sections">
-            {d.sections.map((sec) => (
-              <section class="sdetail-section">
-                <h3 class="sdetail-section-heading">{sec.heading}</h3>
-                <p class="sdetail-section-body">{sec.body}</p>
-              </section>
-            ))}
+          <div class="sdetail-intro">
+            {paras(d.intro).map((para) => <p>{para}</p>)}
           </div>
+          {d.sections.length > 0 && (
+            <>
+              <div class="sdetail-rule" aria-hidden="true"></div>
+              <div class="sdetail-sections">
+                {d.sections.map((sec) => (
+                  <section class="sdetail-section">
+                    {sec.heading && <h3 class="sdetail-section-heading">{sec.heading}</h3>}
+                    {paras(sec.body).length > 1 ? (
+                      paras(sec.body).map((para) => <p class="sdetail-section-body">{para}</p>)
+                    ) : lines(sec.body).length > 1 ? (
+                      <ul class="sdetail-section-list">
+                        {lines(sec.body).map((li) => <li>{li}</li>)}
+                      </ul>
+                    ) : (
+                      <p class="sdetail-section-body">{sec.body}</p>
+                    )}
+                  </section>
+                ))}
+              </div>
+            </>
+          )}
         </article>
       ))}
     </div>
@@ -173,14 +206,22 @@ const { details } = await getServicesView(lang);
     padding-right: 64px; /* clear the absolute close button */
   }
 
-  /* Grey intro paragraph under the title — 16px. */
+  /* Grey intro under the title — 16px. One <p> per paragraph (a blank
+     line in the CMS text splits them), 16px apart. */
   .sdetail-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 760px;
+    margin: 24px 0 0;
+  }
+
+  .sdetail-intro p {
     font-size: 16px;
     font-weight: 400;
     line-height: 1.5;
     color: var(--text-mute);
-    max-width: 760px;
-    margin: 24px 0 0;
+    margin: 0;
   }
 
   /* Hairline rule between the intro and the sections. */
@@ -216,6 +257,12 @@ const { details } = await getServicesView(lang);
     margin: 0;
   }
 
+  /* Odstavce v tele: 12px flex gap + 8px = 20px medzi odstavcami,
+     kým nadpis ostáva na tesnejších 12px od svojho prvého odstavca. */
+  .sdetail-section-body + .sdetail-section-body {
+    margin-top: 8px;
+  }
+
   /* Body copy — 20px. */
   .sdetail-section-body {
     font-size: clamp(16px, 1.6vw, 20px);
@@ -225,6 +272,25 @@ const { details } = await getServicesView(lang);
     color: var(--ink);
     margin: 0;
     max-width: 920px;
+  }
+
+  /* Section written as several lines (the legislation blocks) — bullets,
+     same pattern as the "Obsahuje" list in a service row. Overrides the
+     global `ul { list-style: none }`. */
+  .sdetail-section-list {
+    list-style: disc;
+    margin: 0;
+    padding-left: 24px;
+    font-size: clamp(16px, 1.6vw, 20px);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    color: var(--ink);
+    max-width: 920px;
+  }
+
+  .sdetail-section-list li {
+    margin: 0;
   }
 
   @media (max-width: 767px) {
