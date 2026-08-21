@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from "sanity";
 import { orderRankField, orderRankOrdering } from "@sanity/orderable-document-list";
-import { withPlaceholder } from "../components/placeholderInput";
+import { withPlaceholder, withPlaceholderFrom } from "../components/placeholderInput";
 
 /**
  * Služba — jeden riadok spec-sheetu služieb (01–06: päť fáz projektu
@@ -196,13 +196,37 @@ export const service = defineType({
           title: "Úvod (voliteľný)",
           type: "object",
           description:
-            "Sivý text pod nadpisom modalu. PRÁZDNY RIADOK medzi odsekmi = na webe nový odstavec. Nevyplnený = použije sa popis služby.",
+            "Sivý text pod nadpisom panela. Nechajte PRÁZDNY — predvyplní sa Popisom služby (vidíte ho rovno v poli) a mení sa spolu s ním. Vypĺňajte, len ak má panel začínať inou vetou než riadok služby. PRÁZDNY RIADOK medzi odsekmi = nový odstavec.",
           options: { collapsible: false },
           groups: LANG_GROUPS,
           fields: [
-            defineField({ name: "sk", title: "Úvod (SK)", type: "text", rows: 4, group: "sk" }),
-            defineField({ name: "cz", title: "Úvod (CZ)", type: "text", rows: 4, group: "cz" }),
-            defineField({ name: "en", title: "Úvod (EN)", type: "text", rows: 4, group: "en" }),
+            // Živé predvyplnenie z Popisu služby — editor vidí presne ten
+            // text, ktorý web dosadí, kým pole nechá prázdne (web: pozri
+            // getServicesView v src/lib/services-data.ts).
+            defineField({
+              name: "sk",
+              title: "Úvod (SK)",
+              type: "text",
+              rows: 4,
+              group: "sk",
+              components: { input: withPlaceholderFrom(["desc", "sk"], "Najprv vyplňte Popis služby — úvod panela sa ním predvyplní.") },
+            }),
+            defineField({
+              name: "cz",
+              title: "Úvod (CZ)",
+              type: "text",
+              rows: 4,
+              group: "cz",
+              components: { input: withPlaceholderFrom(["desc", "cz"], "Najprv vyplňte Popis služby — úvod panela sa ním predvyplní.") },
+            }),
+            defineField({
+              name: "en",
+              title: "Úvod (EN)",
+              type: "text",
+              rows: 4,
+              group: "en",
+              components: { input: withPlaceholderFrom(["desc", "en"], "Najprv vyplňte Popis služby — úvod panela sa ním predvyplní.") },
+            }),
           ],
         }),
         defineField({
